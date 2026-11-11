@@ -18,14 +18,16 @@ const IC={
 const BALL='<svg viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00F5A0"/><stop offset="1" stop-color="#00C2FF"/></linearGradient></defs><circle cx="20" cy="20" r="18" fill="none" stroke="url(#bg1)" stroke-width="3"/><path d="M20 10l7 5-2.7 8.3h-8.6L13 15z" fill="url(#bg1)"/><path d="M20 10V3M27 15l7-2M24.3 23.3l4.2 6.2M15.7 23.3l-4.2 6.2M13 15l-7-2" stroke="url(#bg1)" stroke-width="2.4" stroke-linecap="round"/></svg>';
 const short=n=>{const p=String(n).split(' ');return p.length>1?p[0][0]+'. '+p.slice(1).join(' '):n};
 const ab=n=>{const w=n.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(x=>x.length>2||/\d/.test(x));return(w.length>1?w[0][0]+w[1][0]:n.replace(/[^A-Za-zÀ-ÿ]/g,'').slice(0,3)).toUpperCase()};
-const shield=(c,sz='')=>{const h=c.hue,t=ab(c.n);return `<span class="shield ${sz}"><svg viewBox="0 0 40 46"><path d="M20 2 36 7v17c0 10-7 17-16 20C11 41 4 34 4 24V7z" fill="hsl(${h} 55% 36%)" stroke="hsl(${h} 70% 66%)" stroke-width="2.5"/><text x="20" y="28" text-anchor="middle" font-size="${t.length>2?12:15}" font-weight="700" fill="#fff" font-family="Barlow Condensed,Arial Narrow,sans-serif">${t}</text></svg></span>`};
-const bust=h=>`<svg viewBox="0 0 70 84"><path d="M8 84c0-22 12-34 27-34s27 12 27 34z" fill="hsl(${h} 60% 42%)"/><rect x="29" y="38" width="12" height="14" rx="4" fill="#d9ab84"/><circle cx="35" cy="28" r="15" fill="#e8c4a0"/><path d="M20 26c0-12 8-16 15-16s15 4 15 16c-3-6-8-8-15-8s-12 2-15 8z" fill="#2b1d14"/></svg>`;
+const pal=c=>{const k=CCLR[c.n];if(k)return{p:k[0],s:k[1],k:1};const h=c.hue;return{p:`hsl(${h} 58% 38%)`,s:`hsl(${(h+40)%360} 70% 62%)`,k:0}};
+const hexL=x=>{if(x[0]!='#')return .2;const n=parseInt(x.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
+const shield=(c,sz='')=>{const q=pal(c),t=ab(c.n),tx=hexL(q.p)>.45?'#111':'#fff';return `<span class="shield ${sz}"><svg viewBox="0 0 40 46"><path d="M20 2 36 7v17c0 10-7 17-16 20C11 41 4 34 4 24V7z" fill="${q.p}" stroke="${q.s}" stroke-width="2.5"/><path d="M20 2 36 7v6H4V7z" fill="${q.s}" opacity=".35"/><text x="20" y="29" text-anchor="middle" font-size="${t.length>2?12:15}" font-weight="700" fill="${tx}" font-family="Barlow Condensed,Arial Narrow,sans-serif">${t}</text></svg></span>`};
+const bust=(h,c)=>`<svg viewBox="0 0 70 84"><path d="M8 84c0-22 12-34 27-34s27 12 27 34z" fill="${c?pal(c).p:`hsl(${h} 60% 42%)`}"/><rect x="29" y="38" width="12" height="14" rx="4" fill="#d9ab84"/><circle cx="35" cy="28" r="15" fill="#e8c4a0"/><path d="M20 26c0-12 8-16 15-16s15 4 15 16c-3-6-8-8-15-8s-12 2-15 8z" fill="#2b1d14"/></svg>`;
 const tierOf=o=>o>=85?4:o>=75?3:o>=65?2:1;
 const pst=(ovr,pos,seed)=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.round(ovr+PROF[pos][i]+(hash(String(seed)+i)%7-3)),25,99)]);
 const myStats=(at=S.at)=>[['VEL',Math.floor(at[0])],['FIN',Math.floor(at[1])],['PAS',Math.round((at[2]+at[6])/2)],['DRI',Math.floor(at[3])],['DEF',Math.floor(at[4])],['FIS',Math.floor(at[5])]];
 function card(o){
   const cls=o.kind||('t'+tierOf(o.ovr));
-  return `<div class="fut ${cls} ${o.sz||''} ${o.me?'me':''} ${o.inj?'inj':''}" ${o.on?`onclick="${o.on}"`:''}><b class="fo">${o.ovr}</b><i class="fr">${o.pos}</i><i class="fn">${o.nat}</i><span class="fs">${shield(o.club,'xs')}</span><span class="fa">${bust(o.club.hue)}</span><span class="fnm">${esc(o.name)}</span><span class="fst">${o.st.map(([l,v])=>`<span><b>${v}</b><small>${l}</small></span>`).join('')}</span>${o.tag?`<i class="ft">${esc(o.tag)}</i>`:''}</div>`;
+  return `<div class="fut ${cls} ${o.sz||''} ${o.me?'me':''} ${o.inj?'inj':''}" ${o.on?`onclick="${o.on}"`:''}><b class="fo">${o.ovr}</b><i class="fr">${o.pos}</i><i class="fn">${o.nat}</i><span class="fs">${shield(o.club,'xs')}</span><span class="fa">${bust(o.club.hue,o.club)}</span><span class="fnm">${esc(o.name)}</span><span class="fst">${o.st.map(([l,v])=>`<span><b>${v}</b><small>${l}</small></span>`).join('')}</span>${o.tag?`<i class="ft">${esc(o.tag)}</i>`:''}</div>`;
 }
 const myCard=(sz='',extra={})=>card({ovr:O(),pos:S.p.pos,nat:natCode(S.p.nat),name:short(S.p.name),club:cl(S.club),st:myStats(),sz,me:1,inj:S.inj>0,tag:S.y+' · '+PN[S.p.pos],...extra});
 const entryCard=(x,sz,extra={})=>card({ovr:x.ovr,pos:x.pos,nat:natCode(x.nat),name:short(x.n),club:cl(x.club),st:x.me?myStats():pst(x.ovr,x.pos,x.id),sz,me:x.me,...extra});
@@ -182,7 +184,7 @@ function podiumOf(list){
   return `<div class="podium">${[t[1],t[0],t[2]].filter(Boolean).join('')}</div>`;
 }
 function pgRk(){
-  let h=pills([['bdo','Bola de Ouro'],['ovr','Top 10 OVR'],['art','Artilheiros'],['clb','Clubes'],['his','Vencedores']],ui.rk,"rkSet");
+  let h=pills([['bdo','Bola de Ouro'],['ovr','Top 10 OVR'],['art','Artilheiros'],['clb','Clubes'],['his','Vencedores'],['leg','Lendas']],ui.rk,"rkSet");
   if(ui.rk=='bdo'){
     const off=S.ph!='season',last=S.bdo[S.bdo.length-1];
     if(off&&last){
@@ -210,6 +212,11 @@ function pgRk(){
   }else if(ui.rk=='clb'){
     const l=S.cs.filter(c=>c.l>=0).sort((a,b)=>b.s-a.s).slice(0,10);
     h+=`<div class="pn full"><h2>Top 10 clubes do mundo</h2><ul class="rank">${l.map((c,i)=>`<li class="${c.id==S.club?'me':''}"><span class="pos">${i+1}</span>${shield(c,'sm')}<span class="nm2">${esc(c.n)}<small>${LEAGUES[c.l].n} · ${dvName(c)}</small></span><span class="pt">${Math.round(c.s)}<small>força</small></span></li>`).join('')}</ul></div>`;
+  }else if(ui.rk=='leg'){
+    const t=tot(false),bo=S.aw.filter(x=>x.t.includes('BOLA DE OURO')).length,uc=S.ti.filter(x=>x.k=='ucl').length,lb=S.ti.filter(x=>x.k=='lib').length;
+    const mine={n:S.p.name,nat:S.p.nat,pos:S.p.pos,bo,wc:0,ucl:uc,lib:lb,lg:S.ti.filter(x=>x.k=='lig').length,g:t.g,ap:t.ap,me:1};
+    const l=[...LEG,mine].map(x=>({...x,pts:legPts(x)})).sort((a,b)=>b.pts-a.pts),mi=l.findIndex(x=>x.me);
+    h+=`<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map((x,i)=>`<li class="${x.me?'me':''}"><span class="pos">${i+1}</span><span class="nm2">${esc(x.n)}${x.me?' <span class="tag">você</span>':''}<small>${x.nat} · ${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}<p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, ligas e gols. Números de carreira aproximados (fontes públicas); a Seleção ainda não existe no jogo, então os Mundiais só contam para as lendas.</p></div>`;
   }else{
     h+=`<div class="pn full"><h2>Vencedores da Bola de Ouro</h2>${S.bdo.length?tbl(['Ano','Vencedor','Clube','Pts','Você'],S.bdo.slice().reverse().map(b=>{const w=b.top[0];return{c:[b.y,esc(w.n)+(w.me?' <span class="tag">você</span>':''),tn(cl(w.club)),Math.round(w.pts),b.me?b.me+'º':'—'],cls:w.me?'mine':''}})):'<p class="empty">A primeira Bola de Ouro será entregue ao fim da temporada.</p>'}</div>`;
   }
@@ -293,7 +300,25 @@ function retire(){if(confirm('Encerrar a carreira definitivamente?'))rt()}
 
 /* ---------- render ---------- */
 const PG={car:pgCar,jg:pgJg,lg:pgLg,rk:pgRk,mk:pgMk,pf:pgPf};
+
+/* tema por clube (como no BrasLOL): cores do time do jogador mudam todo o app */
+function applyTheme(){
+  const r=document.documentElement.style,c=S?cl(S.club):null;
+  if(!c){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc'].forEach(k=>r.removeProperty(k));return}
+  const q=pal(c);let h=c.hue,sat=45,as=90;
+  if(q.k){
+    const sa=x=>{const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255;return Math.max(R,G,B)-Math.min(R,G,B)};
+    if(sa(q.p)>=40)h=hueOf(q.p);else if(sa(q.s)>=40)h=hueOf(q.s);else{h=45;sat=0;as=0}   // times preto/branco: tema neutro
+  }
+  const A=as?`hsl(${h} ${as}% 58%)`:'hsl(0 0% 88%)',B=as?`hsl(${(h+28)%360} ${as}% 62%)`:'hsl(45 80% 62%)';
+  r.setProperty('--acc',A);r.setProperty('--acc2',B);
+  r.setProperty('--bg',`hsl(${h} ${sat}% 7%)`);r.setProperty('--bg2',`hsl(${h} ${sat*.85}% 12%)`);r.setProperty('--panel',`hsl(${h} ${sat*.75}% 15%)`);
+  r.setProperty('--line',`hsl(${h} ${sat*.7}% 26%)`);r.setProperty('--glow',as?`hsla(${h},90%,60%,.2)`:'rgba(255,255,255,.07)');
+  r.setProperty('--on-acc','#0A0A0A');
+}
+function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=Math.max(R,G,B),d=mx-Math.min(R,G,B);if(!d)return 220;let h=mx==R?60*(((G-B)/d)%6):mx==G?60*((B-R)/d+2):60*((R-G)/d+4);return(h+360)%360}
 function render(keep){
+  try{applyTheme()}catch(e){}
   const a=$('#app'),y=window.scrollY;
   if(!S){a.innerHTML=intro();return}
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')}

@@ -14,7 +14,7 @@
 *{box-sizing:border-box}
 html{background:var(--bg)}
 body{margin:0;background-color:var(--bg);
-  background-image:radial-gradient(800px 420px at 85% -120px,rgba(122,92,255,.45),transparent 70%),radial-gradient(700px 400px at -10% 20%,rgba(0,194,255,.22),transparent 70%),linear-gradient(165deg,#0A1250 0%,#14083D 55%,#050A26 100%);
+  background-image:radial-gradient(900px 480px at 90% -140px,var(--glow),transparent 70%),radial-gradient(700px 420px at -10% 30%,var(--glow),transparent 72%),linear-gradient(170deg,var(--bg2) 0%,var(--bg) 60%);
   background-attachment:fixed;color:var(--ink);font-family:var(--b);font-size:15px;line-height:1.45;
   padding-block:16px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 46px);z-index:-1}

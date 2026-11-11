@@ -99,3 +99,28 @@ const EV=[
 ['Clássico decisivo','A semana do clássico mexeu com o clube inteiro.',[['Assumir a responsabilidade',{mor:4,rep:2,cond:-5},'Você pediu a bola e a torcida notou.'],['Seguir a rotina normal',{mor:1},'Tudo dentro do planejado.']]],
 ['Conselho do capitão','O capitão do time chama você para uma conversa sobre o futuro.',[['Ouvir e agradecer',{mor:3,rep:1},'Você ganhou a confiança do vestiário.'],['Dizer que prefere o seu caminho',{pop:2,mor:-2},'A conversa ficou meio fria.']]]
 ];
+
+/* ---- cores oficiais aproximadas [principal, secundária] (clubes não listados usam cor derivada do nome) ---- */
+const CCLR={
+ 'Flamengo':['#C8102E','#111111'],'Palmeiras':['#006437','#FFFFFF'],'Corinthians':['#222222','#FFFFFF'],'São Paulo':['#E4002B','#111111'],
+ 'Santos':['#EEEEEE','#111111'],'Fluminense':['#8A1538','#00843D'],'Vasco da Gama':['#1A1A1A','#FFFFFF'],'Botafogo':['#222222','#FFFFFF'],
+ 'Grêmio':['#0D80BF','#111111'],'Internacional':['#E5050F','#FFFFFF'],'Atlético Mineiro':['#222222','#FFFFFF'],'Cruzeiro':['#0033A0','#FFFFFF'],
+ 'Real Madrid':['#F2F2F2','#FEBE10'],'Barcelona':['#A50044','#004D98'],'Atlético de Madrid':['#CB3524','#272E61'],'Manchester United':['#DA291C','#FBE122'],
+ 'Manchester City':['#6CABDD','#1C2C5B'],'Liverpool':['#C8102E','#F6EB61'],'Chelsea':['#034694','#DBA111'],'Arsenal':['#EF0107','#FFFFFF'],
+ 'Juventus':['#EEEEEE','#111111'],'Milan':['#FB090B','#111111'],'Inter':['#0068A8','#111111'],'Bayern München':['#DC052D','#0066B2'],
+ 'Borussia Dortmund':['#FDE100','#111111'],'Boca Juniors':['#103F91','#F7D117'],'River Plate':['#EEEEEE','#E4002B'],'Benfica':['#E30613','#FFFFFF'],
+ 'Porto':['#003E7E','#FFFFFF'],'Sporting CP':['#008057','#FFFFFF'],'Ajax':['#D2122E','#FFFFFF'],'Atlético Nacional':['#006A38','#FFFFFF']};
+
+/* ---- lendas: dados aproximados de carreira (títulos e prêmios conhecidos; gols = totais oficiais/estimados) ---- */
+const LEG=[
+ {n:'Lionel Messi',nat:'ARG',pos:'ATA',bo:8,wc:1,ucl:4,lg:12,g:900,ap:1100},
+ {n:'Cristiano Ronaldo',nat:'POR',pos:'ATA',bo:5,wc:0,ucl:5,lg:7,g:950,ap:1300,eu:1},
+ {n:'Pelé',nat:'BRA',pos:'ATA',bo:0,wc:3,ucl:0,lg:10,g:760,ap:830,lib:2,mc:2},
+ {n:'Diego Maradona',nat:'ARG',pos:'MEI',bo:0,wc:1,ucl:0,lg:5,g:345,ap:680},
+ {n:'Johan Cruyff',nat:'HOL',pos:'ATA',bo:3,wc:0,ucl:3,lg:9,g:400,ap:700},
+ {n:'Ronaldo Nazário',nat:'BRA',pos:'ATA',bo:2,wc:2,ucl:0,lg:3,g:415,ap:616},
+ {n:'Franz Beckenbauer',nat:'ALE',pos:'ZAG',bo:2,wc:1,ucl:3,lg:5,g:100,ap:800,eu:1},
+ {n:'Michel Platini',nat:'FRA',pos:'MEI',bo:3,wc:0,ucl:1,lg:2,g:260,ap:500,eu:1},
+ {n:'Alfredo Di Stéfano',nat:'ARG',pos:'ATA',bo:2,wc:0,ucl:5,lg:8,g:510,ap:710},
+ {n:'Zinedine Zidane',nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1}];
+const legPts=l=>l.bo*18+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
