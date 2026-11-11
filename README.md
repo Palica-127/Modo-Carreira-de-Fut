@@ -13,6 +13,8 @@ Abra `pro-football-career.html` no navegador (celular ou PC). O progresso é sal
 - **Bola de Ouro** com 96 rivais simulados, pódio e Top 10 do ano.
 - **Rankings**: Bola de Ouro, Top 10 OVR, Artilheiros, Clubes e Maiores vencedores.
 - **Cartas**: uma por temporada, com edições especiais para prêmios e títulos.
+- **Tema por clube**: as cores do app mudam conforme o time do jogador; escudos com cores reais dos clubes famosos.
+- **Lendas**: Top 10 da história (Messi, Cristiano, Pelé...) com pontuação por títulos, prêmios e gols, e a posição do seu jogador.
 - **Campeões**: histórico de campeões de cada competição.
 - Treino semanal, propostas de clubes, agente, eventos, notícias e partidas minuto a minuto.
 - Simulação rápida: +5 semanas ou até o próximo evento/fim.

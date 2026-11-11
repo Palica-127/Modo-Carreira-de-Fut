@@ -113,14 +113,14 @@ const CCLR={
 
 /* ---- lendas: dados aproximados de carreira (títulos e prêmios conhecidos; gols = totais oficiais/estimados) ---- */
 const LEG=[
- {n:'Lionel Messi',nat:'ARG',pos:'ATA',bo:8,wc:1,ucl:4,lg:12,g:900,ap:1100},
- {n:'Cristiano Ronaldo',nat:'POR',pos:'ATA',bo:5,wc:0,ucl:5,lg:7,g:950,ap:1300,eu:1},
- {n:'Pelé',nat:'BRA',pos:'ATA',bo:0,wc:3,ucl:0,lg:10,g:760,ap:830,lib:2,mc:2},
- {n:'Diego Maradona',nat:'ARG',pos:'MEI',bo:0,wc:1,ucl:0,lg:5,g:345,ap:680},
- {n:'Johan Cruyff',nat:'HOL',pos:'ATA',bo:3,wc:0,ucl:3,lg:9,g:400,ap:700},
- {n:'Ronaldo Nazário',nat:'BRA',pos:'ATA',bo:2,wc:2,ucl:0,lg:3,g:415,ap:616},
- {n:'Franz Beckenbauer',nat:'ALE',pos:'ZAG',bo:2,wc:1,ucl:3,lg:5,g:100,ap:800,eu:1},
- {n:'Michel Platini',nat:'FRA',pos:'MEI',bo:3,wc:0,ucl:1,lg:2,g:260,ap:500,eu:1},
+ {n:'Lionel Messi',wcb:2,ex:6,nat:'ARG',pos:'ATA',bo:8,wc:1,ucl:4,lg:12,g:900,ap:1100},
+ {n:'Cristiano Ronaldo',ex:6,nat:'POR',pos:'ATA',bo:5,wc:0,ucl:5,lg:7,g:950,ap:1300,eu:1},
+ {n:'Pelé',wcb:1,ex:8,nat:'BRA',pos:'ATA',bo:0,wc:3,ucl:0,lg:10,g:760,ap:830,lib:2,mc:2},
+ {n:'Diego Maradona',wcb:1,ex:14,nat:'ARG',pos:'MEI',bo:0,wc:1,ucl:0,lg:5,g:345,ap:680},
+ {n:'Johan Cruyff',wcb:1,ex:4,nat:'HOL',pos:'ATA',bo:3,wc:0,ucl:3,lg:9,g:400,ap:700},
+ {n:'Ronaldo Nazário',wcb:1,ex:4,nat:'BRA',pos:'ATA',bo:2,wc:2,ucl:0,lg:3,g:415,ap:616},
+ {n:'Franz Beckenbauer',ex:4,nat:'ALE',pos:'ZAG',bo:2,wc:1,ucl:3,lg:5,g:100,ap:800,eu:1},
+ {n:'Michel Platini',ex:6,nat:'FRA',pos:'MEI',bo:3,wc:0,ucl:1,lg:2,g:260,ap:500,eu:1},
  {n:'Alfredo Di Stéfano',nat:'ARG',pos:'ATA',bo:2,wc:0,ucl:5,lg:8,g:510,ap:710},
- {n:'Zinedine Zidane',nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1}];
-const legPts=l=>l.bo*18+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
+ {n:'Zinedine Zidane',wcb:1,ex:6,nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1}];
+const legPts=l=>l.bo*18+(l.wcb||0)*7+(l.ex||0)+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;

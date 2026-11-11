@@ -20,8 +20,17 @@ const short=n=>{const p=String(n).split(' ');return p.length>1?p[0][0]+'. '+p.sl
 const ab=n=>{const w=n.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(x=>x.length>2||/\d/.test(x));return(w.length>1?w[0][0]+w[1][0]:n.replace(/[^A-Za-zÀ-ÿ]/g,'').slice(0,3)).toUpperCase()};
 const pal=c=>{const k=CCLR[c.n];if(k)return{p:k[0],s:k[1],k:1};const h=c.hue;return{p:`hsl(${h} 58% 38%)`,s:`hsl(${(h+40)%360} 70% 62%)`,k:0}};
 const hexL=x=>{if(x[0]!='#')return .2;const n=parseInt(x.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
-const shield=(c,sz='')=>{const q=pal(c),t=ab(c.n),tx=hexL(q.p)>.45?'#111':'#fff';return `<span class="shield ${sz}"><svg viewBox="0 0 40 46"><path d="M20 2 36 7v17c0 10-7 17-16 20C11 41 4 34 4 24V7z" fill="${q.p}" stroke="${q.s}" stroke-width="2.5"/><path d="M20 2 36 7v6H4V7z" fill="${q.s}" opacity=".35"/><text x="20" y="29" text-anchor="middle" font-size="${t.length>2?12:15}" font-weight="700" fill="${tx}" font-family="Barlow Condensed,Arial Narrow,sans-serif">${t}</text></svg></span>`};
-const bust=(h,c)=>`<svg viewBox="0 0 70 84"><path d="M8 84c0-22 12-34 27-34s27 12 27 34z" fill="${c?pal(c).p:`hsl(${h} 60% 42%)`}"/><rect x="29" y="38" width="12" height="14" rx="4" fill="#d9ab84"/><circle cx="35" cy="28" r="15" fill="#e8c4a0"/><path d="M20 26c0-12 8-16 15-16s15 4 15 16c-3-6-8-8-15-8s-12 2-15 8z" fill="#2b1d14"/></svg>`;
+const shield=(c,sz='')=>{
+  const q=pal(c),t=ab(c.n),tx=hexL(q.p)>.45?'#111':'#fff',v=hash(c.n)%5,id='c'+c.id,ts=t.length>2?11.5:15;
+  const P='M20 2 36 7v17c0 10-7 17-16 20C11 41 4 34 4 24V7z';
+  const body=[
+    `<path d="${P}" fill="${q.p}"/><path d="M20 2 36 7v6H4V7z" fill="${q.s}" opacity=".4"/>`,
+    `<path d="${P}" fill="${q.p}"/><g clip-path="url(#${id})"><path d="M13 0h7v46h-7zM27 0h7v46h-7z" fill="${q.s}" opacity=".45"/></g>`,
+    `<path d="${P}" fill="${q.p}"/><g clip-path="url(#${id})"><path d="M0 22 20 12 40 22v8L20 20 0 30z" fill="${q.s}" opacity=".5"/></g>`,
+    `<path d="${P}" fill="${q.p}"/><g clip-path="url(#${id})"><path d="M0 0h20L0 28z" fill="${q.s}" opacity=".4"/></g>`,
+    `<path d="${P}" fill="${q.p}"/><g clip-path="url(#${id})"><path d="M0 18h40v9H0z" fill="${q.s}" opacity=".5"/></g>`][v];
+  return `<span class="shield ${sz}"><svg viewBox="0 0 40 46"><defs><clipPath id="${id}"><path d="${P}"/></clipPath><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient></defs>${body}<path d="${P}" fill="url(#${id}g)"/><path d="${P}" fill="none" stroke="${q.s}" stroke-width="2.2"/><path d="M20 5 33.5 9v15c0 8.5-6 14.6-13.5 17.4" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1"/><text x="20" y="29" text-anchor="middle" font-size="${ts}" font-weight="800" fill="${tx}" stroke="${tx=='#fff'?'rgba(0,0,0,.35)':'rgba(255,255,255,.3)'}" stroke-width=".6" paint-order="stroke" font-family="Barlow Condensed,Arial Narrow,sans-serif">${t}</text></svg></span>`};
+const bust=(h,c)=>`<svg viewBox="0 0 70 84"><path d="M8 84c0-22 12-34 27-34s27 12 27 34z" fill="${c?pal(c).p:`hsl(${h} 60% 42%)`}"/><rect x="29" y="38" width="12" height="14" rx="4" fill="#d9ab84"/><path d="M27 50l8 9 8-9" fill="#fff" fill-opacity=".85"/><circle cx="35" cy="28" r="15" fill="#e8c4a0"/><path d="M20 26c0-12 8-16 15-16s15 4 15 16c-3-6-8-8-15-8s-12 2-15 8z" fill="#2b1d14"/></svg>`;
 const tierOf=o=>o>=85?4:o>=75?3:o>=65?2:1;
 const pst=(ovr,pos,seed)=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.round(ovr+PROF[pos][i]+(hash(String(seed)+i)%7-3)),25,99)]);
 const myStats=(at=S.at)=>[['VEL',Math.floor(at[0])],['FIN',Math.floor(at[1])],['PAS',Math.round((at[2]+at[6])/2)],['DRI',Math.floor(at[3])],['DEF',Math.floor(at[4])],['FIS',Math.floor(at[5])]];
@@ -54,8 +63,9 @@ const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar">
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
   const idx=S.ph!='season'?4:S.week==1?0:S.week<=15?1:S.week<=17?2:3;
-  return `<header class="hud"><div class="logo">${BALL}<div><div class="eyebrow">Carreira de craque</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
-  <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
+  const c=cl(S.club);
+  return `<header class="hud"><div class="logo">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
+    <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
 }
 const NAVS=[['car','Carreira'],['jg','Jogos'],['lg','Ligas'],['rk','Ranking'],['mk','Mercado'],['pf','Perfil']];
 const nav=()=>`<nav class="nav" role="tablist">${NAVS.map(([k,n])=>`<button class="nb" role="tab" aria-selected="${ui.pg==k}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${n}</button>`).join('')}</nav>`;
@@ -216,7 +226,7 @@ function pgRk(){
     const t=tot(false),bo=S.aw.filter(x=>x.t.includes('BOLA DE OURO')).length,uc=S.ti.filter(x=>x.k=='ucl').length,lb=S.ti.filter(x=>x.k=='lib').length;
     const mine={n:S.p.name,nat:S.p.nat,pos:S.p.pos,bo,wc:0,ucl:uc,lib:lb,lg:S.ti.filter(x=>x.k=='lig').length,g:t.g,ap:t.ap,me:1};
     const l=[...LEG,mine].map(x=>({...x,pts:legPts(x)})).sort((a,b)=>b.pts-a.pts),mi=l.findIndex(x=>x.me);
-    h+=`<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map((x,i)=>`<li class="${x.me?'me':''}"><span class="pos">${i+1}</span><span class="nm2">${esc(x.n)}${x.me?' <span class="tag">você</span>':''}<small>${x.nat} · ${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}<p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, ligas e gols. Números de carreira aproximados (fontes públicas); a Seleção ainda não existe no jogo, então os Mundiais só contam para as lendas.</p></div>`;
+    h+=`<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map((x,i)=>`<li class="${x.me?'me':''}"><span class="pos">${i+1}</span><span class="natb">${x.nat}</span><span class="nm2">${esc(x.n)}${x.me?' <span class="tag">você</span>':''}<small>${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}<p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, ligas e gols. Números de carreira aproximados (fontes públicas); a Seleção ainda não existe no jogo, então os Mundiais só contam para as lendas.</p></div>`;
   }else{
     h+=`<div class="pn full"><h2>Vencedores da Bola de Ouro</h2>${S.bdo.length?tbl(['Ano','Vencedor','Clube','Pts','Você'],S.bdo.slice().reverse().map(b=>{const w=b.top[0];return{c:[b.y,esc(w.n)+(w.me?' <span class="tag">você</span>':''),tn(cl(w.club)),Math.round(w.pts),b.me?b.me+'º':'—'],cls:w.me?'mine':''}})):'<p class="empty">A primeira Bola de Ouro será entregue ao fim da temporada.</p>'}</div>`;
   }
@@ -304,7 +314,7 @@ const PG={car:pgCar,jg:pgJg,lg:pgLg,rk:pgRk,mk:pgMk,pf:pgPf};
 /* tema por clube (como no BrasLOL): cores do time do jogador mudam todo o app */
 function applyTheme(){
   const r=document.documentElement.style,c=S?cl(S.club):null;
-  if(!c){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc'].forEach(k=>r.removeProperty(k));return}
+  if(!c){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc','--muted'].forEach(k=>r.removeProperty(k));return}
   const q=pal(c);let h=c.hue,sat=45,as=90;
   if(q.k){
     const sa=x=>{const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255;return Math.max(R,G,B)-Math.min(R,G,B)};
@@ -314,7 +324,7 @@ function applyTheme(){
   r.setProperty('--acc',A);r.setProperty('--acc2',B);
   r.setProperty('--bg',`hsl(${h} ${sat}% 7%)`);r.setProperty('--bg2',`hsl(${h} ${sat*.85}% 12%)`);r.setProperty('--panel',`hsl(${h} ${sat*.75}% 15%)`);
   r.setProperty('--line',`hsl(${h} ${sat*.7}% 26%)`);r.setProperty('--glow',as?`hsla(${h},90%,60%,.2)`:'rgba(255,255,255,.07)');
-  r.setProperty('--on-acc','#0A0A0A');
+  r.setProperty('--on-acc','#0A0A0A');r.setProperty('--muted',`hsl(${h} ${sat?22:0}% 70%)`);
 }
 function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=Math.max(R,G,B),d=mx-Math.min(R,G,B);if(!d)return 220;let h=mx==R?60*(((G-B)/d)%6):mx==G?60*((B-R)/d+2):60*((R-G)/d+4);return(h+360)%360}
 function render(keep){
