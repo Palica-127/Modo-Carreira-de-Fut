@@ -4,8 +4,8 @@
    navegação inferior no celular e lateral no PC.
    ============================================================ */
 :root{
-  --bg:#060A22;--bg2:#0B1240;--panel:#101A52;--ink:#F4F7FF;--muted:#9AA7DB;--line:#27358F;
-  --acc:#00F5A0;--acc2:#00C2FF;--on-acc:#02161F;--glow:rgba(0,245,160,.18);
+  --bg:#0E0F12;--bg2:#15171B;--panel:#191B20;--ink:#F2F3F5;--muted:#9AA0A9;--line:#272A31;
+  --acc:#2DD4A0;--acc2:#2DD4A0;--on-acc:#05140F;--glow:transparent;
   --gold:#D9B35F;--gold-hi:#F2D58C;--gold-lo:#A57C2E;--on-gold:#1B1405;
   --ok:#47C58C;--bad:#EF7064;--teal:#3AC6D3;--silver:#B9C4D0;--bronze:#C98A55;
   --d:'Barlow Condensed','Arial Narrow',sans-serif;--b:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -166,6 +166,7 @@ h3{font:700 20px/1.1 var(--d);text-transform:uppercase;margin:0 0 8px}
 /* escudos e cartas */
 .shield{display:inline-block;flex:none;width:30px;height:35px;vertical-align:middle;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
 .shield svg{display:block;width:100%;height:100%}
+.shield.img img{display:block;width:100%;height:100%;object-fit:contain}
 .shield.xs{width:20px;height:23px}.shield.sm{width:24px;height:28px}.shield.lg{width:58px;height:68px}.shield.xl{width:90px;height:105px}
 .futr{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 14px;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 .futr>*{scroll-snap-align:start;flex:none}
@@ -332,3 +333,95 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
 .hud h1{font-size:25px;white-space:nowrap}.season{padding:5px 10px}.season b{font-size:22px}.hud{gap:8px}
 .tn{font-size:14px}
 .hud h1{font-size:22px}.hud .logo .shield{width:38px;height:45px}.tn{font-size:13px;letter-spacing:0}
+
+
+/* ============================================================
+   VISUAL LIMPO — superfícies planas, uma cor de destaque, sem brilho
+   ============================================================ */
+html{background:var(--bg)}
+body{background:var(--bg);background-image:none}
+body::before{display:none}
+h1,h2,h3{font-style:normal}
+/* cabeçalho */
+.hud{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:none;padding:10px 14px 10px 12px}
+.hud::before,.hud::after{display:none}
+.hud h1{text-shadow:none;letter-spacing:.02em}
+.hud .eyebrow{color:var(--muted);opacity:1}
+.season{background:transparent;border:1px solid var(--line);border-radius:10px;backdrop-filter:none}
+.season b{color:var(--ink)}
+/* trilha */
+.trk i{background:var(--line);clip-path:none;height:4px}
+.trk .now i{background:var(--acc);box-shadow:none}
+.trk .done i{background:var(--muted)}
+/* painéis */
+.pn{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:none}
+.pn::before{display:none}
+h2{font-size:17px;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+h2::before{display:none}
+h2::after{background:var(--line)}
+.m{background:var(--bg2);border-radius:12px}
+.m.mine{border-color:var(--acc);box-shadow:none}
+.msg{background:var(--bg2);border-left-color:var(--acc)}
+/* botões */
+.play{background:var(--acc);box-shadow:none;font-style:normal;letter-spacing:.1em;border-radius:12px;font-size:20px}
+.play::after{display:none}
+.play:active{transform:none;filter:brightness(.9)}
+.ghost,.pill{background:transparent;border-color:var(--line)}
+.ghost:hover{background:var(--bg2);border-color:var(--muted)}
+.pill{font-style:normal}
+.pill[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);border-color:var(--acc);box-shadow:none}
+.pills.stk{background:color-mix(in srgb,var(--bg) 92%,transparent)}
+/* números */
+.cab div,.cnt div{background:var(--bg2);box-shadow:none;border-radius:12px}
+.cab b{color:var(--ink)}
+.cnt b{color:var(--ink);text-shadow:none}
+.ar .bar i{background:var(--acc)}
+.ovb i{background:var(--muted)}
+/* tabelas e rankings */
+.tb tr.mine td{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+tbody tr:nth-child(even) td{background:transparent}
+th{background:var(--panel)}
+.rank li:nth-child(-n+3){background:transparent}
+.rank li.me{background:color-mix(in srgb,var(--acc) 10%,transparent);box-shadow:inset 3px 0 0 var(--acc)}
+.rank li:nth-child(1) .pos,.rank li:nth-child(1) .nm2{text-shadow:none;color:var(--ink)}
+.rank li:nth-child(2) .pos,.rank li:nth-child(3) .pos{color:var(--muted)}
+.pos{color:var(--muted)}
+.pt{color:var(--ink)}
+.pd .bs{background:var(--bg2);border-top-color:var(--muted)}
+.p1 .bs{color:var(--ink)}
+/* escudos */
+.shield{filter:none}
+/* cartas: tons sóbrios e planos */
+.fut{filter:none;--fb:#8A6A4B;--fc:#16100A;--fm:rgba(22,16,10,.55)}
+.fut.t2{--fb:#C9CED6;--fc:#161A20;--fm:rgba(22,26,32,.55)}
+.fut.t3{--fb:#D8BE7A;--fc:#231A05;--fm:rgba(35,26,5,.55)}
+.fut.t4{--fb:#3B6FD9;--fc:#fff;--fm:rgba(255,255,255,.7)}
+.fut.bo{--fb:#1B1710;--fc:#E5CB8C;--fm:rgba(229,203,140,.65)}
+.fut.tit{--fb:#2B8F73;--fc:#fff;--fm:rgba(255,255,255,.7)}
+.fut.art{--fb:#B5483F;--fc:#fff;--fm:rgba(255,255,255,.72)}
+.fut.top{--fb:#4FA98B;--fc:#04130E;--fm:rgba(4,19,14,.6)}
+.fut::before{background:linear-gradient(160deg,rgba(255,255,255,.14),transparent 50%)}
+.fut::after{display:none}
+.fut.bo,.fut.tit,.fut.t4,.fut.me{filter:none}
+.fut.me{outline:0}
+.fut .fa svg{filter:none}
+/* troféus, hero e celebração */
+.hero{background:var(--panel);color:var(--ink);border:1px solid var(--line);clip-path:none;border-radius:14px}
+.hero::after{display:none}
+.hero .nm{font-style:normal}
+.cele{background:var(--panel);border-color:var(--line);box-shadow:none}
+.cele small{color:var(--muted)}.cele b{font-style:normal}
+.shelf{background:transparent;border-color:var(--line)}
+.shelf::after{background:var(--line);box-shadow:none}
+.tro svg{filter:none}
+.tro b{background:var(--bg2);color:var(--ink);border:1px solid var(--line)}
+.hx,.hx.t2,.hx.t3,.hx.t4{background:var(--bg2);color:var(--ink);border:0;box-shadow:inset 0 0 0 1px var(--line)}
+/* mercado e navegação */
+.buy{border-color:var(--acc);color:var(--acc)}
+.buy:active{background:color-mix(in srgb,var(--acc) 15%,transparent)}
+.nav{background:var(--panel);backdrop-filter:none}
+.nb[aria-selected="true"]::before{box-shadow:none}
+.nb[aria-selected="true"] svg{filter:none}
+.toast{background:var(--panel);border-color:var(--line)}
+.ov{background:rgba(0,0,0,.7)}
+.natb{background:transparent}

@@ -21,6 +21,7 @@ const ab=n=>{const w=n.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(x=>x.
 const pal=c=>{const k=CCLR[c.n];if(k)return{p:k[0],s:k[1],k:1};const h=c.hue;return{p:`hsl(${h} 58% 38%)`,s:`hsl(${(h+40)%360} 70% 62%)`,k:0}};
 const hexL=x=>{if(x[0]!='#')return .2;const n=parseInt(x.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
 const shield=(c,sz='')=>{
+  if(typeof CREST!=='undefined'&&CREST[c.n])return `<span class="shield img ${sz}"><img src="${CREST[c.n]}" alt="" loading="lazy"></span>`;
   const q=pal(c),t=ab(c.n),tx=hexL(q.p)>.45?'#111':'#fff',v=hash(c.n)%5,id='c'+c.id,ts=t.length>2?11.5:15;
   const P='M20 2 36 7v17c0 10-7 17-16 20C11 41 4 34 4 24V7z';
   const body=[
@@ -321,10 +322,12 @@ function applyTheme(){
     if(sa(q.p)>=40)h=hueOf(q.p);else if(sa(q.s)>=40)h=hueOf(q.s);else{h=45;sat=0;as=0}   // times preto/branco: tema neutro
   }
   const A=as?`hsl(${h} ${as}% 58%)`:'hsl(0 0% 88%)',B=as?`hsl(${(h+28)%360} ${as}% 62%)`:'hsl(45 80% 62%)';
-  r.setProperty('--acc',A);r.setProperty('--acc2',B);
-  r.setProperty('--bg',`hsl(${h} ${sat}% 7%)`);r.setProperty('--bg2',`hsl(${h} ${sat*.85}% 12%)`);r.setProperty('--panel',`hsl(${h} ${sat*.75}% 15%)`);
-  r.setProperty('--line',`hsl(${h} ${sat*.7}% 26%)`);r.setProperty('--glow',as?`hsla(${h},90%,60%,.2)`:'rgba(255,255,255,.07)');
-  r.setProperty('--on-acc','#0A0A0A');r.setProperty('--muted',`hsl(${h} ${sat?22:0}% 70%)`);
+  /* visual limpo: superfícies quase neutras, só o destaque (--acc) usa a cor do clube */
+  const ss=sat?9:0;
+  r.setProperty('--acc',A);r.setProperty('--acc2',A);
+  r.setProperty('--bg',`hsl(${h} ${ss}% 8%)`);r.setProperty('--bg2',`hsl(${h} ${ss}% 11%)`);r.setProperty('--panel',`hsl(${h} ${ss}% 13%)`);
+  r.setProperty('--line',`hsl(${h} ${ss}% 21%)`);r.setProperty('--glow','transparent');
+  r.setProperty('--on-acc','#0A0A0A');r.setProperty('--muted',`hsl(${h} ${ss?8:0}% 64%)`);
 }
 function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=Math.max(R,G,B),d=mx-Math.min(R,G,B);if(!d)return 220;let h=mx==R?60*(((G-B)/d)%6):mx==G?60*((B-R)/d+2):60*((R-G)/d+4);return(h+360)%360}
 function render(keep){
