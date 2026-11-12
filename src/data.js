@@ -168,3 +168,8 @@ const PERKS=[
  {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}}
 ];
 const PCLV=30,pcNeed=lv=>120+40*lv;
+
+/* Seleções da Copa do Mundo: [nome, código, força]. As 16 primeiras são as nacionalidades jogáveis. */
+const WCN=[['Brasil','BRA',86],['Argentina','ARG',87],['Portugal','POR',84],['Espanha','ESP',86],['França','FRA',88],['Inglaterra','ENG',85],['Alemanha','GER',84],['Itália','ITA',82],['Holanda','NED',83],['Turquia','TUR',74],['Uruguai','URU',80],['Colômbia','COL',78],['Nigéria','NGA',73],['Marrocos','MAR',77],['Japão','JPN',75],['EUA','USA',74],
+ ['Bélgica','BEL',82],['Croácia','CRO',80],['Dinamarca','DEN',76],['México','MEX',75],['Senegal','SEN',75],['Coreia do Sul','KOR',73],['Suíça','SUI',75],['Equador','ECU',72],['Chile','CHI',72],['Camarões','CMR',68],['Austrália','AUS',68],['Polônia','POL',72],['Suécia','SWE',72],['Egito','EGY',68],['Irã','IRN',67],['Canadá','CAN',68]];
+const STG=['Fase de grupos','Oitavas','Quartas','Semifinal','Vice-campeão','Campeão'];

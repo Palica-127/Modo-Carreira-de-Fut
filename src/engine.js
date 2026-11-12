@@ -219,7 +219,7 @@ function pm(h,a,label,knock,kind){
     S.form=S.form*.7+r.rt*.3;S.mor=C(S.mor+(gf>ga?4:gf<ga?-4:0)+(r.rt-6.5)*3,0,100);S.money+=r.gl*S.ct.bon*(1+pfx('bon'));pcXp(Math.max(4,(r.rt-4)*9+r.gl*6+r.as*3)*(1+pfx('xpm'))*(.4+.6*Math.min(1,r.mn/90)));pcTrust((r.rt-6.5)*1.3);
     const k=kind=='ucl'||kind=='lib'?2:1;
     {const dr=(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k;S.rep=C(S.rep+dr*(dr>0?1+pfx('fame'):1),0,100)}S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
-    if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).')}
+    if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).');mail('Departamento médico','Lesão confirmada','Você ficará fora por '+w+' semana(s). Descanso e fisioterapia ajudam na recuperação.')}
   }else{S.mor=C(S.mor-1.5,0,100);if(!S.inj)pcTrust(-.35)}
   S.wm+=r.mn;return r;
 }
@@ -260,7 +260,7 @@ function trn_(){
   const t=S.tr,im=[.6,1,1.6][t.i],ag=S.p.age,aM=ag<20?1.3:ag<25?1:ag<30?.6:.25,c=cl(S.club),ck=1+C((c.s-55)/150,-.1,.25),K=14/SEASON;
   if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!')}
   else{
-    pcXp(40*[.8,1,1.3][t.i]*(1+pfx('xpw')));pcTrust([.1,.25,.5][t.i]);
+    pcXp(40*[.8,1,1.3][t.i]*(t.a==7?.3:1)*(1+pfx('xpw')));pcTrust(t.a==7?0:[.1,.25,.5][t.i]);
     if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.45*K*im*aM*ck*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
     else if(t.a==8){S.form=Math.min(10,S.form+.1);S.mor=C(S.mor+1.5,0,100)}
     if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).')}
@@ -285,10 +285,10 @@ function step(){
     if(r.pl)news(`${r.comp}: ${cl(r.h).n} ${r.g[0]}x${r.g[1]} ${cl(r.a).n}. Nota ${r.rt}${r.gl?' · '+r.gl+' gol(s)':''}.`);
   });
   if(w==15||w==30)snap(S.y+(w==15?'.1':'.2'));
-  if(w==15){S.of=gen(3);S.ag=0;if(S.of.length)news('📨 Janela aberta: '+S.of.length+' proposta(s) recebida(s).')}
+  if(w==15){S.of=gen(3);S.ag=0;if(S.of.length){news('📨 Janela aberta: '+S.of.length+' proposta(s) recebida(s).');mail('Agente','Janela de transferências aberta',S.of.length+' proposta(s) recebida(s). Confira no Mercado antes que a janela feche.')}}
   if(w==17)S.of=[];
   S.week++;
-  if(S.week>SEASON)end();else if(Math.random()<.11)S.ev=P(EV);
+  if(S.week>SEASON)end();else if((S.week==10||S.week==22)&&!S.inj)S.ev=testEv();else if(Math.random()<.11)S.ev=P(EV);
   return true;
 }
 function adv(){if(step()){save();render()}}
@@ -335,11 +335,11 @@ function neg(i){
   save();render();
 }
 const rej=i=>{S.of.splice(i,1);save();render()};
-function agent(){if(S.ag||!winOpen())return;S.ag=1;const g=gen(2);S.of.push(...g);news('O agente procurou clubes: '+g.length+' nova(s) proposta(s).');save();render()}
+function agent(){if(S.ag||!winOpen())return;S.ag=1;const g=gen(2);S.of.push(...g);news('O agente procurou clubes: '+g.length+' nova(s) proposta(s).');mail('Agente','Novas propostas',g.length+' clube(s) querem conversar. Veja no Mercado.');save();render()}
 function pick(i){
   const e=S.ev[2][i][1];let m=e.mon;if(m=='r')m=Math.random()<.5?15:-10;
   S.mor=C(S.mor+(e.mor||0),0,100);S.rep=C(S.rep+(e.rep||0),0,100);S.pop=C(S.pop+(e.pop||0),0,100);S.cond=C(S.cond+(e.cond||0),20,100);S.money+=(m||0)*S.ct.sal;
-  news(S.ev[0]+': '+S.ev[2][i][2]);S.ev=null;save();render();
+  news(S.ev[0]+': '+S.ev[2][i][2]);mail(S.ev[0]=='Teste do técnico'?'Técnico':'Imprensa',S.ev[0],S.ev[2][i][2]);if(e.tr)pcTrust(e.tr);if(e.xp)pcXp(e.xp);S.ev=null;save();render();
 }
 
 /* ---------- artilharia ---------- */
@@ -370,14 +370,14 @@ function bdoList(final){
   S.rv.forEach(r=>{
     const x=r.cur;if(x.ap<minR)return;const c=S.cs[r.club];
     const pts=bdoScore(x.ap,x.rs,x.g*proj,x.a*proj,clubPts(r.club,final),r.ovr,C((r.ovr-55)*2.2,0,100),tbOf(c.l,c.d));
-    out.push({id:r.id,n:r.n,club:r.club,pos:r.pos,age:r.age,ovr:Math.round(r.ovr),nat:r.nat,pts:pts+(final?R(-2,2):0),g:x.g,a:x.a});
+    out.push({id:r.id,n:r.n,club:r.club,pos:r.pos,age:r.age,ovr:Math.round(r.ovr),nat:r.nat,pts:pts+(final&&S.wcR?(S.wcR[r.nat]||0):0)+(final?R(-2,2):0),g:x.g,a:x.a});
   });
   const t=tot(true),mc=cl(S.club);
   if(t.ap>=minU){
     const y=S.hist.filter(x=>x.y==S.y).concat(S.cur?[S.cur]:[]);
     const sum=y.reduce((s,x)=>({ap:s.ap+x.ap,g:s.g+x.g,a:s.a+x.a,rs:s.rs+x.rs}),{ap:0,g:0,a:0,rs:0});
     if(sum.ap>=minU){
-      const pts=bdoScore(sum.ap,sum.rs,sum.g*proj,sum.a*proj,clubPts(S.club,final),O(),S.rep,tbOf(mc.l,mc.d));
+      const pts=bdoScore(sum.ap,sum.rs,sum.g*proj,sum.a*proj,clubPts(S.club,final),O(),S.rep,tbOf(mc.l,mc.d))+(final?(S.wcMe||0):0);
       out.push({id:'me',n:S.p.name,club:S.club,pos:S.p.pos,age:S.p.age,ovr:O(),nat:S.p.nat,pts,g:sum.g,a:sum.a,me:1});
     }
   }
@@ -425,10 +425,12 @@ function end(){
   if(myG>0&&myG>=mx)aw.push('Artilheiro da '+dn+' ('+myG+' gols)');
   if(ys.ap>=15&&avg>=7.3)aw.push('Craque da '+dn);
   if(S.p.age<=21&&ys.ap>=15&&avg>=7)aw.push('Melhor Jovem da Temporada');
+  if(S.y%4==2)worldCup().forEach(t=>aw.push(t));
   /* 3) Bola de Ouro */
   const lst=bdoList(true),idx=lst.findIndex(x=>x.me),rk=idx<0?0:idx+1;
   const topTen=lst.slice(0,10).map((x,i)=>({...x,rank:i+1,prev:S.bdoPrev[x.id]||0}));
   S.bdo.push({y:S.y,top:topTen,me:rk});
+  S.wcR=null;S.wcMe=0;
   S.bdoPrev={};lst.slice(0,30).forEach((x,i)=>S.bdoPrev[x.id]=i+1);
   if(rk==1){aw.push('🌟 BOLA DE OURO — Melhor Jogador do Mundo');S.rep=C(S.rep+10,0,100);S.pop=C(S.pop+12,0,100)}
   else if(rk>0&&rk<=3)aw.push('Bola de Ouro: pódio ('+rk+'º lugar)');
@@ -470,6 +472,7 @@ function end(){
          move:up_.includes(S.club)?1:dn_.includes(S.club)?-1:0,
          ucl:champ.ucl.c,lib:champ.lib.c,mc:champ.mc,top3:topTen.slice(0,3)};
   S.ph='off';news(`Fim da temporada ${S.y}: ${pos}º lugar na ${dn} (${L0.n}).`);
+  mail('Clube',`Balanço da temporada ${S.y}`,`${mc0.n} terminou em ${pos}º na ${dn}. Você fez ${ys.g} gol(s) e ${ys.a} assistência(s) em ${ys.ap} jogo(s), com nota média ${avg.toFixed(2)}.${aw.length?' Prêmios: '+aw.join('; ')+'.':''}${S.of.length?' Há '+S.of.length+' proposta(s) no Mercado.':''}`);
   if(S.p.age>=40)rt();
 }
 function roll(){
@@ -493,11 +496,11 @@ function importSave(txt){
 }
 
 /* ---------- Nível, habilidades e confiança do técnico (portado do BrasLOL) ---------- */
-function pcEnsure(){if(!S.pc)S.pc={lv:1,xp:0,tp:0,perks:{},tr:55};const p=S.pc;if(!p.perks)p.perks={};if(p.tr==null)p.tr=55;if(p.lv==null){p.lv=1;p.xp=0;p.tp=0}}
+function pcEnsure(){if(!S.mail){S.mail=[];S.mailN=0}if(!S.wc)S.wc=[];if(!S.pc)S.pc={lv:1,xp:0,tp:0,perks:{},tr:55};const p=S.pc;if(!p.perks)p.perks={};if(p.tr==null)p.tr=55;if(p.lv==null){p.lv=1;p.xp=0;p.tp=0}}
 const pfx=k=>{pcEnsure();let v=0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
 function pcXp(n){
   pcEnsure();const p=S.pc;if(p.lv>=PCLV)return;p.xp+=n;
-  while(p.lv<PCLV&&p.xp>=pcNeed(p.lv)){p.xp-=pcNeed(p.lv);p.lv++;const g=1+(p.lv%5==0?1:0);p.tp+=g;news('⭐ Nível '+p.lv+'! +'+g+' ponto'+(g>1?'s':'')+' de habilidade.')}
+  while(p.lv<PCLV&&p.xp>=pcNeed(p.lv)){p.xp-=pcNeed(p.lv);p.lv++;const g=1+(p.lv%5==0?1:0);p.tp+=g;news('⭐ Nível '+p.lv+'! +'+g+' ponto'+(g>1?'s':'')+' de habilidade.');if(p.lv%5==0)mail('Comissão técnica','Você chegou ao nível '+p.lv,'Você ganhou '+g+' ponto(s) de habilidade. Gaste em Perfil → Habilidades.')}
   if(p.lv>=PCLV)p.xp=0;
 }
 function pcTrust(d){pcEnsure();const p=S.pc;if(d>0)d*=1+pfx('trp');p.tr=C(Math.round((p.tr+d)*10)/10,0,100)}
@@ -516,4 +519,58 @@ function pcLearn(id){
   p.tp-=d.c;p.perks[id]=1;
   if(d.at)S.at[d.at[0]]=Math.min(99,S.at[d.at[0]]+d.at[1]);
   news('🌟 Habilidade aprendida: '+d.n+'.');save();return d.n+' aprendida.';
+}
+
+/* ---------- Caixa de e-mail, teste do técnico e Copa do Mundo (portado do BrasLOL) ---------- */
+function mail(from,sub,body){pcEnsure();S.mail.unshift({id:++S.mailN,y:S.y,w:S.week,from,sub,body,rd:0});if(S.mail.length>80)S.mail.length=80}
+function testEv(){
+  const d=O()-cl(S.club).s,p=C(.4+d/55+(S.cond-60)/220+(S.pc.tr-50)/300,.1,.88),ok=Math.random()<p;
+  return ['Teste do técnico','O técnico monta um teste tático e físico para decidir quem merece a vaga. Como você encara?',[
+    ['Dar o máximo ('+Math.round(p*100)+'% de ir bem)',ok?{tr:6,xp:90,cond:-8}:{tr:-3,xp:30,cond:-10},ok?'Você foi muito bem no teste e impressionou o técnico.':'Você se atrapalhou no teste e o técnico não gostou.'],
+    ['Jogar pelo seguro',{tr:2,xp:50,cond:-4},'Teste correto, sem grandes brilhos.'],
+    ['Pedir dicas ao assistente',{tr:1,xp:40,mor:2},'Você aprendeu com a comissão técnica.']]];
+}
+const wcNeed=nat=>{const t=WCN.find(x=>x[0]==nat);return t?55+(t[2]-70)*1.1:60};
+function worldCup(){
+  pcEnsure();const mine=S.p.nat,pos=S.p.pos,aw=[];
+  const T=WCN.map(([n,c,s])=>({n,c,s:s+R(-3,3),pt:0,gf:0,ga:0})),my=T.find(t=>t.n==mine);
+  const need=wcNeed(mine)+R(-3,3),called=!!my&&S.p.age>=18&&O()>=need-2&&S.inj<=6,starter=called&&O()>=need+3;
+  if(called){my.s+=(O()-need)*.4;mail('Federação','Convocação para a Copa do Mundo',(starter?'Você está entre os titulares':'Você foi convocado como opção do banco')+' da seleção '+mine+' para a Copa de '+S.y+'.')}
+  const me={called,starter,g:0,a:0,ap:0,stage:0};
+  const ps={ATA:.30,PNT:.20,MEI:.11,VOL:.04,ZAG:.03}[pos]*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('gl')),as={ATA:.12,PNT:.18,MEI:.26,VOL:.08,ZAG:.03}[pos]*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('ast'));
+  const play=(a,b,ko)=>{
+    const ga=pois(1.25*Math.pow(a.s/b.s,2.4)),gb=pois(1.25*Math.pow(b.s/a.s,2.4));let w=null;
+    if(ko&&ga==gb)w=Math.random()<.5+(a.s-b.s)/160?a:b;else w=ga>gb?a:gb>ga?b:null;
+    if(called&&(a==my||b==my)){me.ap++;const tg=a==my?ga:gb;for(let i=0;i<tg;i++){const x=Math.random();if(x<Math.min(.6,ps))me.g++;else if(x<Math.min(.6,ps)+Math.min(.4,as))me.a++}}
+    return{ga,gb,w};
+  };
+  /* sorteio: 4 potes de 8 por força */
+  const srt=[...T].sort((x,y)=>y.s-x.s),G=[0,1,2,3,4,5,6,7].map(()=>[]);
+  for(let p=0;p<4;p++){const pot=Sh(srt.slice(p*8,p*8+8));pot.forEach((t,i)=>G[i].push(t))}
+  G.forEach(g=>{for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const a=g[i],b=g[j],r=play(a,b,false);a.gf+=r.ga;a.ga+=r.gb;b.gf+=r.gb;b.ga+=r.ga;if(r.w===a)a.pt+=3;else if(r.w===b)b.pt+=3;else{a.pt++;b.pt++}}});
+  const rk=g=>[...g].sort((x,y)=>y.pt-x.pt||(y.gf-y.ga)-(x.gf-x.ga)||y.gf-x.gf||Math.random()-.5);
+  const Q=G.map(rk);let cur=[[0,1],[2,3],[4,5],[6,7],[1,0],[3,2],[5,4],[7,6]].map(([i,j])=>[Q[i][0],Q[j][1]]);
+  let rnd=0,myStage=Q.some(g=>g[0]===my||g[1]===my)?1:0,champ=null,ru=null;const sfL=[];
+  while(cur.length){
+    const nx=[];cur.forEach(([a,b])=>{const r=play(a,b,true);nx.push(r.w);const l=r.w===a?b:a;
+      if(cur.length==2)sfL.push(l);
+      if(cur.length==1){champ=r.w;ru=l}
+      if(r.w===my)myStage=Math.max(myStage,rnd+2);
+    });
+    rnd++;cur=[];for(let i=0;i<nx.length;i+=2)cur.push([nx[i],nx[i+1]]);
+    if(nx.length==1)break;
+  }
+  const stage=myStage;
+  me.stage=stage;
+  S.wcR={};S.wcR[champ.n]=7;S.wcR[ru.n]=4;sfL.forEach(t=>S.wcR[t.n]=2);
+  S.wcMe=called?(S.wcR[mine]||0)+me.g*.6+me.a*.3:0;
+  S.wc.push({y:S.y,champ:champ.n,ru:ru.n,sf:sfL.map(t=>t.n),me,nat:mine});
+  if(called){
+    S.rep=C(S.rep+[1,2,3,5,8,12][stage],0,100);S.pop=C(S.pop+[1,2,4,6,9,14][stage],0,100);pcXp(60+stage*25);
+    if(stage==5){S.ti.push({y:S.y,t:'Copa do Mundo',k:'wc',c:S.club});aw.push('🏆 CAMPEÃO DO MUNDO com '+mine);news('🏆 '+mine+' é campeã do mundo! Você levantou a taça!')}
+    else aw.push('Copa do Mundo: '+STG[stage]+' com '+mine);
+    if(me.g>=3)aw.push('Destaque da Copa ('+me.g+' gols)');
+    mail('Federação','Copa do Mundo '+S.y+': '+STG[stage],'A seleção '+mine+' terminou como '+STG[stage].toLowerCase()+'. Você disputou '+me.ap+' jogo(s), com '+me.g+' gol(s) e '+me.a+' assistência(s). Campeã: '+champ.n+'.');
+  }else news('Copa do Mundo '+S.y+': '+champ.n+' é campeã. '+(my?'Você não foi convocado.':''));
+  return aw;
 }

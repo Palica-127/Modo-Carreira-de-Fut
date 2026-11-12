@@ -45,7 +45,7 @@ const hx=(v,sz='')=>`<span class="hx t${tierOf(v)} ${sz}">${v}</span>`;
 const tn=(c,cls='')=>`<span class="tn ${cls}">${shield(c,'sm')}<span>${esc(c.n)}</span></span>`;
 const tbl=(heads,rows)=>`<div class="tw"><table class="tb"><tr>${heads.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr class="${r.cls||''}">${r.c.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`;
 const pills=(items,cur,fn)=>`<div class="pills">${items.map(([k,l])=>`<button class="pill" aria-pressed="${cur==k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
-const TRO={lig:['#3AC6D3','Liga'],dom:['#B9C4D0','Copa'],ucl:['#7AA2FF','UCL'],lib:['#F2D58C','LIB'],mc:['#C58BFF','Mundial'],bo:['#FFD84D','Bola']};
+const TRO={wc:['#2EC4B6','Copa'],lig:['#3AC6D3','Liga'],dom:['#B9C4D0','Copa'],ucl:['#7AA2FF','UCL'],lib:['#F2D58C','LIB'],mc:['#C58BFF','Mundial'],bo:['#FFD84D','Bola']};
 const troIcon=(k,y,lab)=>{const c=TRO[k][0];return `<div class="tro"><svg viewBox="0 0 44 54"><path d="M12 4h20v14c0 8-4.5 13-10 13s-10-5-10-13zM12 8H5v3c0 5 3 8 8 9M32 8h7v3c0 5-3 8-8 9" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><rect x="19" y="30" width="6" height="9" fill="${c}"/><rect x="13" y="39" width="18" height="6" rx="1.5" fill="${c}"/><rect x="11" y="45" width="22" height="5" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>${esc(lab||TRO[k][1])}</span></div>`};
 const ballTro=y=>`<div class="tro"><svg viewBox="0 0 44 54"><circle cx="22" cy="24" r="17" fill="#FFD84D" stroke="rgba(0,0,0,.35)" stroke-width="1.4"/><path d="M22 14l7 5-2.7 8h-8.6L15 19z" fill="#B8860B"/><rect x="11" y="43" width="22" height="7" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>Bola de Ouro</span></div>`;
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2700)}
@@ -123,7 +123,7 @@ function pgCar(){
     <div class="kv"><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Potencial</small><b>${C(S.p.pot-3,0,99)}–${C(S.p.pot+3,0,99)}</b></div><div><small>Contrato</small><b>${ct.yrs} ano(s)</b></div><div><small>Salário</small><b>${F(ct.sal)}/sem</b></div><div><small>Valor de mercado</small><b>${F(val())}</b></div><div><small>Papel</small><b>${role()}</b></div></div>${S.loan?`<p class="note">Emprestado de ${esc(cl(S.loan.from).n)} até o fim da temporada.</p>`:''}</div></div></div>
   <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Jogos.</p></div>`;
-  h+=`<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
+  h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
     <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
     <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade e é limitada pelo potencial (valor após “/”).</p>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
@@ -250,7 +250,7 @@ function pgMk(){
 /* ---------- Perfil ---------- */
 const KL={bo:'Bola de Ouro',tit:'Campeão continental',art:'Artilheiro',top:'Top 10 Bola de Ouro'};
 function pgPf(){
-  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['hab','Habilidades'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
+  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['hab','Habilidades'],['mail',mailLbl()],['sel','Seleção'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
   const t=tot(false);
   if(ui.pf=='at'){
     h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div></div></div></div>
@@ -264,6 +264,10 @@ function pgPf(){
     h+=`<div class="pn full"><h2>Histórico</h2>${S.hist.length?tbl(['Ano','Clube','Divisão','Pos.','J','G','A','Nota'],S.hist.map(x=>{const c=cl(x.c);return{c:[x.y,tn(c),LEAGUES[x.l].dn[x.d],x.pos?x.pos+'º':'—',x.ap,x.g,x.a,x.ap?(x.rs/x.ap).toFixed(2):'—']}})):'<p class="empty">Sem temporadas concluídas.</p>'}</div>
     ${yrs.length>1?`<div class="pn"><h2>Gols por temporada</h2>${bars(yrs,gl)}</div>`:''}
     <div class="pn"><h2>Prêmios</h2>${S.aw.length?S.aw.slice().reverse().map(x=>`<p style="margin:4px 0">🏅 <b>${x.y}</b> — ${x.t}</p>`).join(''):'<p class="empty">Nenhum prêmio ainda.</p>'}</div>`;
+  }else if(ui.pf=='mail'){
+    h+=pgMail();
+  }else if(ui.pf=='sel'){
+    h+=pgSel();
   }else if(ui.pf=='hab'){
     h+=pgHab();
   }else if(ui.pf=='conq'){
@@ -344,6 +348,29 @@ function render(keep){
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
 }
+/* ---------- Caixa de e-mail, Seleção e plano semanal (portado do BrasLOL) ---------- */
+const mailLbl=()=>{const n=(S.mail||[]).filter(m=>!m.rd).length;return 'Caixa'+(n?' ('+n+')':'')};
+function mailAll(){(S.mail||[]).forEach(m=>m.rd=1);save();render(true)}
+function pgMail(){
+  const ms=S.mail||[],un=ms.filter(m=>!m.rd).length;
+  return `<div class="pn full"><h2>Caixa de entrada · ${un} nova(s)</h2><div class="row"><button class="ghost" onclick="mailAll()">Marcar tudo como lido</button></div>${ms.length?`<ul class="mails">${ms.map(m=>`<li class="${m.rd?'':'unread'}" onclick="sheet('m','${m.id}')"><b>${esc(m.from)}</b><span>${esc(m.sub)}</span><small>${m.y} · S${m.w}</small></li>`).join('')}</ul>`:'<p class="empty">Nenhuma mensagem ainda. Propostas, prêmios, lesões e convocações chegam aqui.</p>'}</div>`;
+}
+function pgSel(){
+  const nat=S.p.nat,code=natCode(nat),need=Math.round(wcNeed(nat)),wy=S.y%4==2&&!S.wc.some(w=>w.y==S.y)?S.y:S.y+((6-S.y%4)%4||4);
+  const cups=S.wc.slice().reverse(),titles=S.wc.filter(w=>w.champ==nat&&w.me.called).length;
+  const stand=WCN.map(([n,c,s])=>({n,c,s,t:S.wc.filter(w=>w.champ==n).length})).sort((a,b)=>b.s-a.s).slice(0,10);
+  return `<div class="pn"><h2>Seleção ${esc(nat)} <span class="natb">${code}</span></h2>${kv([['Próxima Copa',wy],['OVR para convocação','~'+need],['Seu OVR',O()],['Copas disputadas',S.wc.filter(w=>w.me.called).length],['Títulos',titles],['Gols em Copas',S.wc.reduce((s,w)=>s+w.me.g,0)]])}<p class="note">A Copa do Mundo acontece a cada 4 anos (2026, 2030, ...) no fim da temporada. Você precisa ter pelo menos 18 anos e OVR compatível com a seleção. Bons desempenhos dão reputação, popularidade e pontos na Bola de Ouro.</p></div>
+  <div class="pn"><h2>Ranking de seleções</h2><ul class="rank">${stand.map((x,i)=>`<li class="${x.n==nat?'me':''}"><span class="pos">${i+1}</span><span class="natb">${x.c}</span><span class="nm2">${esc(x.n)}<small>${x.t} título(s) no jogo</small></span><span class="pt">${x.s}<small>força</small></span></li>`).join('')}</ul></div>
+  <div class="pn full"><h2>Copas do Mundo</h2>${cups.length?tbl(['Ano','Campeã','Vice','Sua seleção','Você','G','A'],cups.map(w=>({c:[w.y,esc(w.champ),esc(w.ru),STG[w.me.stage],w.me.called?(w.me.starter?'Titular':'Banco'):'Não convocado',w.me.g,w.me.a],cls:w.champ==w.nat&&w.me.called?'mine':''}))):'<p class="empty">Nenhuma Copa disputada ainda.</p>'}</div>`;
+}
+const PLANS=[['l','Leve',null,0],['n','Normal',null,1],['i','Intenso',null,2],['d','Folga',7,0]];
+function setPlan(k){const p=PLANS.find(x=>x[0]==k);if(p[2]!=null)S.tr.a=p[2];else if(S.tr.a==7)S.tr.a=1;S.tr.i=p[3];save();render(true)}
+function planInfo(a,i){const im=[.6,1,1.6][i],en=18+(a==7?16:0)-6*im*(a==7?.2:1)+(S.at[5]-60)/20,xp=Math.round(40*[.8,1,1.3][i]*(a==7?.3:1)*(1+pfx('xpw'))),tr=a==7?0:[.1,.25,.5][i];return{en:Math.round(en*10)/10,xp,tr,risk:a==7?'nenhum':i==2?'alto':i==1?'baixo':'mínimo'}}
+function planBlock(){
+  const cur=S.tr.a==7?'d':['l','n','i'][S.tr.i];
+  return `<div class="pn"><h2>Plano semanal</h2><div class="pills">${PLANS.map(([k,n])=>`<button class="pill" aria-pressed="${cur==k}" onclick="setPlan('${k}')">${n}</button>`).join('')}</div><div class="plans">${PLANS.map(([k,n,a,i])=>{const f=planInfo(a!=null?a:(S.tr.a==7?1:S.tr.a),i);return `<div class="plan ${cur==k?'on':''}"><b>${n}</b><small>XP ~${f.xp}</small><small>Energia ${f.en>=0?'+':''}${f.en}/sem</small><small>Confiança +${f.tr}</small><small>Lesão: ${f.risk}</small></div>`}).join('')}</div><p class="note">Energia atual: <b>${Math.round(S.cond)}</b>/100. Cansado (abaixo de 40) o treino rende menos. O teste do técnico acontece nas semanas 10 e 22.</p></div>`;
+}
+
 /* ---------- Habilidades e nível (portado do BrasLOL) ---------- */
 let pcBr='f',pcSel=null,pcMsg='';
 function pcSet(b){pcBr=b;pcSel=null;render(true)}
@@ -433,6 +460,10 @@ function sheetHtml(){
       ${kv([['Liga',L?L.n:'—'],['Divisão',dvName(c)],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Champions',win('ucl')],['Libertadores',win('lib')],['Mundial',win('mc')],['Ligas',nlg]])}
       <h3>Elenco (destaques)</h3>${squad.length?`<ul class="rank">${squad.map(z=>`<li onclick="sheet('p','${z.id}')"><span class="pos">${z.pos}</span>${hx(Math.round(z.ovr))}<span class="nm2">${esc(z.n)}<small>${z.age} anos · ${z.nat}</small></span></li>`).join('')}</ul>`:'<p class="empty">Sem jogadores rivais cadastrados neste clube.</p>'}
       ${mine?'<p class="note">Este é o seu clube.</p>':''}`;
+    }else if(s.t=='m'){
+      const m=(S.mail||[]).find(z=>String(z.id)==s.id);if(!m){closeSheetSilent();return ''}
+      if(!m.rd){m.rd=1;save()}
+      title=m.sub;body=`<p class="note" style="margin-top:0"><b>${esc(m.from)}</b> · ${m.y} · semana ${m.w}</p><p>${esc(m.body)}</p>`;
     }else if(s.t=='l'){
       const all=[...LEG].map(x=>({...x,pts:legPts(x)})).sort((a,b)=>b.pts-a.pts),i=all.findIndex(x=>x.n==s.id),x=all[i];
       if(!x){closeSheetSilent();return ''}

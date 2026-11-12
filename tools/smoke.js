@@ -21,7 +21,7 @@ function allPages(tag){
   for(let d=0;d<4;d++){ev(`ui.pg='lg';ui.lg=1;ui.lgm='tab';ui.dv=${d};render()`);if(bad())errors.push(tag+' lg dv '+d)}
   for(const k of ['bdo','ovr','art','clb','his']){ev(`ui.pg='rk';ui.rk='${k}';render()`);if(bad())errors.push(tag+' rk '+k)}
   for(const sh of ["'me','me'","'p',S.rv[0].id","'c',S.club","'c',S.cs.find(c=>c.l>=0&&c.id!=S.club).id","'l',encodeURIComponent(LEG[0].n)"]){ev(`ui.pg='rk';sheet(${sh})`);const t=w.document.querySelector('#app').textContent;if(bad()||!w.document.querySelector('.sheet'))errors.push(tag+' ficha '+sh);ev('closeSheet()')}
-  for(const k of ['at','cards','hist','tro','hab','conq','fin','sys']){ev(`ui.pg='pf';ui.pf='${k}';render()`);if(bad())errors.push(tag+' pf '+k)}
+  for(const k of ['at','cards','hist','tro','hab','mail','sel','conq','fin','sys']){ev(`ui.pg='pf';ui.pf='${k}';render()`);if(bad())errors.push(tag+' pf '+k)}
   ev(`ui.pg='car';render()`);
 }
 allPages('inicio');
