@@ -91,7 +91,7 @@ function newGame(f){
   qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
-function afterLoad(){FXC={};rcBuild();pcEnsure();hxEnsure()}
+function afterLoad(){FXC={};rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
 /* ---------- temporada ---------- */
 function qualifyByStrength(){
@@ -119,7 +119,7 @@ function buildComps(){
   });
   S.ucl=mkComp('Liga dos Campeões',[...S.qU,...S.ex.eu],['Fase de 32','Oitavas','Quartas','Semifinal','Final'],[3,9,15,22,29].map(wsc),'ucl');
   S.lib=mkComp('Libertadores',[...S.qL,...S.ex.sa],['Oitavas','Quartas','Semifinal','Final'],[6,13,20,27].map(wsc),'lib');
-  S.mc=null;
+  S.mc=null;[...S.dc,S.ucl,S.lib].forEach(drawK);
 }
 function setupSeason(){
   FXC={};S.tb={};S.dv={};
@@ -300,16 +300,26 @@ function trophy(k,label){
   const b={ucl:[8,12],lib:[7,10],dom:[3,4],mc:[4,6]}[k.k]||[2,3];
   S.rep=C(S.rep+b[0],0,100);S.pop=C(S.pop+b[1],0,100);news('🏆 Campeão: '+(label||k.n)+'!');
 }
+/* sorteio: feito assim que a fase anterior termina (a primeira, ao montar a temporada) */
+function drawK(k){
+  k.dr=[];if(k.ch!=null||k.rd>=k.rn.length||k.al.length<2)return;
+  const a=Sh(k.al);for(let i=0;i+1<a.length;i+=2)k.dr.push([a[i],a[i+1]]);
+  const m=k.dr.find(p=>p.includes(S.club));
+  if(m&&typeof news=='function')news('🎲 Sorteio — '+k.n+' ('+k.rn[k.rd]+'): '+cl(m[0]).n+' x '+cl(m[1]).n+'.');
+}
 function ko(k){
-  const a=Sh(k.al),w=[],last=a.length==2;
-  for(let i=0;i<a.length;i+=2){
-    const r=fx(a[i],a[i+1],k.n+' — '+k.rn[k.rd],1,k.k);
-    w.push(r.win);k.log.push([k.rd,a[i],a[i+1],r.g[0],r.g[1],r.win,r.pen?1:0]);
-    if(last)k.ru=r.win==a[i]?a[i+1]:a[i];
+  if(!k.dr||!k.dr.length)drawK(k);
+  const D=k.dr,w=[],last=D.length==1;
+  for(const [x,y] of D){
+    const r=fx(x,y,k.n+' — '+k.rn[k.rd],1,k.k);
+    w.push(r.win);k.log.push([k.rd,x,y,r.g[0],r.g[1],r.win,r.pen?1:0]);
+    if(last)k.ru=r.win==x?y:x;
   }
   k.al=w;k.rd++;
-  if(w.length==1){k.ch=w[0];if(w[0]==S.club)trophy(k)}
+  if(w.length==1){k.ch=w[0];k.dr=[];if(w[0]==S.club)trophy(k)}else drawK(k);
 }
+const KB={lg:['Liga','#3aa0ff'],dom:['Copa','#4cd08a'],ucl:['Champions','#8a8cff'],lib:['Libertadores','#f0a43a'],mc:['Mundial','#e6c25a']};
+const kBadge=k=>`<span class="kb" style="--kc:${KB[k][1]}">${KB[k][0]}</span>`;
 
 /* ---------- treino ---------- */
 function trn_(){
@@ -339,11 +349,11 @@ function wkPlan(){
   const w=S.week,c=cl(S.club),g=[];
   if(S.wmid!=w){
     const k=allComps().find(k=>k.ch==null&&k.wk[k.rd]==w&&k.al.includes(S.club));
-    if(k)g.push({d:kDay(k.k),ph:'mid',n:k.n+' — '+k.rn[k.rd]});
-    else if(w==SEASON&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final'});
+    if(k){const m=(k.dr||[]).find(p=>p.includes(S.club));g.push({d:kDay(k.k),ph:'mid',n:k.n+' — '+k.rn[k.rd],h:m?m[0]:null,a:m?m[1]:null,kk:k.k})}
+    else if(w==SEASON&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final',h:S.ucl.ch,a:S.lib.ch,kk:'mc'});
   }
   const rd=roundAt(c.l<0?0:c.l,c.d,w),m=(rd||[]).find(x=>x.includes(S.club));
-  g.push({d:lgDay(w),ph:'end',n:rd?'Liga — '+dvName(c):'Semana sem rodada da liga',h:m?m[0]:null,a:m?m[1]:null});
+  g.push({d:lgDay(w),ph:'end',n:rd?'Liga — '+dvName(c):'Semana sem rodada da liga',h:m?m[0]:null,a:m?m[1]:null,kk:'lg'});
   return g.sort((x,y)=>x.d-y.d);
 }
 function wkBegin(){
@@ -355,7 +365,7 @@ function stepMid(){
   if(S.ph!='season'||S.ev||S.wmid==S.week)return false;
   wkBegin();const w=S.week;
   allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w)ko(k)});
-  if(w==SEASON&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[SEASON],'mc');ko(S.mc)}
+  if(w==SEASON&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[SEASON],'mc');drawK(S.mc);ko(S.mc)}
   S.wmid=w;return true;
 }
 function stepEnd(){

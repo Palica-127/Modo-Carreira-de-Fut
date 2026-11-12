@@ -70,13 +70,29 @@ function lvBall(r,t){
   x=side?1-d:d;
   return{x,y,side,ev:null};
 }
+let LVSUB=[];
+/* a cada minuto a bola faz 'passes' intermediários e os jogadores deslizam em linear: movimento contínuo */
+function lvPitchRun(pit,r,t,fresh){
+  LVSUB.forEach(clearTimeout);LVSUB=[];
+  const cur=lvBall(r,t),prv=t>0?lvBall(r,t-1):{x:.5,y:.5,side:0},tm=lvMs[ui.lv.sp];
+  const N=ui.lv.pause||tm<240?1:4,ms=Math.max(30,tm/N),sf=hash(r.h+r.a)%997;
+  const at=k=>{
+    if(k>=N-1)return cur;
+    const f=(k+1)/N,j=(1-Math.abs(f-.5)*2)*.14;
+    return{x:C(prv.x+(cur.x-prv.x)*f+(lvR(sf,t,20+k)-.5)*j,.02,.98),y:C(prv.y+(cur.y-prv.y)*f+(lvR(sf,t,30+k)-.5)*j*1.4,.04,.96),side:cur.side};
+  };
+  if(fresh)pit.querySelectorAll('.pd,.pb').forEach(d=>d.style.transitionDuration='0ms');
+  lvPitchSet(pit,r,t,at(0),fresh?0:ms,cur.ev);
+  if(fresh)void pit.offsetWidth;
+  for(let k=1;k<N;k++)LVSUB.push(setTimeout(()=>{const q=document.getElementById('lvpitch');if(q&&ui.lv&&ui.lv.t==t)lvPitchSet(q,r,t,at(k),ms,cur.ev)},k*ms));
+}
 function lvPitchHtml(r){
   const c=[cl(r.h),cl(r.a)],pl=[pal(c[0]),pal(c[1])];
-  const dots=[0,1].map(s=>r.xi[s].map((p,i)=>`<i class="pd t${s}${p[2]?' me':''}${p[1]=='GOL'?' gk':''}" data-s="${s}" data-i="${i}" style="--c1:${pl[s].p};--c2:${pl[s].s}" title="${esc(p[0])}">${i+1}</i>`).join('')).join('');
+  const dots=[0,1].map(s=>r.xi[s].map((p,i)=>`<i class="pd t${s}${p[2]?' me':''}${p[1]=='GOL'?' gk':''}" data-s="${s}" data-i="${i}" style="--c1:${pl[s].p};--c2:${pl[s].s}" title="${esc(p[0])}">${p[2]?`<s class="mk">▼</s><u class="mn">${esc(p[0].split(' ').slice(-1)[0])} · VOCÊ</u>`:''}${i+1}</i>`).join('')).join('');
   return `<div id="lvpitch" class="lvpit" data-k="${S.last.indexOf(r)}"><svg class="lvf" viewBox="0 0 105 68" preserveAspectRatio="none" aria-hidden="true"><rect x=".5" y=".5" width="104" height="67"/><line x1="52.5" y1=".5" x2="52.5" y2="67.5"/><circle cx="52.5" cy="34" r="9.15"/><rect x=".5" y="13.85" width="16.5" height="40.3"/><rect x=".5" y="24.85" width="5.5" height="18.3"/><rect x="88" y="13.85" width="16.5" height="40.3"/><rect x="99" y="24.85" width="5.5" height="18.3"/><rect class="gl" x="-1.2" y="29" width="1.7" height="10"/><rect class="gl" x="104.5" y="29" width="1.7" height="10"/></svg>${dots}<b class="pb"></b><div class="pchip"></div></div>`;
 }
-function lvPitchSet(pit,r,t){
-  const L=ui.lv,ms=Math.min(560,lvMs[L.sp]*.9),B=lvBall(r,t),bs=lvBase(r);
+function lvPitchSet(pit,r,t,B,ms,E){
+  const bs=lvBase(r);
   let near=null,nd=9;
   pit.querySelectorAll('.pd').forEach(d=>{
     const s=+d.dataset.s,i=+d.dataset.i,b=bs[s][i],k=LVK[b[2]]||.2;
@@ -87,11 +103,11 @@ function lvPitchSet(pit,r,t){
     const dd=Math.hypot((x-B.x)*105,(y-B.y)*68);if(dd<nd){nd=dd;near=[s,i]}
   });
   pit.querySelectorAll('.pd.hot').forEach(d=>d.classList.remove('hot'));
-  const ball=pit.querySelector('.pb');ball.style.transitionDuration=(ms*.8)+'ms';ball.style.left=(B.x*100).toFixed(1)+'%';ball.style.top=(B.y*100).toFixed(1)+'%';
+  const ball=pit.querySelector('.pb');ball.style.transitionDuration=ms+'ms';ball.style.left=(B.x*100).toFixed(1)+'%';ball.style.top=(B.y*100).toFixed(1)+'%';
   const h=near&&pit.querySelector(`.pd[data-s="${near[0]}"][data-i="${near[1]}"]`);if(h)h.classList.add('hot');
   const ch=pit.querySelector('.pchip'),nm=near?r.xi[near[0]][near[1]][0]:'';
-  ch.className='pchip'+(B.ev&&B.ev[0]=='gol'?' gol':'');
-  ch.textContent=B.ev?(B.ev[0]=='gol'?'GOL! '+B.ev[1]:B.ev[0]+(nm?' · '+nm:'')):nm;
+  ch.className='pchip'+(E&&E[0]=='gol'?' gol':'');
+  ch.textContent=E?(E[0]=='gol'?'GOL! '+E[1]:E[0]+(nm?' · '+nm:'')):nm;
 }
 function lvHtml(){
   const L=ui.lv,r=S.last[L.i];if(!r||!r.st)return '';
@@ -123,17 +139,25 @@ function lvDraw(){
     let pit=old&&old.dataset.k==String(ui.lv.i)?old:null;
     if(!pit){const w=document.createElement('div');w.innerHTML=lvPitchHtml(r);pit=w.firstChild}
     slot.appendChild(pit);
-    if(!old||pit!==old){pit.querySelectorAll('.pd,.pb').forEach(d=>d.style.transitionDuration='0ms');lvPitchSet(pit,r,ui.lv.t);void pit.offsetWidth}
-    else lvPitchSet(pit,r,ui.lv.t);
+    lvPitchRun(pit,r,ui.lv.t,!old||pit!==old);
   }
 }
 
 /* ---------- calendário: avançar os dias até o jogo, depois jogar ---------- */
 let ADV=null;
+/* avança os dias atualizando só a faixa da semana (sem redesenhar a tela inteira, para não piscar) */
+function stripUpd(){
+  const day=S.day|0,w=document.querySelectorAll('#pblk .wd');if(!w.length)return false;
+  const pl=wkPlan();
+  w.forEach((el,d)=>{el.classList.toggle('now',d==day);el.classList.toggle('past',d<day);const g=pl.find(x=>x.d==d),sp=el.querySelector('.wi');if(sp&&!g)sp.textContent=d<day?'✓':'·'});
+  const t=document.getElementById('pdt');if(t)t.textContent=dTxt(S.week,day);
+  return true;
+}
 function avancar(){
   if(ADV||S.ph!='season'||S.ev)return;
   const g=wkPlan()[0];S.day=S.day|0;if(!g||S.day>=g.d)return;
-  ADV=setInterval(()=>{S.day++;if(S.day>=g.d){clearInterval(ADV);ADV=null;save()}render(true)},300);
+  const b=document.querySelector('#pblk .play');if(b){b.disabled=true;b.textContent='⏳ Avançando…'}
+  ADV=setInterval(()=>{S.day++;const ok=stripUpd();if(S.day>=g.d||!ok){clearInterval(ADV);ADV=null;save();render(true)}},260);
 }
 function jogarJogo(){
   if(ADV||S.ph!='season'||S.ev)return;
@@ -146,11 +170,13 @@ function jogarJogo(){
 }
 function weekStrip(){
   const w=S.week,pl=wkPlan(),day=S.day|0;
-  return `<div class="wkst">${WD.map((n,d)=>{const g=pl.find(x=>x.d==d);return `<div class="wd ${d==day?'now':''} ${d<day?'past':''} ${g?'gm':''}"><small>${n}</small><b>${String(wkDate(w,d).getDate()).padStart(2,'0')}</b><span>${g?'⚽':d<day?'✓':'·'}</span></div>`}).join('')}</div>`;
+  return `<div class="wkst">${WD.map((n,d)=>{const g=pl.find(x=>x.d==d),o=g&&g.h!=null?cl(g.h==S.club?g.a:g.h):null;
+    const ic=g?(o?shield(o,'xs'):'⚽'):d<day?'✓':'·';
+    return `<div class="wd ${d==day?'now':''} ${d<day?'past':''} ${g?'gm':''}" ${g?`style="--kc:${KB[g.kk||'lg'][1]}" title="${esc(g.n)}${o?' · '+esc(o.n):''}"`:''}><small>${n}</small><b>${String(wkDate(w,d).getDate()).padStart(2,'0')}</b><span class="wi">${ic}</span>${g?`<em class="wk">${KB[g.kk||'lg'][0]}</em>`:''}</div>`}).join('')}</div>`;
 }
 function playBlock(){
   S.day=S.day|0;const g=wkPlan()[0],ready=S.day>=g.d,opp=g.h!=null?`${cl(g.h).n} x ${cl(g.a).n}`:'';
   const evb=S.ev?'disabled':'';
-  return `${weekStrip()}<p class="note" style="margin:8px 0">📅 <b>${dTxt(S.week,S.day)}</b> · próximo jogo: <b>${dTxt(S.week,g.d)}</b> — ${esc(g.n)}${opp?' ('+esc(opp)+')':''}</p>
-  ${ready?`<button class="play" onclick="jogarJogo()" ${evb}>⚽ Jogar — ${esc(g.n)}</button><p class="note" style="margin:6px 0">É dia de jogo. A partida é transmitida ao vivo.</p>`:`<button class="play" onclick="avancar()" ${evb}>▶ Avançar</button><p class="note" style="margin:6px 0">Faltam ${g.d-S.day} dia(s) para o jogo. O tempo corre direto até lá.</p>`}`;
+  return `<div id="pblk">${weekStrip()}<p class="note" style="margin:8px 0">📅 <b id="pdt">${dTxt(S.week,S.day)}</b> · próximo jogo: <b>${dTxt(S.week,g.d)}</b> — ${esc(g.n)}${opp?' ('+esc(opp)+')':''}</p>
+  ${ready?`<button class="play" onclick="jogarJogo()" ${evb}>⚽ Jogar — ${esc(g.n)}</button><p class="note" style="margin:6px 0">É dia de jogo. A partida é transmitida ao vivo.</p>`:`<button class="play" onclick="avancar()" ${evb}>▶ Avançar</button><p class="note" style="margin:6px 0">Faltam ${g.d-S.day} dia(s) para o jogo. O tempo corre direto até lá.</p>`}</div>`;
 }

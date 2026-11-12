@@ -23,15 +23,30 @@ function pgJogar(){
   const v={prox:viewProx,res:viewRes,tab:viewTab,cal:viewCal,copa:viewCopa,camp:viewCamp}[ui.jg]||viewProx;
   return pills(JG_TABS,ui.jg,'jgSet','scroll')+v();
 }
+/* eventos do seu clube na temporada (liga, copas, continentais e Mundial) */
+function calEvents(){
+  const c=cl(S.club),T=rounds(c.l,c.d),WS=weeksOf(T.length),ev=[];
+  T.forEach((r,i)=>{const wk=WS[i],m=r.find(x=>x.includes(S.club));if(!m)return;const home=m[0]==S.club;
+    ev.push({w:wk,d:lgDay(wk),k:'lg',o:home?m[1]:m[0],home,res:S.res.filter(x=>x.w==wk&&x.c=='Liga').map(x=>x.t).join('')||null,nm:'Liga'})});
+  allComps().forEach(k=>{
+    for(let r=0;r<k.rn.length;r++){
+      const wk=k.wk[r],nm=k.rn[r],full=k.n+' — '+nm,lg=k.log.find(x=>x[0]==r&&(x[1]==S.club||x[2]==S.club));
+      const rs=S.res.find(x=>x.w==wk&&x.c==full);
+      if(lg)ev.push({w:wk,d:kDay(k.k),k:k.k,o:lg[1]==S.club?lg[2]:lg[1],home:lg[1]==S.club,res:rs?rs.t:null,nm:k.n+' · '+nm});
+      else if(k.ch==null&&k.al.includes(S.club)){
+        if(r==k.rd){const m=(k.dr||[]).find(p=>p.includes(S.club));ev.push({w:wk,d:kDay(k.k),k:k.k,o:m?(m[0]==S.club?m[1]:m[0]):null,home:m?m[0]==S.club:true,res:null,nm:k.n+' · '+nm})}
+        else if(r>k.rd)ev.push({w:wk,d:kDay(k.k),k:k.k,o:null,res:null,fut:1,nm:k.n+' · '+nm});
+      }
+    }
+  });
+  if(!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))ev.push({w:SEASON,d:2,k:'mc',o:S.ucl.ch==S.club?S.lib.ch:S.ucl.ch,home:true,res:null,nm:'Mundial de Clubes · Final'});
+  return ev.sort((a,b)=>a.w-b.w||a.d-b.d);
+}
+const evOpp=e=>e.o!=null?(e.home===false?'<small class="muted">fora</small> ':'<small class="muted">casa</small> ')+tn(cl(e.o)):e.fut?'<span class="muted">A definir (sorteio)</span>':'<span class="muted">Sorteio pendente</span>';
 /* próximos jogos da liga e das copas (as fases seguintes das copas só valem se o clube avançar) */
 function upcoming(){
-  const c=cl(S.club),T=rounds(c.l,c.d),rows=[],last=Math.min(SEASON,S.week+5);
-  for(let w=S.week+1;w<=last;w++){
-    const m=(roundAt(c.l,c.d,w)||[]).find(x=>x.includes(S.club));
-    if(m){const home=m[0]==S.club,o=cl(home?m[1]:m[0]);rows.push({c:[dTxt(w,lgDay(w)),'Liga',(home?'vs ':'@ ')+esc(o.n),Math.round(o.s)]})}
-    allComps().forEach(k=>{if(k.ch==null&&k.al.includes(S.club))for(let r=k.rd;r<k.rn.length;r++)if(k.wk[r]==w)rows.push({c:[dTxt(w,kDay(k.k)),esc(k.n),esc(k.rn[r])+(r>k.rd?' (se avançar)':''),'—']})});
-  }
-  return rows.length?`<div class="pn"><h2>Calendário próximo</h2>${tbl(['Data','Torneio','Jogo','Força'],rows)}</div>`:'';
+  const rows=calEvents().filter(e=>e.w>S.week&&e.w<=S.week+5&&!e.res).map(e=>({c:[dTxt(e.w,e.d),kBadge(e.k),esc(e.nm.split(' · ')[1]||'')+(e.fut?' (se avançar)':''),evOpp(e),e.o!=null?Math.round(cl(e.o).s):'—'],cls:'kr kr-'+e.k}));
+  return rows.length?`<div class="pn"><h2>Calendário próximo</h2>${tbl(['Data','Torneio','Fase','Adversário','Força'],rows)}</div>`:'';
 }
 const mrow=(h,a,gh,ga)=>`<div class="m ${h==S.club||a==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${gh>ga?'win':gh<ga?'lose':''} lnk" onclick="sheet('c','${cl(h).id}')">${shield(cl(h),'xs')}<span>${esc(cl(h).n)}</span></div><div class="sc" style="font-size:18px">${gh}<i>x</i>${ga}</div><div class="tn b ${ga>gh?'win':ga<gh?'lose':''} lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div></div></div>`;
 function lastRound(l,d){
@@ -61,9 +76,11 @@ function viewTab(){
   return h+lastRound(ui.lg,d)+nextRound(ui.lg,d);
 }
 function viewCal(){
-  const c=cl(S.club),T=rounds(c.l,c.d),WS=weeksOf(T.length),ks=[S.dc[c.l],S.ucl,S.lib];
-  let h=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${tbl(['Sem','Data','Jogo','Resultado'],T.map((r,i)=>{const wk=WS[i],m=r.find(x=>x.includes(S.club)),res=S.res.filter(x=>x.w==wk&&x.c=='Liga').map(x=>x.t).join('');return{c:[wk,dTxt(wk,lgDay(wk)),m?esc(cl(m[0]).n)+' x '+esc(cl(m[1]).n):'—',res||'—'],cls:wk==S.week&&S.ph=='season'?'mine':''}}))}</div>`;
-  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+')').join(' · ')],cls:k.ch==null&&k.al.includes(S.club)?'mine':''})).concat([{c:['Mundial de Clubes','Final ('+dTxt(SEASON,2)+'), entre os campeões da Champions e da Libertadores']}]))}</div>`;
+  const c=cl(S.club),ks=[S.dc[c.l],S.ucl,S.lib],ev=calEvents();
+  const lg=`<p class="kleg">${['lg','dom','ucl','lib','mc'].map(kBadge).join('')}</p>`;
+  const rsc=t=>{const m=t&&t.match(/(\d+) x (\d+)/);return m?m[1]+' x '+m[2]:'—'};
+  let h=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${lg}${tbl(['Sem','Data','Torneio','Adversário','Resultado'],ev.map(e=>({c:[e.w,dTxt(e.w,e.d),kBadge(e.k)+(e.k=='lg'?'':' <small class="muted">'+esc(e.nm.split(' · ')[1]||'')+'</small>'),evOpp(e),rsc(e.res)],cls:'kr kr-'+e.k+(e.w==S.week&&S.ph=='season'?' mine':'')})))}</div>`;
+  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[kBadge(k.k)+' '+esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+')').join(' · ')],cls:'kr kr-'+k.k+(k.ch==null&&k.al.includes(S.club)?' mine':'')})).concat([{c:[kBadge('mc')+' Mundial de Clubes','Final ('+dTxt(SEASON,2)+'), entre os campeões da Champions e da Libertadores'],cls:'kr kr-mc'}]))}</div>`;
   return h;
 }
 const viewCopa=()=>lgPills()+compView(S.dc[ui.lg])+compView(S.ucl)+compView(S.lib)+(S.mc?compView(S.mc):'');
