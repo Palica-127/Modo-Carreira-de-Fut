@@ -250,7 +250,7 @@ function pgMk(){
 /* ---------- Perfil ---------- */
 const KL={bo:'Bola de Ouro',tit:'Campeão continental',art:'Artilheiro',top:'Top 10 Bola de Ouro'};
 function pgPf(){
-  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['sys','Sistema']],ui.pf,"pfSet");
+  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
   const t=tot(false);
   if(ui.pf=='at'){
     h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div></div></div></div>
@@ -264,6 +264,10 @@ function pgPf(){
     h+=`<div class="pn full"><h2>Histórico</h2>${S.hist.length?tbl(['Ano','Clube','Divisão','Pos.','J','G','A','Nota'],S.hist.map(x=>{const c=cl(x.c);return{c:[x.y,tn(c),LEAGUES[x.l].dn[x.d],x.pos?x.pos+'º':'—',x.ap,x.g,x.a,x.ap?(x.rs/x.ap).toFixed(2):'—']}})):'<p class="empty">Sem temporadas concluídas.</p>'}</div>
     ${yrs.length>1?`<div class="pn"><h2>Gols por temporada</h2>${bars(yrs,gl)}</div>`:''}
     <div class="pn"><h2>Prêmios</h2>${S.aw.length?S.aw.slice().reverse().map(x=>`<p style="margin:4px 0">🏅 <b>${x.y}</b> — ${x.t}</p>`).join(''):'<p class="empty">Nenhum prêmio ainda.</p>'}</div>`;
+  }else if(ui.pf=='conq'){
+    h+=pgConq();
+  }else if(ui.pf=='fin'){
+    h+=pgFin();
   }else if(ui.pf=='tro'){
     const tr=S.ti.map(x=>troIcon(x.k||'lig',x.y,x.t.replace(/ \(.*/,'')));
     const bo=S.aw.filter(a=>a.t.includes('BOLA DE OURO')).map(a=>ballTro(a.y));
@@ -338,6 +342,43 @@ function render(keep){
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
 }
+/* ---------- Conquistas e Finanças (portado do BrasLOL) ---------- */
+const ACH=[
+ ['Estreia','Dispute a primeira partida profissional',t=>t.ap>=1],
+ ['Primeiro gol','Marque seu primeiro gol',t=>t.g>=1],
+ ['Artilheiro','Marque 100 gols na carreira',t=>t.g>=100],
+ ['Centenário','Marque 250 gols na carreira',t=>t.g>=250],
+ ['Lenda dos gols','Marque 500 gols na carreira',t=>t.g>=500],
+ ['Garçom','Dê 100 assistências',t=>t.a>=100],
+ ['Veterano','Dispute 500 jogos',t=>t.ap>=500],
+ ['Mil jogos','Dispute 1000 jogos',t=>t.ap>=1000],
+ ['Campeão','Conquiste um título',t=>S.ti.length>=1],
+ ['Colecionador','Conquiste 10 títulos',t=>S.ti.length>=10],
+ ['Colecionador de elite','Conquiste 25 títulos',t=>S.ti.length>=25],
+ ['Rei da Europa','Vença a Liga dos Campeões',t=>S.ti.some(x=>x.k=='ucl')],
+ ['Rei da América','Vença a Libertadores',t=>S.ti.some(x=>x.k=='lib')],
+ ['Campeão do mundo','Vença o Mundial de Clubes',t=>S.ti.some(x=>x.k=='mc')],
+ ['Bola de Ouro','Vença a Bola de Ouro',t=>S.aw.some(x=>x.t.includes('BOLA DE OURO'))],
+ ['Bicampeão da Bola','Vença 2 Bolas de Ouro',t=>S.aw.filter(x=>x.t.includes('BOLA DE OURO')).length>=2],
+ ['Craque','Chegue a 80 de OVR',t=>Math.max(S.peak,O())>=80],
+ ['Fora de série','Chegue a 90 de OVR',t=>Math.max(S.peak,O())>=90],
+ ['Do zero ao topo','Jogue na 1ª divisão',t=>S.hist.concat(S.cur?[S.cur]:[]).some(x=>cl(x.c).d==0)],
+ ['Viajante','Jogue em 3 clubes diferentes',t=>new Set(S.hist.concat(S.cur?[S.cur]:[]).map(x=>x.c)).size>=3],
+ ['Milionário','Acumule €50M',t=>S.money>=5e7]
+];
+function achList(){const t=tot(false);return ACH.map(([n,d,f])=>{let ok=false;try{ok=!!f(t)}catch(e){}return{n,d,ok}})}
+function pgConq(){
+  const l=achList(),n=l.filter(x=>x.ok).length;
+  return `<div class="pn full"><h2>Conquistas · ${n}/${l.length}</h2><div class="achs">${l.map(x=>`<div class="ach ${x.ok?'ok':''}"><b>${x.ok?'🏆':'🔒'} ${esc(x.n)}</b><small>${esc(x.d)}</small></div>`).join('')}</div></div>`;
+}
+function pgFin(){
+  const c=S.ct,anual=c.sal*52,tt=tot(false),bonus=tt.g*c.bon;
+  const hist=S.hist.slice(-8);
+  return `<div class="pn"><h2>Finanças</h2>${kv([['Patrimônio',F(S.money)],['Salário/semana',F(c.sal)],['Salário/ano',F(anual)],['Bônus por gol',F(c.bon)],['Contrato',c.yrs+' ano(s)'],['Multa',F(c.cl)],['Valor de mercado',F(val())],['Bônus (carreira)',F(bonus)]])}</div>
+  <div class="pn"><h2>Projeção da próxima temporada</h2>${kv([['Salário',F(anual)],['Bônus estimado',F(Math.round((tt.ap?tt.g/Math.max(1,S.hist.length||1):8)*c.bon))],['Total estimado',F(anual+Math.round((tt.ap?tt.g/Math.max(1,S.hist.length||1):8)*c.bon))]])}<p class="note">Estimativa baseada no seu contrato atual e na média de gols por temporada.</p></div>
+  <div class="pn full"><h2>Clube atual</h2><div class="tn">${shield(cl(S.club),'sm')}<span>${esc(cl(S.club).n)}</span></div><p class="note">${S.loan?'Você está emprestado.':'Contrato com multa de '+F(c.cl)+'.'}</p></div>`;
+}
+
 /* ---------- Fichas (portado do BrasLOL): jogador, clube e lenda ---------- */
 const statBars=st=>`<div class="sbars">${st.map(([l,v])=>`<div class="sb"><span>${l}</span><i><u style="width:${v}%" class="t${tierOf(v)}"></u></i><b>${v}</b></div>`).join('')}</div>`;
 const kv=(a)=>`<div class="kvs">${a.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('')}</div>`;
