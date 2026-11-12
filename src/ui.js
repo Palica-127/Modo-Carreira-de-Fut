@@ -50,7 +50,13 @@ const tn=(c,cls='')=>`<span class="tn lnk ${cls}" onclick="event.stopPropagation
 const tbl=(heads,rows)=>`<div class="tw"><table class="tb"><tr>${heads.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr class="${r.cls||''}">${r.c.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`;
 const pills=(items,cur,fn,cls='')=>`<div class="pills ${cls}">${items.map(([k,l])=>`<button class="pill" aria-pressed="${cur==k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
 const TRO={wc:['#2EC4B6','Copa'],lig:['#3AC6D3','Liga'],dom:['#B9C4D0','Copa'],ucl:['#7AA2FF','UCL'],lib:['#F2D58C','LIB'],mc:['#C58BFF','Mundial'],bo:['#FFD84D','Bola']};
-const troIcon=(k,y,lab)=>{const c=TRO[k][0];return `<div class="tro"><svg viewBox="0 0 44 54"><path d="M12 4h20v14c0 8-4.5 13-10 13s-10-5-10-13zM12 8H5v3c0 5 3 8 8 9M32 8h7v3c0 5-3 8-8 9" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><rect x="19" y="30" width="6" height="9" fill="${c}"/><rect x="13" y="39" width="18" height="6" rx="1.5" fill="${c}"/><rect x="11" y="45" width="22" height="5" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>${esc(lab||TRO[k][1])}</span></div>`};
+const shade=(h,f)=>'#'+[1,3,5].map(i=>{const v=parseInt(h.slice(i,i+2),16);return Math.max(0,Math.min(255,Math.round(f>0?v+(255-v)*f:v*(1+f)))).toString(16).padStart(2,'0')}).join('');
+const troIcon=(k,y,lab)=>{const c=TRO[k][0],g='tg'+k,globe=k=='mc'||k=='wc',lg=k=='ucl'||k=='lib',
+  defs=`<defs><linearGradient id="${g}" x1="0" x2="1"><stop offset="0" stop-color="${shade(c,.45)}"/><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${shade(c,-.4)}"/></linearGradient></defs>`,
+  body=globe?`<circle cx="22" cy="17" r="13" fill="url(#${g})" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><path d="M10 15c8 3 16 3 24 0M12 24c6 2 14 2 20 0M22 4c-5 6-5 18 0 26M22 4c5 6 5 18 0 26" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1"/><path d="M18 30h8l2 9h-12z" fill="url(#${g})" stroke="rgba(0,0,0,.3)" stroke-width="1"/>`
+   :lg?`<path d="M13 3h18c0 12-2 17-6 20v5h4v4H15v-4h4v-5c-4-3-6-8-6-20z" fill="url(#${g})" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><path d="M13 6H7c-1 8 2 12 7 13M31 6h6c1 8-2 12-7 13" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/><path d="M17 6c0 8 1 12 4 15" stroke="rgba(255,255,255,.5)" stroke-width="2" fill="none"/>`
+   :`<path d="M12 4h20v14c0 8-4.5 13-10 13s-10-5-10-13z" fill="url(#${g})" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><path d="M12 8H5v3c0 5 3 8 8 9M32 8h7v3c0 5-3 8-8 9" fill="none" stroke="${c}" stroke-width="2.6"/><rect x="19" y="30" width="6" height="9" fill="url(#${g})"/><path d="M16 8c0 6 1 12 4 16" stroke="rgba(255,255,255,.45)" stroke-width="2" fill="none"/>`;
+  return `<div class="tro"><svg viewBox="0 0 44 54">${defs}${body}<rect x="12" y="${globe?39:lg?32:39}" width="20" height="${globe?5:lg?5:6}" rx="1.5" fill="#6b4a1f"/><rect x="10" y="${globe?44:lg?37:45}" width="24" height="5" rx="1.5" fill="#4a3213"/></svg>${y!==''&&y!=null?`<b>${y}</b>`:''}<span>${esc(lab||TRO[k][1])}</span></div>`};
 const ballTro=y=>`<div class="tro"><svg viewBox="0 0 44 54"><circle cx="22" cy="24" r="17" fill="#FFD84D" stroke="rgba(0,0,0,.35)" stroke-width="1.4"/><path d="M22 14l7 5-2.7 8h-8.6L15 19z" fill="#B8860B"/><rect x="11" y="43" width="22" height="7" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>Bola de Ouro</span></div>`;
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2700)}
 
@@ -350,5 +356,6 @@ function pgFin(){
 /* ---------- Fichas (portado do BrasLOL): jogador, clube e lenda ---------- */
 const statBars=st=>`<div class="sbars">${st.map(([l,v])=>`<div class="sb"><span>${l}</span><i><u style="width:${v}%" class="t${tierOf(v)}"></u></i><b>${v}</b></div>`).join('')}</div>`;
 const kv=(a)=>`<div class="kvs">${a.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('')}</div>`;
-function sheet(t,id){ui.sheet={t,id:decodeURIComponent(id)};render(true)}
-function closeSheet(){ui.sheet=null;render(true)}
+function sheet(t,id){id=decodeURIComponent(id);const o=ui.sheet;if(o&&!(o.t==t&&o.id==id))(ui.shs=ui.shs||[]).push({t:o.t,id:o.id});if(!o)ui.shs=[];ui.sheet={t,id};render(true)}
+function backSheet(){const p=(ui.shs||[]).pop();ui.sheet=p||null;render(true)}
+function closeSheet(){ui.sheet=null;ui.shs=[];render(true)}

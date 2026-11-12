@@ -222,6 +222,23 @@ function titleLines(list){
   const by={};list.forEach(x=>{(by[x.k]=by[x.k]||[]).push(x.y)});
   return [['bo','Bola de Ouro'],['wc','Copa do Mundo'],['ucl','Liga dos Campeões'],['lib','Libertadores'],['mc','Mundial de Clubes'],['lig','Liga nacional'],['dom','Copa nacional']].map(([k,n])=>yrsLine(n,by[k]||[])).join('');
 }
+/* ---------- componentes das fichas (estilo BrasLOL) ---------- */
+const shHero=(left,name,sub,tags,tiles)=>`<div class="hero2"><div class="h2c">${left}</div><div class="h2m"><h2 class="h2n">${name}</h2><div class="h2s">${sub}</div>${tags.map(t=>`<div class="h2t">${t}</div>`).join('')}</div><div class="h2k">${tiles.map(([l,v])=>`<div><b>${v}</b><small>${l}</small></div>`).join('')}</div></div>`;
+const SHG=[['mc','Mundial de Clubes',1],['ucl','Liga dos Campeões',1],['lib','Libertadores',1],['wc','Copa do Mundo',1],['lig','Ligas',0],['dom','Copas nacionais',0]];
+const shelfBox=(n,it,ico)=>`<div class="sh-t"><span>${n}</span><b>${it.length}</b></div><div class="shelf">${it.map(ico).join('')||'<span class="none">Ainda vazia</span>'}</div>`;
+const shelfRows=list=>SHG.map(([k,n,a])=>{const it=list.filter(x=>x.k==k).sort((p,q)=>(+p.y||0)-(+q.y||0));return it.length||a?shelfBox(n,it,x=>troIcon(k,x.y,'')):''}).join('');
+function ovrChart(pts){
+  if(pts.length<2)return `<div class="pn"><h2>Evolução do OVR</h2><p class="note" style="margin:0">O gráfico aparece a partir da segunda temporada.</p></div>`;
+  const W=600,H=190,px=30,py=26,mn=Math.min(...pts.map(p=>p[1]))-3,mx=Math.max(...pts.map(p=>p[1]))+3;
+  const X=i=>px+i*(W-2*px)/(pts.length-1),Y=v=>H-py-(v-mn)*(H-2*py)/((mx-mn)||1);
+  const pk=pts.reduce((a,p)=>p[1]>a[1]?p:a,pts[0]),pi=pts.indexOf(pk),st=Math.ceil(pts.length/8);
+  return `<div class="pn"><h2>Evolução do OVR</h2><svg class="ovrc" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução do OVR por temporada"><polyline fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" points="${pts.map((p,i)=>X(i)+','+Y(p[1])).join(' ')}"/>${pts.map((p,i)=>`<circle cx="${X(i)}" cy="${Y(p[1])}" r="${i==pi?6:3.5}" fill="${i==pi?'#ffd84d':'currentColor'}"/>`).join('')}<text x="${X(pi)}" y="${Y(pk[1])-12}" text-anchor="middle" font-size="18" font-weight="700" fill="#ffd84d">${pk[1]}</text>${pts.map((p,i)=>i%st==0||i==pts.length-1?`<text x="${X(i)}" y="${H-6}" text-anchor="middle" font-size="13" fill="currentColor" opacity=".7">${p[0]}</text>`:'').join('')}</svg><p class="note" style="margin:6px 0 0">Pico: ${pk[1]} em ${pk[0]}.</p></div>`;
+}
+const allTitles=titles=>`<details class="pn det"><summary>Todos os títulos e prêmios</summary>${titleLines(titles)}</details>`;
+const podCard=(rows,bo)=>{
+  const v=rows.filter(r=>r.pos==2).length,q=rows.filter(r=>r.pos==3).length;
+  return `<div class="pn pod"><h2>Pódios e vices</h2><div class="chips"><span><b>${bo}</b>Bolas de Ouro</span><span><b>${v}</b>Vices</span><span><b>${q}</b>3º lugar</span><span><b>${rows.length}</b>Top 10</span></div>${rows.filter(r=>r.pos>1).slice().reverse().slice(0,8).map(r=>`<div class="pr2"><b>${r.y}</b><span>${r.pos}º na Bola de Ouro · ${r.pts} pts</span></div>`).join('')||'<p class="note" style="margin:0">Vices e pódios da Bola de Ouro aparecem aqui.</p>'}</div>`;
+};
 /* jogador (rival ativo, aposentado ou o seu) */
 function shP(s){
   const me=s.t=='me'||s.id=='me';let x;
@@ -230,84 +247,93 @@ function shP(s){
     x=rvAny(s.id);if(x)x={...x,ovr:Math.round(x.ovr)};
     if(!x){const e=S.bdo.flatMap(b=>b.top).find(z=>z.id==s.id);if(!e)return null;x={...e,pot:e.ovr,cur:Z,ad:[0,0,0,0,0,0],car:newCar(),h:[],ghost:1}}
   }
-  const tabs=[['res','Resumo'],['tit','Títulos'],['tmp','Temporadas']],tb=shTab(s,tabs),c=cl(x.club);
-  let b=`<div class="shc">${entryCard({...x,club:x.club},'',{on:'',tag:me?'Você':x.ret?'Aposentado em '+x.ret:''})}</div>${shTabs(s,tabs)}`;
-  const titles=me?myTitles():rvTitles(x),nt=titles.filter(z=>z.k!='bo').length;
-  if(tb=='res'){
-    const cu=x.cur||Z,nota=cu.ap?(cu.rs/cu.ap).toFixed(2):'—',car=x.car||newCar(),L=me?myLeg():null;
-    b+=kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]||x.pos],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot],['Bolas de Ouro',me?L.bo:car.bo],['Pódios',me?L.ex+L.bo:car.pod+car.bo],['Títulos',nt],['Melhor OVR',me?Math.max(S.peak,O()):car.pk||x.ovr]]);
-    b+=`<h3>Atributos</h3>${statBars(me?myStats():rvStats(x))}`;
-    if(!x.ret&&!x.ghost)b+=`<h3>Temporada atual</h3>${kv([['Jogos',cu.ap],['Gols',cu.g],['Assist.',cu.a],['Nota média',nota]])}`;
-    const t=me?tot(false):{ap:car.ap,g:car.g,a:car.a};
-    b+=`<h3>Carreira${me?'':' (desde o início do jogo)'}</h3>${kv([['Jogos',t.ap],['Gols',t.g],['Assist.',t.a],['Gols/jogo',t.ap?(t.g/t.ap).toFixed(2):'0.00']])}<button class="ghost" onclick="sheet('c','${x.club}')">Ver ficha do ${esc(c.n)}</button>`;
-  }else if(tb=='tit'){
-    b+=`<h3>Estante</h3>${shelfOf(titles)}<h3>Por competição</h3>${titleLines(titles)}`;
-    if(!me&&x.ghost)b+='<p class="note">Este jogador saiu do ranking e não tem histórico detalhado.</p>';
-  }else{
-    let rows;
-    if(me){
-      const live=S.cur&&S.ph=='season'?[{...S.cur,l:cl(S.cur.c).l,d:cl(S.cur.c).d,pos:0,live:1}]:[];
-      const all=S.hist.concat(live),lastOf={};all.forEach((z,i)=>{lastOf[z.y]=i});
-      rows=all.map((z,i)=>{
-        const pr=[...S.ti.filter(t=>t.y==z.y&&t.c==z.c).map(t=>t.t.replace(/ \(.*/,'')),...(lastOf[z.y]==i&&!z.live?S.aw.filter(a=>a.y==z.y).map(a=>a.t.replace('🌟 ','').replace('🏆 ','')):[])];
-        return{c:[z.y+(z.live?' ⏱':''),tn(cl(z.c)),z.pos?z.pos+'º':'—',z.ap,z.g,z.a,z.ap?(z.rs/z.ap).toFixed(2):'—',esc(pr.join(', '))||'—'],cls:z.live?'mine':''};
-      });
-      return {title:x.n,body:b+(rows.length?`<h3>Temporadas</h3>${tbl(['Ano','Clube','Pos.','J','G','A','Nota','Títulos e prêmios'],rows)}`:'<p class="empty">Sem temporadas concluídas.</p>')};
-    }
-    rows=(x.h||[]).map(e=>({c:[e[0],tn(cl(e[1])),e[2],e[3],e[4],e[5],e[3]?(e[6]/100).toFixed(2):'—',e[7]?e[7]+'º':'—',esc(String(e[8]||'').split('').map(k=>TL[k]).filter(Boolean).join(', '))||'—']}));
-    if(!x.ret&&!x.ghost&&S.ph=='season'&&x.cur){const u=x.cur;rows.push({c:[S.y+' ⏱',tn(cl(x.club)),Math.round(x.ovr),u.ap,u.g,u.a,u.ap?(u.rs/u.ap).toFixed(2):'—','—','—'],cls:'mine'})}
+  const c=cl(x.club),titles=me?myTitles():rvTitles(x),cnt=k=>titles.filter(z=>z.k==k).length,car=x.car||newCar();
+  const plc=S.bdo.map(b=>{const i=b.top.findIndex(z=>me?z.me:z.id==x.id);return i>=0?{y:b.y,pos:i+1,pts:Math.round(b.top[i].pts)}:null}).filter(Boolean);
+  const lr=legList(),ix=lr.findIndex(z=>me?z.me:z.id==x.id),lp=ix>=0?Math.round(lr[ix].pts):'—';
+  const live=S.ph=='season'&&!x.ret&&!x.ghost;
+  /* linhas de temporada e dados do gráfico */
+  let rows,pts=[],nS,tAp,tG,tA,nota,pk;
+  if(me){
+    const lv=S.cur&&S.ph=='season'?[{...S.cur,l:cl(S.cur.c).l,d:cl(S.cur.c).d,pos:0,live:1,o:O(),ag:S.p.age}]:[];
+    const all=S.hist.concat(lv),lastOf={};all.forEach((z,i)=>{lastOf[z.y]=i});
+    rows=all.map((z,i)=>{
+      const pr=[...S.ti.filter(t=>t.y==z.y&&t.c==z.c).map(t=>t.t.replace(/ \(.*/,'')),...(lastOf[z.y]==i&&!z.live?S.aw.filter(a=>a.y==z.y).map(a=>a.t.replace('🌟 ','').replace('🏆 ','')):[])];
+      return{c:[z.y+(z.live?' ⏱':''),tn(cl(z.c)),z.o||'—',z.ag||'—',z.pos?z.pos+'º':'—',z.ap,z.g,z.a,z.ap?(z.rs/z.ap).toFixed(2):'—',esc(pr.join(', '))||'—'],cls:z.live?'mine':''};
+    });
+    all.forEach(z=>{if(z.o)pts.push([z.y,z.o])});
+    const ys=new Set(all.map(z=>z.y));nS=ys.size;const t=tot(false);tAp=t.ap;tG=t.g;tA=t.a;
+    const rs=all.reduce((a,z)=>a+z.rs,0),ap=all.reduce((a,z)=>a+z.ap,0);nota=ap?(rs/ap).toFixed(2):'—';pk=Math.max(S.peak||0,O());
     rows.reverse();
-    b+=rows.length?`<h3>Temporadas</h3>${tbl(['Ano','Clube','OVR','J','G','A','Nota','Bola','Títulos'],rows)}`:'<p class="empty">As temporadas aparecem aqui ao fim de cada ano do jogo.</p>';
+  }else{
+    const h=x.h||[];
+    rows=h.map(e=>({c:[e[0],tn(cl(e[1])),e[2],e[3],e[4],e[5],e[3]?(e[6]/100).toFixed(2):'—',e[7]?e[7]+'º':'—',esc(String(e[8]||'').split('').map(k=>TL[k]).filter(Boolean).join(', '))||'—']}));
+    h.forEach(e=>pts.push([e[0],e[2]]));
+    if(live&&x.cur){const u=x.cur;rows.push({c:[S.y+' ⏱',tn(cl(x.club)),Math.round(x.ovr),u.ap,u.g,u.a,u.ap?(u.rs/u.ap).toFixed(2):'—','—','—'],cls:'mine'});pts.push([S.y,Math.round(x.ovr)])}
+    rows.reverse();
+    nS=h.length+(live?1:0);tAp=car.ap;tG=car.g;tA=car.a;
+    const w=h.reduce((a,e)=>a+e[3],0);nota=w?(h.reduce((a,e)=>a+e[6]/100*e[3],0)/w).toFixed(2):'—';pk=car.pk||x.ovr;
   }
-  return {title:x.n,body:b};
+  const best=plc.length?Math.min(...plc.map(z=>z.pos))+'º':'—';
+  const hero=shHero(entryCard({...x,club:x.club},'',{on:'',tag:''}),esc(x.n),`${PNQ[x.pos]||x.pos} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,
+    [me?'<b>VOCÊ</b> seu jogador':x.ret?'<b>APOSENTADO</b> em '+x.ret:x.ghost?'<b>FORA DO RANKING</b>':'<b>ATIVO</b> craque do mundo',
+     ix>=0&&ix<10?`<b>TOP ${ix+1}</b> na história do jogo`:ix>=0?`<b>${ix+1}º</b> no ranking de lendas`:''].filter(Boolean),
+    [['Bolas de Ouro',cnt('bo')],['Champions',cnt('ucl')],['Libertadores',cnt('lib')],['Copas do Mundo',cnt('wc')],['Mundiais',cnt('mc')],['Ligas',cnt('lig')],['Pontos',lp]]);
+  const stats=kv([['Temporadas',nS],['Jogos',tAp],['Gols',tG],['Assistências',tA],['Gols/jogo',tAp?(tG/tAp).toFixed(2):'0.00'],['Nota média',nota],['Pico de OVR',pk],['Melhor posição',best],['Top 10 no prêmio',plc.length]]);
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfRows(titles)}</div>
+    <div class="pn"><h2>Estante da Bola de Ouro</h2>${shelfBox('Bola de Ouro',titles.filter(z=>z.k=='bo').sort((p,q)=>p.y-q.y),z=>ballTro(z.y))}</div>${podCard(plc,cnt('bo'))}`;
+  const cu=x.cur||Z,right=`<div class="pn"><h2>Estatísticas</h2>${stats}</div><div class="pn"><h2>Atributos</h2>${statBars(me?myStats():rvStats(x))}${live?`<h3>Temporada atual</h3>${kv([['Jogos',cu.ap],['Gols',cu.g],['Assist.',cu.a],['Nota média',cu.ap?(cu.rs/cu.ap).toFixed(2):'—']])}`:''}</div>${ovrChart(pts)}${allTitles(titles)}`;
+  const heads=me?['Ano','Time','OVR','Idade','Pos.','J','G','A','Nota','Títulos e prêmios']:['Ano','Time','OVR','J','G','A','Nota','Bola','Títulos'];
+  const tmp=`<div class="pn full"><h2>Temporadas</h2>${rows.length?tbl(heads,rows):'<p class="empty">As temporadas aparecem aqui ao fim de cada ano do jogo.</p>'}${me?'<p class="note">Pos. é a posição do seu clube na liga.</p>':'<p class="note">Bola = posição na votação da Bola de Ouro. Registro a partir de 2026.</p>'}</div>`;
+  return {title:x.n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>${tmp}`};
 }
 /* clube */
 function shC(s){
   const c=cl(+s.id);if(!c)return null;
   const L=c.l>=0?LEAGUES[c.l]:null,tab=L?stand(c.l,c.d):[],pos=tab.findIndex(z=>z.id==c.id)+1,t=clubTitles(c.id);
-  const tabs=[['res','Resumo'],['tit','Títulos'],['tmp','Temporadas'],['elc','Elenco']],tb=shTab(s,tabs);
-  let b=`<div class="shc">${shield(c,'lg')}</div>${shTabs(s,tabs)}`;
-  if(tb=='res'){
-    b+=kv([['Liga',L?L.n:'—'],['Divisão',dvName(c)],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Champions',t.ucl.length],['Libertadores',t.lib.length],['Mundial',t.mc],['Ligas (jogo)',t.lg.length],['Copas (jogo)',t.dom.length],['Pontos de título',cpPts(t)]]);
-    if(c.id==S.club)b+='<p class="note">Este é o seu clube.</p>';
-  }else if(tb=='tit'){
-    b+=yrsLine('Liga dos Campeões',t.ucl)+yrsLine('Vice da Champions',t.uclV)+yrsLine('Libertadores',t.lib)+yrsLine('Vice da Libertadores',t.libV)
-      +`<div class="tl"><b>Mundial de Clubes / Intercontinental <span class="tag">${t.mc}</span></b><small>${[t.mcG.length?'No jogo: '+t.mcG.join(' · '):'',(t.mc-t.mcG.length)?(t.mc-t.mcG.length)+' no histórico real (aprox.)':''].filter(Boolean).join(' · ')||'—'}</small></div>`
-      +yrsLine('Liga nacional (jogo)',t.lg)+yrsLine('Copa nacional (jogo)',t.dom)
-      +`<div class="tl"><b>Divisões de acesso (jogo) <span class="tag">${t.low.length}</span></b><small>${t.low.length?t.low.map(z=>z.y+' ('+LEAGUES[c.l].dn[z.d]+')').join(' · '):'—'}</small></div>`
-      +'<p class="note">Champions e Libertadores: histórico real até 2025. Ligas e copas nacionais: só as temporadas do jogo, a partir de 2026.</p>';
-  }else if(tb=='tmp'){
-    const rows=[];
-    const stg=(m,rn,ch,id)=>{const st=m&&m[id];if(!st)return '—';if(ch)return '🏆 Campeão';return st>=rn.length?'Vice':rn[st-1]};
-    S.fin.forEach(f=>{
-      let d=-1,p=0;Object.entries(f.p).forEach(([k,a])=>{const i=a.indexOf(c.id);if(i>=0){d=+k.split('-')[1];p=i+1}});
-      if(d<0&&!(f.k.u&&f.k.u[c.id])&&!(f.k.b&&f.k.b[c.id]))return;const h=S.champs.find(z=>z.y==f.y);
-      rows.push({c:[f.y,L&&d>=0?L.dn[d]:'Convidado',d<0?'—':p==1?'🏆 1º':p+'º',stg(f.k.u,ST_UCL,h&&h.ucl.c==c.id,c.id),stg(f.k.b,ST_LIB,h&&h.lib.c==c.id,c.id),stg(f.k.d,ST_LIB,h&&L&&h.dom[L.k]==c.id,c.id)]});
-    });
-    rows.reverse();
-    if(S.ph=='season'&&L){
-      const lv=(k,rn)=>{const m=reachOf(k)[c.id];if(k.ch==c.id)return '🏆 Campeão';if(k.al.includes(c.id))return 'Em disputa ('+k.rn[k.rd]+')';return m?(m>=rn.length?'Vice':rn[m-1]):'—'};
-      rows.unshift({c:[S.y+' ⏱',L.dn[c.d],pos+'º',lv(S.ucl,ST_UCL),lv(S.lib,ST_LIB),lv(S.dc[c.l],ST_LIB)],cls:'mine'});
-    }
-    b+=rows.length?`<h3>Temporadas</h3>${tbl(['Ano','Divisão','Pos.','Champions','Liberta.','Copa'],rows)}`:'<p class="empty">As temporadas aparecem aqui ao fim de cada ano do jogo.</p>';
-  }else{
-    const sq=(RC[c.id]||[]).slice().sort((a,z)=>z.ovr-a.ovr).slice(0,10);
-    b+=`<h3>Craques do clube</h3>${sq.length?`<ul class="rank">${sq.map(z=>`<li onclick="sheet('p','${z.id}')"><span class="pos">${z.pos}</span>${hx(Math.round(z.ovr))}<span class="nm2">${esc(z.n)}<small>${z.age} anos · ${esc(z.nat)}</small></span></li>`).join('')}</ul>`:'<p class="empty">Nenhum craque do top 96 joga neste clube agora.</p>'}<button class="ghost" onclick="abrirElenco(${c.id})">Ver elenco completo</button>`;
+  const mcIt=[...t.mcG.map(y=>({y})),...Array(Math.max(0,t.mc-t.mcG.length)).fill({y:''})];
+  const hero=shHero(`<div class="h2b">${shield(c,'lg')}</div>`,esc(c.n),`${L?esc(L.n)+' · '+esc(dvName(c)):'Clube convidado'}${pos?' · '+pos+'º colocado':''}`,
+    [c.id==S.club?'<b>SEU CLUBE</b>':'',`<b>${cpPts(t)} PTS</b> no power ranking de títulos`].filter(Boolean),
+    [['Champions',t.ucl.length],['Libertadores',t.lib.length],['Mundiais',t.mc],['Ligas (jogo)',t.lg.length],['Copas (jogo)',t.dom.length],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—']]);
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfBox('Mundial de Clubes',mcIt,x=>troIcon('mc',x.y,''))}${shelfBox('Liga dos Campeões',t.ucl.slice().sort((a,z)=>a-z),y=>troIcon('ucl',y,''))}${shelfBox('Libertadores',t.lib.slice().sort((a,z)=>a-z),y=>troIcon('lib',y,''))}${t.lg.length?shelfBox('Ligas nacionais (jogo)',t.lg.slice().sort((a,z)=>a-z),y=>troIcon('lig',y,'')):''}${t.dom.length?shelfBox('Copas nacionais (jogo)',t.dom.slice().sort((a,z)=>a-z),y=>troIcon('dom',y,'')):''}<p class="note">Champions e Libertadores: histórico real até 2025. Ligas e copas nacionais: só as temporadas do jogo. ${t.mc-t.mcG.length>0?'Mundiais sem ano são do histórico real (aprox.).':''}</p></div>
+    <div class="pn pod"><h2>Vices</h2><div class="chips"><span><b>${t.uclV.length}</b>Vice Champions</span><span><b>${t.libV.length}</b>Vice Liberta.</span><span><b>${t.low.length}</b>Divisões de acesso</span></div>${[...t.uclV.map(y=>({y,t:'Vice da Champions'})),...t.libV.map(y=>({y,t:'Vice da Libertadores'}))].sort((a,z)=>z.y-a.y).slice(0,8).map(r=>`<div class="pr2"><b>${r.y}</b><span>${r.t}</span></div>`).join('')||'<p class="note" style="margin:0">Vices continentais aparecem aqui.</p>'}</div>`;
+  const sq=(RC[c.id]||[]).slice().sort((a,z)=>z.ovr-a.ovr).slice(0,10);
+  const right=`<div class="pn"><h2>Estatísticas</h2>${kv([['Liga',L?esc(L.k):'—'],['Divisão',esc(dvName(c))],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Pontos de título',cpPts(t)],['Títulos no jogo',t.lg.length+t.dom.length+t.ucl.length+t.lib.length]])}</div>
+    <div class="pn"><h2>Craques do clube</h2>${sq.length?`<ul class="rank">${sq.map(z=>`<li onclick="sheet('p','${z.id}')"><span class="pos">${z.pos}</span>${hx(Math.round(z.ovr))}<span class="nm2">${esc(z.n)}<small>${z.age} anos · ${esc(z.nat)}</small></span></li>`).join('')}</ul>`:'<p class="empty">Nenhum craque do top 96 joga neste clube agora.</p>'}<button class="ghost" onclick="abrirElenco(${c.id})">Ver elenco completo</button></div>
+    <details class="pn det"><summary>Todos os títulos</summary>${yrsLine('Liga dos Campeões',t.ucl)+yrsLine('Vice da Champions',t.uclV)+yrsLine('Libertadores',t.lib)+yrsLine('Vice da Libertadores',t.libV)+yrsLine('Liga nacional (jogo)',t.lg)+yrsLine('Copa nacional (jogo)',t.dom)+`<div class="tl"><b>Divisões de acesso (jogo) <span class="tag">${t.low.length}</span></b><small>${t.low.length?t.low.map(z=>z.y+' ('+LEAGUES[c.l].dn[z.d]+')').join(' · '):'—'}</small></div>`}</details>`;
+  const rows=[];
+  const stg=(m,rn,ch,id)=>{const st=m&&m[id];if(!st)return '—';if(ch)return '🏆 Campeão';return st>=rn.length?'Vice':rn[st-1]};
+  S.fin.forEach(f=>{
+    let d=-1,p=0;Object.entries(f.p).forEach(([k,a])=>{const i=a.indexOf(c.id);if(i>=0){d=+k.split('-')[1];p=i+1}});
+    if(d<0&&!(f.k.u&&f.k.u[c.id])&&!(f.k.b&&f.k.b[c.id]))return;const h=S.champs.find(z=>z.y==f.y);
+    rows.push({c:[f.y,L&&d>=0?L.dn[d]:'Convidado',d<0?'—':p==1?'🏆 1º':p+'º',stg(f.k.u,ST_UCL,h&&h.ucl.c==c.id,c.id),stg(f.k.b,ST_LIB,h&&h.lib.c==c.id,c.id),stg(f.k.d,ST_LIB,h&&L&&h.dom[L.k]==c.id,c.id)]});
+  });
+  rows.reverse();
+  if(S.ph=='season'&&L){
+    const lv=(k,rn)=>{const m=reachOf(k)[c.id];if(k.ch==c.id)return '🏆 Campeão';if(k.al.includes(c.id))return 'Em disputa ('+k.rn[k.rd]+')';return m?(m>=rn.length?'Vice':rn[m-1]):'—'};
+    rows.unshift({c:[S.y+' ⏱',L.dn[c.d],pos+'º',lv(S.ucl,ST_UCL),lv(S.lib,ST_LIB),lv(S.dc[c.l],ST_LIB)],cls:'mine'});
   }
-  return {title:c.n,body:b};
+  const tmp=`<div class="pn full"><h2>Temporadas</h2>${rows.length?tbl(['Ano','Divisão','Pos.','Champions','Liberta.','Copa'],rows):'<p class="empty">As temporadas aparecem aqui ao fim de cada ano do jogo.</p>'}</div>`;
+  return {title:c.n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>${tmp}`};
 }
 /* lenda real (estática) */
 function shL(s){
   const all=legList(),x=all.find(z=>z.st=='lenda'&&z.n==s.id);if(!x)return null;
-  const yrs=BDO_REAL.filter(z=>z.n==x.n).map(z=>z.y);
-  return {title:x.n,body:`${kv([['Posição',PNQ[x.pos]||x.pos],['País',esc(x.nat)],['Ranking',(all.indexOf(x)+1)+'º'],['Pontos',Math.round(x.pts)],['Bolas de Ouro',x.bo],['Copas',x.wc],['Champions',x.ucl||0],['Libertadores',x.lib||0],['Mundiais de Clubes',x.mc||0],['Ligas',x.lg],['Gols',x.g],['Jogos',x.ap]])}
-    <h3>Bolas de Ouro</h3>${yrsLine('Anos',yrs)}<p class="note">Pontuação: Bolas de Ouro, Copas, Champions, Libertadores, Mundiais, ligas e gols. Números de carreira aproximados (fontes públicas).</p>`};
+  const yrs=BDO_REAL.filter(z=>z.n==x.n).map(z=>z.y),n=(k,v)=>Array.from({length:Math.min(v||0,14)},()=>({k,y:''}));
+  const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...n('lig',x.lg)];
+  const i=all.indexOf(x);
+  const hero=shHero(`<div class="h2b"><b class="h2big">${natCode(x.nat)}</b><small>${PNQ[x.pos]||x.pos}</small></div>`,esc(x.n),`${PNQ[x.pos]||x.pos} · ${esc(x.nat)}`,
+    ['<b>LENDA</b> histórico real',i<10?`<b>TOP ${i+1}</b> na história do jogo`:`<b>${i+1}º</b> no ranking de lendas`],
+    [['Bolas de Ouro',x.bo],['Champions',x.ucl||0],['Libertadores',x.lib||0],['Copas do Mundo',x.wc],['Mundiais',x.mc||0],['Ligas',x.lg],['Pontos',Math.round(x.pts)]]);
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfRows(it)}</div><div class="pn"><h2>Estante da Bola de Ouro</h2>${shelfBox('Bola de Ouro',yrs.map(y=>({y})),z=>ballTro(z.y))}</div>`;
+  const right=`<div class="pn"><h2>Estatísticas</h2>${kv([['Jogos',x.ap],['Gols',x.g],['Gols/jogo',x.ap?(x.g/x.ap).toFixed(2):'—'],['Ranking',(i+1)+'º'],['Pontos',Math.round(x.pts)],['Bolas de Ouro',x.bo]])}<p class="note">Pontuação: Bolas de Ouro, Copas, Champions, Libertadores, Mundiais, ligas e gols. Números de carreira aproximados (fontes públicas); só a Bola de Ouro tem os anos.</p></div>`;
+  return {title:x.n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>`};
 }
 /* jogador de elenco (gerado): sem histórico detalhado */
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||SQP[+slot]==null)return null;
   const x=sqPlayer(c,+slot);
-  return {title:x.n,body:`<div class="shc">${entryCard({...x,club:x.club},'',{on:''})}</div>${kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot]])}<h3>Atributos</h3>${statBars(pst(x.ovr,x.pos,x.id))}<p class="note">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button>`};
+  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Potencial',x.pot],['Idade',x.age],['Posição',x.pos]]);
+  return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};
 }
 /* seleção */
 function shS(s){
@@ -332,5 +358,5 @@ function sheetHtml(){
   const s=ui.sheet,f={p:shP,me:shP,c:shC,l:shL,q:shQ,s:shS,m:shM}[s.t];let o=null;
   try{o=f?f(s):null}catch(e){console.error(e)}
   if(!o){ui.sheet=null;return ''}
-  return `<div class="ov" onclick="if(event.target==this)closeSheet()"><div class="pn sheet"><button class="x" aria-label="Fechar" onclick="closeSheet()">×</button><h2>${esc(o.title)}</h2>${o.body}</div></div>`;
+  return `<div class="ov ${o.hero?'fp':''}" onclick="if(event.target==this)closeSheet()"><div class="pn sheet ${o.hero?'fp':''}"><button class="x" aria-label="Fechar" onclick="closeSheet()">×</button>${o.hero?`<div class="shtop"><button class="ghost" onclick="backSheet()">← Voltar</button></div>`:`<h2>${esc(o.title)}</h2>`}${o.body}</div></div>`;
 }

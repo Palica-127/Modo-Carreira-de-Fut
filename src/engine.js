@@ -313,7 +313,7 @@ function gen(n){
   });
   return o;
 }
-const stint=()=>{if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d});S.cur=null}};
+const stint=()=>{if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d,o:O(),ag:S.p.age});S.cur=null}};
 function acc(i){
   const o=S.of[i];
   if(o.t=='ren'){S.ct={sal:o.sal,yrs:o.yrs,bon:o.bon,cl:o.cl};news('Contrato renovado: '+F(o.sal)+'/semana por '+o.yrs+' ano(s).');S.of.splice(i,1)}
@@ -418,7 +418,7 @@ function end(){
   const fin={};LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{fin[li+'-'+di]=stand(li,di).map(c=>c.id)}));
   histSeason(fin);
   /* 2) estatísticas do usuário */
-  S.hist.push({...S.cur,l:mc0.l,d:mc0.d,pos});S.cur=null;
+  S.hist.push({...S.cur,l:mc0.l,d:mc0.d,pos,o:O(),ag:S.p.age});S.cur=null;
   const ys=S.hist.filter(x=>x.y==S.y).reduce((s,x)=>({ap:s.ap+x.ap,g:s.g+x.g,a:s.a+x.a,rs:s.rs+x.rs,lg:s.lg+x.lg}),{ap:0,g:0,a:0,rs:0,lg:0});
   const avg=ys.ap?ys.rs/ys.ap:0,aw=[],dn=L0.dn[mc0.d];
   if(pos==1){S.ti.push({y:S.y,t:dn+' ('+L0.n+')',k:'lig',c:S.club});S.rep=C(S.rep+(tier==0?6:3),0,100);S.pop=C(S.pop+(tier==0?4:2),0,100);news('🏆 '+mc0.n+' é campeão da '+dn+'!')}
@@ -484,7 +484,7 @@ function roll(){
   qualifyOK();setupSeason();S.ph='season';save();render();
 }
 function qualifyOK(){/* vagas já definidas em end(); aqui só garantimos que existem */if(!S.qU.length)qualifyByStrength()}
-function rt(){if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d});S.cur=null}S.ph='ret';save();render()}
+function rt(){if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d,o:O(),ag:S.p.age});S.cur=null}S.ph='ret';save();render()}
 
 /* ---------- save / load / export ---------- */
 const SAVE_KEY='h10';
