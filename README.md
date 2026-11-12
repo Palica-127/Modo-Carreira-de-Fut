@@ -19,6 +19,8 @@ Abra `pro-football-career.html` no navegador (celular ou PC). O progresso é sal
 - **10 ligas, 26 divisões, 16 clubes por divisão** com promoção e rebaixamento.
 - Copas nacionais, Champions League, Libertadores, Mundial de Clubes e Copa do Mundo.
 - Bola de Ouro com 96 craques simulados que envelhecem, se aposentam e entram no ranking de lendas.
+- **Jogo ao vivo**: ao jogar a semana, a partida do seu clube é transmitida minuto a minuto (pausa, 1x a 15x, pular), com estatísticas ao vivo e, no fim, posse, finalizações, destaques com nota, MVP e gráfico de domínio da partida.
+- **Troféus**: desenhos padrão; para usar imagens reais, coloque PNGs em `trofeus/` (veja `trofeus/LEIA-ME.md`).
 - Elencos gerados de forma determinística (não pesam no save).
 - Tema por clube, treino semanal, propostas, agente, eventos e partidas minuto a minuto.
 
@@ -29,6 +31,7 @@ src/engine.js   simulação, competições, ofertas, Bola de Ouro, save/load
 src/hist.js     histórico real (Bola de Ouro, Champions, Libertadores, Copa)
 src/ui.js       estrutura das telas e abas principais
 src/abas.js     abas novas e fichas
+src/live.js     jogo ao vivo e estatísticas de fim de jogo
 src/style.css   visual
 build.py        junta tudo em pro-football-career.html
 test_engine.js, test_batch.js, tools/smoke.js   testes
