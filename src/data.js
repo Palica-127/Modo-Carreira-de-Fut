@@ -124,3 +124,47 @@ const LEG=[
  {n:'Alfredo Di Stéfano',nat:'ARG',pos:'ATA',bo:2,wc:0,ucl:5,lg:8,g:510,ap:710},
  {n:'Zinedine Zidane',wcb:1,ex:6,nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1}];
 const legPts=l=>l.bo*18+(l.wcb||0)*7+(l.ex||0)+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
+
+/* ---------- Árvore de habilidades (portado do BrasLOL, adaptado ao futebol) ----------
+   br = ramo, c = custo em pontos, lv = nível mínimo, pa = pré-requisitos (basta um; `need` no nó final), r = linha (0 topo ... 4 base),
+   x = posição horizontal em %, at = [atributo, pontos], fx = efeitos: gl gols, ast assistências, rtw nota nas vitórias, bon bônus por gol,
+   inj lesões, en desgaste de energia, xpw XP no treino, xpm XP em jogos, tra evolução no treino, fame reputação, trp confiança ganha. */
+const PBR={f:['Decisivo','Decide jogos'],e:['Estudioso','Evolui mais rápido'],p:['Profissional','Vida de atleta']};
+const PERKS=[
+ {id:'f1',br:'f',n:'Sangue frio',d:'+6% de chance de converter chances em gol.',c:1,lv:2,pa:[],r:0,x:50,fx:{gl:.06}},
+ {id:'f4',br:'f',n:'Chute colocado',d:'+2 de Finalização.',c:1,lv:4,pa:['f1'],r:1,x:30,at:[1,2]},
+ {id:'f5',br:'f',n:'Arranque',d:'+2 de Velocidade.',c:1,lv:4,pa:['f1'],r:1,x:70,at:[0,2]},
+ {id:'f6',br:'f',n:'Faro de gol',d:'+8% de chance de gol.',c:2,lv:7,pa:['f4'],r:2,x:14,fx:{gl:.08}},
+ {id:'f2',br:'f',n:'Decisivo',d:'+0,3 de nota nas vitórias.',c:2,lv:7,pa:['f4'],r:2,x:38,fx:{rtw:.3}},
+ {id:'f7',br:'f',n:'Cobrador',d:'+20% no bônus por gol.',c:2,lv:7,pa:['f5'],r:2,x:62,fx:{bon:.2}},
+ {id:'f8',br:'f',n:'Dribles curtos',d:'+2 de Drible.',c:2,lv:7,pa:['f5'],r:2,x:86,at:[3,2]},
+ {id:'f9',br:'f',n:'Garçom',d:'+12% de chance de assistência.',c:2,lv:10,pa:['f6','f2'],r:3,x:26,fx:{ast:.12}},
+ {id:'f3',br:'f',n:'Matador',d:'+10% de gol e +0,2 de nota nas vitórias.',c:2,lv:10,pa:['f2','f7'],r:3,x:50,fx:{gl:.10,rtw:.2}},
+ {id:'f10',br:'f',n:'Visão periférica',d:'+2 de Visão de jogo.',c:2,lv:10,pa:['f7','f8'],r:3,x:74,at:[6,2]},
+ {id:'f11',br:'f',n:'Lenda do gol',d:'+8% de gol, +8% de assistência e +0,3 de nota nas vitórias. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['f9','f3','f10'],need:2,r:4,x:50,fx:{gl:.08,ast:.08,rtw:.3}},
+
+ {id:'e1',br:'e',n:'Dedicado',d:'+20% de XP no treino semanal.',c:1,lv:2,pa:[],r:0,x:50,fx:{xpw:.2}},
+ {id:'e4',br:'e',n:'Passe refinado',d:'+2 de Passe.',c:1,lv:4,pa:['e1'],r:1,x:30,at:[2,2]},
+ {id:'e5',br:'e',n:'Caderno de jogo',d:'+15% de XP nas partidas.',c:1,lv:4,pa:['e1'],r:1,x:70,fx:{xpm:.15}},
+ {id:'e6',br:'e',n:'Leitor de jogo',d:'+2 de Visão de jogo.',c:2,lv:7,pa:['e4'],r:2,x:14,at:[6,2]},
+ {id:'e3',br:'e',n:'Analista',d:'+25% de XP nas partidas.',c:2,lv:7,pa:['e4'],r:2,x:38,fx:{xpm:.25}},
+ {id:'e2',br:'e',n:'Aprendiz',d:'+15% de XP no treino semanal.',c:2,lv:7,pa:['e5'],r:2,x:62,fx:{xpw:.15}},
+ {id:'e7',br:'e',n:'Treino extra',d:'+15% de evolução dos atributos no treino.',c:2,lv:7,pa:['e5'],r:2,x:86,fx:{tra:.15}},
+ {id:'e8',br:'e',n:'Muralha',d:'+2 de Defesa.',c:2,lv:10,pa:['e6','e3'],r:3,x:26,at:[4,2]},
+ {id:'e9',br:'e',n:'Professor',d:'+15% de XP no treino e +10% de evolução.',c:2,lv:10,pa:['e3','e2'],r:3,x:50,fx:{xpw:.15,tra:.10}},
+ {id:'e10',br:'e',n:'Malabarista',d:'+2 de Drible.',c:2,lv:10,pa:['e2','e7'],r:3,x:74,at:[3,2]},
+ {id:'e11',br:'e',n:'Gênio',d:'+20% de XP no treino e nas partidas e +15% de evolução. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['e8','e9','e10'],need:2,r:4,x:50,fx:{xpw:.2,xpm:.2,tra:.15}},
+
+ {id:'p1',br:'p',n:'Atleta',d:'15% menos desgaste de energia.',c:1,lv:2,pa:[],r:0,x:50,fx:{en:.15}},
+ {id:'p4',br:'p',n:'Preparo físico',d:'+2 de Físico.',c:1,lv:4,pa:['p1'],r:1,x:30,at:[5,2]},
+ {id:'p5',br:'p',n:'Dieta',d:'15% menos risco de lesão.',c:1,lv:4,pa:['p1'],r:1,x:70,fx:{inj:.15}},
+ {id:'p6',br:'p',n:'Recuperação',d:'Mais 10% de energia poupada.',c:2,lv:7,pa:['p4'],r:2,x:14,fx:{en:.10}},
+ {id:'p3',br:'p',n:'Líder',d:'+25% de confiança ganha com o técnico.',c:2,lv:7,pa:['p4'],r:2,x:38,fx:{trp:.25}},
+ {id:'p2',br:'p',n:'Imagem pública',d:'+25% de reputação ganha.',c:2,lv:7,pa:['p5'],r:2,x:62,fx:{fame:.25}},
+ {id:'p7',br:'p',n:'Corpo fechado',d:'Mais 15% menos risco de lesão.',c:2,lv:7,pa:['p5'],r:2,x:86,fx:{inj:.15}},
+ {id:'p9',br:'p',n:'Corpo de aço',d:'+2 de Físico.',c:2,lv:10,pa:['p6','p3'],r:3,x:26,at:[5,2]},
+ {id:'p8',br:'p',n:'Negociador',d:'+25% no bônus por gol.',c:2,lv:10,pa:['p3','p2'],r:3,x:50,fx:{bon:.25}},
+ {id:'p10',br:'p',n:'Blindado',d:'Mais 20% menos risco de lesão.',c:2,lv:10,pa:['p2','p7'],r:3,x:74,fx:{inj:.20}},
+ {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}}
+];
+const PCLV=30,pcNeed=lv=>120+40*lv;

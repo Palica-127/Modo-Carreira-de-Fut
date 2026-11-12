@@ -250,7 +250,7 @@ function pgMk(){
 /* ---------- Perfil ---------- */
 const KL={bo:'Bola de Ouro',tit:'Campeão continental',art:'Artilheiro',top:'Top 10 Bola de Ouro'};
 function pgPf(){
-  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
+  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['hab','Habilidades'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
   const t=tot(false);
   if(ui.pf=='at'){
     h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div></div></div></div>
@@ -264,6 +264,8 @@ function pgPf(){
     h+=`<div class="pn full"><h2>Histórico</h2>${S.hist.length?tbl(['Ano','Clube','Divisão','Pos.','J','G','A','Nota'],S.hist.map(x=>{const c=cl(x.c);return{c:[x.y,tn(c),LEAGUES[x.l].dn[x.d],x.pos?x.pos+'º':'—',x.ap,x.g,x.a,x.ap?(x.rs/x.ap).toFixed(2):'—']}})):'<p class="empty">Sem temporadas concluídas.</p>'}</div>
     ${yrs.length>1?`<div class="pn"><h2>Gols por temporada</h2>${bars(yrs,gl)}</div>`:''}
     <div class="pn"><h2>Prêmios</h2>${S.aw.length?S.aw.slice().reverse().map(x=>`<p style="margin:4px 0">🏅 <b>${x.y}</b> — ${x.t}</p>`).join(''):'<p class="empty">Nenhum prêmio ainda.</p>'}</div>`;
+  }else if(ui.pf=='hab'){
+    h+=pgHab();
   }else if(ui.pf=='conq'){
     h+=pgConq();
   }else if(ui.pf=='fin'){
@@ -342,6 +344,25 @@ function render(keep){
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
 }
+/* ---------- Habilidades e nível (portado do BrasLOL) ---------- */
+let pcBr='f',pcSel=null,pcMsg='';
+function pcSet(b){pcBr=b;pcSel=null;render(true)}
+function pcPick(id){pcSel=id;render(true)}
+function pcDo(id){pcMsg=pcLearn(id);pcSel=id;render(true)}
+function pgHab(){
+  pcEnsure();const p=S.pc,need=p.lv>=PCLV?1:pcNeed(p.lv),pct=p.lv>=PCLV?100:Math.round(p.xp/need*100),got=PERKS.filter(x=>p.perks[x.id]).length;
+  const tabs=Object.keys(PBR).map(b=>{const n=PERKS.filter(x=>x.br==b&&p.perks[x.id]).length;return `<button class="pill" aria-pressed="${pcBr==b}" onclick="pcSet('${b}')">${PBR[b][0]} <small>${n}/11</small></button>`}).join('');
+  const tr=Math.round(p.tr),trt=tr>=75?'O técnico confia muito em você.':tr>=55?'Boa relação: você briga por uma vaga.':tr>=35?'Confiança baixa: pouco espaço.':'O técnico não conta com você.';
+  const sel=PERKS.find(x=>x.id==pcSel);
+  const rows=[0,1,2,3,4].map(r=>`<div class="prow">${PERKS.filter(x=>x.br==pcBr&&x.r==r).map(x=>{const st=pcPerkSt(x);return `<button class="perk ${st} ${pcSel==x.id?'sel':''}" onclick="pcPick('${x.id}')"><b>${esc(x.n)}</b><small>${st=='own'?'✓ aprendida':'custo '+x.c+' · nv '+x.lv}</small></button>`}).join('')}</div>`).join('');
+  let det='<p class="note">Toque numa habilidade para ver os detalhes.</p>';
+  if(sel){const st=pcPerkSt(sel);det=`<div class="pdet"><b>${esc(sel.n)}</b><small>${PBR[sel.br][0]} · custo ${sel.c} ponto${sel.c>1?'s':''} · nível ${sel.lv}</small><p>${esc(sel.d)}</p>${st=='own'?'<span class="tag">Aprendida</span>':`<button class="play" ${st=='can'?'':'disabled'} onclick="pcDo('${sel.id}')">Aprender</button>`}</div>`}
+  return `<div class="pn"><h2>Nível ${p.lv}${p.lv>=PCLV?' (máx.)':''}</h2><div class="cab"><div><b class="num">${p.tp}</b><small>Pontos</small></div><div><b class="num">${got}/${PERKS.length}</b><small>Aprendidas</small></div></div>
+  <div class="xpb"><u style="width:${pct}%"></u></div><p class="note">${p.lv>=PCLV?'Nível máximo.':`XP ${Math.floor(p.xp)}/${need}. Jogue e treine para subir de nível; cada nível dá 1 ponto (2 a cada 5 níveis).`}</p></div>
+  <div class="pn"><h2>Confiança do técnico</h2><div class="xpb tr"><u style="width:${tr}%"></u></div><p class="note"><b>${tr}/100</b> · ${trt} Ela sobe com boas notas e treino intenso e cai quando você não joga. Influencia sua vaga de titular.</p></div>
+  <div class="pn full"><h2>Árvore de habilidades</h2><div class="pills">${tabs}</div><p class="note" style="margin:0 0 8px">${PBR[pcBr][0]} · ${PBR[pcBr][1]}. Comece pelo topo e desça. A última exige 2 das 3 ligadas.${pcMsg?` <b>${esc(pcMsg)}</b>`:''}</p>${rows}${det}</div>`;
+}
+
 /* ---------- Conquistas e Finanças (portado do BrasLOL) ---------- */
 const ACH=[
  ['Estreia','Dispute a primeira partida profissional',t=>t.ap>=1],

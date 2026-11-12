@@ -446,3 +446,10 @@ th{background:var(--panel)}
 .ach{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;opacity:.55}
 .ach.ok{opacity:1;border-color:rgba(255,216,77,.55);background:rgba(255,216,77,.08)}
 .ach b{display:block;font-size:13px}.ach small{opacity:.75}
+
+.prow{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.perk{flex:1;min-width:0;max-width:150px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 6px;color:inherit;cursor:pointer;text-align:center}
+.perk b{display:block;font-size:12px}.perk small{opacity:.7;font-size:10px}
+.perk.own{background:rgba(0,245,160,.16);border-color:#00F5A0}.perk.can{border-color:#FFD84D}.perk.lock{opacity:.4}.perk.sel{outline:2px solid #00C2FF}
+.pdet{background:rgba(255,255,255,.05);border-radius:10px;padding:10px;margin-top:10px}.pdet b{display:block}.pdet small{opacity:.7}.pdet p{margin:6px 0}
+.xpb{height:10px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden;margin:8px 0}.xpb u{display:block;height:100%;background:linear-gradient(90deg,#00F5A0,#00C2FF)}.xpb.tr u{background:linear-gradient(90deg,#FF6B6B,#FFD84D,#00F5A0)}

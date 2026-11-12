@@ -79,7 +79,7 @@ function newGame(f){
   const at=A.map((_,i)=>C(base+(w[i]-.14)*40+RI(-5,5)+(i==5?(h-180)/3:0)+(i==0||i==3?(180-h)/4:0)+(i==4?(h-180)/5:0),25,80));
   S={v:2,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(74,95)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
      y:2026,week:1,tr:{a:pos=='ZAG'||pos=='VOL'?4:1,i:1},sc:{},hist:[],sn:[],ti:[],aw:[],nw:[],of:[],ev:null,ph:'season',last:[],res:[],peak:0,wm:0,ag:0,
-     champs:[],bdo:[],bdoPrev:{},cards:[],qU:[],qL:[],dv:{},tb:{},dc:[],ucl:null,lib:null,mc:null,cur:null,sum:null};
+     pc:{lv:1,xp:0,tp:0,perks:{},tr:55},champs:[],bdo:[],bdoPrev:{},cards:[],qU:[],qL:[],dv:{},tb:{},dc:[],ucl:null,lib:null,mc:null,cur:null,sum:null};
   S.cs=mkClubs();mkRivals();rcBuild();
   const li=f.lg,L=LEAGUES[li],d=L.dn.length-1;
   const pool=S.cs.filter(c=>c.l==li&&c.d==d).sort((a,b)=>a.s-b.s).slice(0,8);
@@ -87,7 +87,7 @@ function newGame(f){
   qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
-function afterLoad(){FXC={};rcBuild()}
+function afterLoad(){FXC={};rcBuild();pcEnsure()}
 
 /* ---------- temporada ---------- */
 function qualifyByStrength(){
@@ -160,10 +160,10 @@ const pen=(h,a)=>Math.random()<.5+(cl(h).s-cl(a).s)/150?h:a;
 const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s;return[pois(1.4*Math.pow(x/y,2.2)*1.1),pois(1.2*Math.pow(y/x,2.2))]};
 function lnp(){
   if(S.inj>0)return null;
-  const d=O()-cl(S.club).s+(S.mor-50)/12+(S.form-6.5)*2+(S.cond<45?-8:0)+R(-3,3)+(S.loan?4:0);
+  const d=O()-cl(S.club).s+(pcEnsure(),(S.pc.tr-50)/8)+(S.mor-50)/12+(S.form-6.5)*2+(S.cond<45?-8:0)+R(-3,3)+(S.loan?4:0);
   return d>=-5?{s:1}:d>=-12?{s:Math.random()<.5?1:0}:Math.random()<.6?{s:0}:null;
 }
-const role=()=>{const d=O()-cl(S.club).s;return S.inj?'Lesionado':d>=-5?'Titular':d>=-12?'Rodízio':'Reserva'};
+const role=()=>{const d=O()-cl(S.club).s+(S.pc?(S.pc.tr-50)/8:0);return S.inj?'Lesionado':d>=-5?'Titular':d>=-12?'Rodízio':'Reserva'};
 
 function pm(h,a,label,knock,kind){
   const me=S.club,my=h==me?0:1,o=cl(my?h:a),mc=cl(me),ov=O(),pos=S.p.pos,lu=lnp();
@@ -176,9 +176,9 @@ function pm(h,a,label,knock,kind){
   const L=[1.4*Math.pow(sh/sa,2.2)*1.1,1.2*Math.pow(sa/sh,2.2)];
   const ycm=lu&&Math.random()<(pos=='ZAG'||pos=='VOL'?.2:.1)?RI(inn,out):0;
   const rcm=lu&&Math.random()<.012?RI(inn,out):0;
-  const jm=lu&&Math.random()<.014*(1+(100-S.cond)/60)*(1.4-S.at[5]/140)*(out-inn+1)/90?RI(inn,out):0;
-  const PA=({ATA:1,PNT:.6,MEI:.4,VOL:.12,ZAG:.08})[pos]*Math.pow(S.at[1]/68,2)*(.7+S.cond/200);
-  const AA=({ATA:.4,PNT:.7,MEI:1,VOL:.4,ZAG:.1})[pos]*(S.at[2]/70)*(S.at[6]/70);
+  const jm=lu&&Math.random()<.014*(1+(100-S.cond)/60)*(1.4-S.at[5]/140)*(1-Math.min(.6,pfx('inj')))*(out-inn+1)/90?RI(inn,out):0;
+  const PA=({ATA:1,PNT:.6,MEI:.4,VOL:.12,ZAG:.08})[pos]*Math.pow(S.at[1]/68,2)*(.7+S.cond/200)*(1+pfx('gl'));
+  const AA=({ATA:.4,PNT:.7,MEI:1,VOL:.4,ZAG:.1})[pos]*(S.at[2]/70)*(S.at[6]/70)*(1+pfx('ast'));
   const isLg=kind=='lg';
   e(0,`Começa o jogo! ${cl(h).n} x ${cl(a).n} — ${label}.`);
   e(0,lu?lu.s?'Você foi escalado como titular.':'Você começa no banco de reservas.':S.inj>0?'Você está lesionado e acompanha de fora.':'O técnico não utilizou você nesta partida.');
@@ -212,15 +212,15 @@ function pm(h,a,label,knock,kind){
   r.sh=L.map((l,i)=>r.g[i]+Math.round(l*RI(3,6)));r.po=C(Math.round(50+(sh-sa)*.9),30,70);
   rateClub(h,r.g[0],r.g[1]);rateClub(a,r.g[1],r.g[0]);
   if(lu){
-    let x=6.2+C((ov-o.s)*.03,-.8,.8)+(S.form-6.5)*.15+(ok-bad)*.1+r.gl*.9+r.as*.55+(gf>ga?.3:gf<ga?-.3:0)+((pos=='ZAG'||pos=='VOL')&&ga==0?.5:0)-(r.rc?2:0)-(r.yc?.2:0)+R(-.35,.35);
+    let x=6.2+C((ov-o.s)*.03,-.8,.8)+(S.form-6.5)*.15+(ok-bad)*.1+r.gl*.9+r.as*.55+(gf>ga?.3+pfx('rtw'):gf<ga?-.3:0)+((pos=='ZAG'||pos=='VOL')&&ga==0?.5:0)-(r.rc?2:0)-(r.yc?.2:0)+R(-.35,.35);
     x=6+(x-6)*(.5+.5*Math.min(1,r.mn/90));r.rt=Math.round(C(x,3,10)*10)/10;
     const c=S.cur;c.ap++;c.g+=r.gl;c.a+=r.as;c.rs+=r.rt;c.mn+=r.mn;c.y1+=r.yc;c.r1+=r.rc;
     if(isLg)c.lg+=r.gl;
-    S.form=S.form*.7+r.rt*.3;S.mor=C(S.mor+(gf>ga?4:gf<ga?-4:0)+(r.rt-6.5)*3,0,100);S.money+=r.gl*S.ct.bon;
+    S.form=S.form*.7+r.rt*.3;S.mor=C(S.mor+(gf>ga?4:gf<ga?-4:0)+(r.rt-6.5)*3,0,100);S.money+=r.gl*S.ct.bon*(1+pfx('bon'));pcXp(Math.max(4,(r.rt-4)*9+r.gl*6+r.as*3)*(1+pfx('xpm'))*(.4+.6*Math.min(1,r.mn/90)));pcTrust((r.rt-6.5)*1.3);
     const k=kind=='ucl'||kind=='lib'?2:1;
-    S.rep=C(S.rep+(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k,0,100);S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
+    {const dr=(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k;S.rep=C(S.rep+dr*(dr>0?1+pfx('fame'):1),0,100)}S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
     if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).')}
-  }else S.mor=C(S.mor-1.5,0,100);
+  }else{S.mor=C(S.mor-1.5,0,100);if(!S.inj)pcTrust(-.35)}
   S.wm+=r.mn;return r;
 }
 function aiMatch(h,a,knock,kind){
@@ -260,9 +260,10 @@ function trn_(){
   const t=S.tr,im=[.6,1,1.6][t.i],ag=S.p.age,aM=ag<20?1.3:ag<25?1:ag<30?.6:.25,c=cl(S.club),ck=1+C((c.s-55)/150,-.1,.25),K=14/SEASON;
   if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!')}
   else{
-    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.45*K*im*aM*ck*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
+    pcXp(40*[.8,1,1.3][t.i]*(1+pfx('xpw')));pcTrust([.1,.25,.5][t.i]);
+    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.45*K*im*aM*ck*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
     else if(t.a==8){S.form=Math.min(10,S.form+.1);S.mor=C(S.mor+1.5,0,100)}
-    if(im>1.5&&Math.random()<.014*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).')}
+    if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).')}
   }
   S.cond=C(S.cond+18+(t.a==7?16:0)-6*im*(t.a==7?.2:1)+(S.at[5]-60)/20,25,100);
 }
@@ -278,7 +279,7 @@ function step(){
   }));
   allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w)ko(k)});
   if(w==30&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[30],'mc');ko(S.mc)}
-  S.cond=C(S.cond-S.wm/90*12,20,100);S.money+=S.ct.sal*52/SEASON;
+  S.cond=C(S.cond-S.wm/90*12*(1-Math.min(.5,pfx('en'))),20,100);S.money+=S.ct.sal*52/SEASON;
   S.last.forEach(r=>{
     S.res.push({w,c:r.comp,t:`${cl(r.h).n} ${r.g[0]} x ${r.g[1]} ${cl(r.a).n}${r.pen?' (pên.)':''}`,rt:r.rt});
     if(r.pl)news(`${r.comp}: ${cl(r.h).n} ${r.g[0]}x${r.g[1]} ${cl(r.a).n}. Nota ${r.rt}${r.gl?' · '+r.gl+' gol(s)':''}.`);
@@ -489,4 +490,30 @@ function loadGame(){
 }
 function importSave(txt){
   try{const j=JSON.parse(txt);if(!j||j.v!=2||!j.cs||!j.p)throw 0;S=j;afterLoad();save();return true}catch(e){return false}
+}
+
+/* ---------- Nível, habilidades e confiança do técnico (portado do BrasLOL) ---------- */
+function pcEnsure(){if(!S.pc)S.pc={lv:1,xp:0,tp:0,perks:{},tr:55};const p=S.pc;if(!p.perks)p.perks={};if(p.tr==null)p.tr=55;if(p.lv==null){p.lv=1;p.xp=0;p.tp=0}}
+const pfx=k=>{pcEnsure();let v=0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
+function pcXp(n){
+  pcEnsure();const p=S.pc;if(p.lv>=PCLV)return;p.xp+=n;
+  while(p.lv<PCLV&&p.xp>=pcNeed(p.lv)){p.xp-=pcNeed(p.lv);p.lv++;const g=1+(p.lv%5==0?1:0);p.tp+=g;news('⭐ Nível '+p.lv+'! +'+g+' ponto'+(g>1?'s':'')+' de habilidade.')}
+  if(p.lv>=PCLV)p.xp=0;
+}
+function pcTrust(d){pcEnsure();const p=S.pc;if(d>0)d*=1+pfx('trp');p.tr=C(Math.round((p.tr+d)*10)/10,0,100)}
+function pcPerkSt(x){
+  pcEnsure();const p=S.pc;if(p.perks[x.id])return'own';
+  const got=x.pa.filter(i=>p.perks[i]).length;
+  if(p.lv<x.lv||(x.pa.length&&got<(x.need||1)))return'lock';
+  return p.tp>=x.c?'can':'cost';
+}
+function pcLearn(id){
+  pcEnsure();const p=S.pc,d=PERKS.find(x=>x.id==id);if(!d||p.perks[id])return'';
+  const st=pcPerkSt(d);
+  if(p.lv<d.lv)return d.n+' pede nível '+d.lv+'.';
+  if(st=='lock')return d.need?d.n+' pede '+d.need+' das habilidades ligadas.':d.n+' pede uma habilidade ligada antes.';
+  if(p.tp<d.c)return d.n+' custa '+d.c+' ponto'+(d.c>1?'s':'')+'.';
+  p.tp-=d.c;p.perks[id]=1;
+  if(d.at)S.at[d.at[0]]=Math.min(99,S.at[d.at[0]]+d.at[1]);
+  news('🌟 Habilidade aprendida: '+d.n+'.');save();return d.n+' aprendida.';
 }
