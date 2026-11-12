@@ -34,8 +34,12 @@ const cmpT=(a,b)=>{const x=S.tb[a.id],y=S.tb[b.id];return y.Pt-x.Pt||(y.F-y.A)-(
 const stand=(l,d)=>S.cs.filter(c=>c.l==l&&c.d==d).sort(cmpT);
 
 /* ---------- calendário (round-robin) ---------- */
-const rr=t=>{let a=[...t],n=a.length,r=[];for(let i=0;i<n-1;i++){const m=[];for(let j=0;j<n/2;j++)m.push([a[j],a[n-1-j]]);r.push(m);a.splice(1,0,a.pop())}return r.concat(r.map(x=>x.map(([h,b])=>[b,h])))};
+const rr=t=>{let a=[...t],n=a.length,r=[];for(let i=0;i<n-1;i++){const m=[];for(let j=0;j<n/2;j++)m.push([a[j],a[n-1-j]]);r.push(m);a.splice(1,0,a.pop())}return 2*(n-1)<=SEASON?r.concat(r.map(x=>x.map(([h,b])=>[b,h]))):r};   // turno e returno; divisões enormes jogam turno único
 const rounds=(l,d)=>FXC[l+'-'+d]||(FXC[l+'-'+d]=rr(S.dv[l+'-'+d].ord));
+/* rodadas espalhadas pelas SEASON semanas: weeksOf(n)[k] = semana da rodada k */
+const WK={};
+const weeksOf=n=>WK[n]||(WK[n]=(()=>{const o=[];for(let w=1;w<=SEASON;w++)if(Math.floor(w*n/SEASON)>Math.floor((w-1)*n/SEASON))o.push(w);return o})());
+const roundAt=(l,d,w)=>{const R_=rounds(l,d),n=R_.length;return Math.floor(w*n/SEASON)>Math.floor((w-1)*n/SEASON)?R_[Math.floor((w-1)*n/SEASON)]:null};
 const pois=l=>{const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random()}while(p>L);return k-1};
 
 /* ---------- mundo ---------- */
@@ -77,7 +81,7 @@ const rvStats=r=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.roun
 function newGame(f){
   const pos=f.pos,w=PW[pos],h=f.h,base=RI(44,54);
   const at=A.map((_,i)=>C(base+(w[i]-.14)*40+RI(-5,5)+(i==5?(h-180)/3:0)+(i==0||i==3?(180-h)/4:0)+(i==4?(h-180)/5:0),25,80));
-  S={v:2,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(74,95)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
+  S={v:3,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(74,95)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
      y:2026,week:1,tr:{a:pos=='ZAG'||pos=='VOL'?4:1,i:1},sc:{},hist:[],sn:[],ti:[],aw:[],nw:[],of:[],ev:null,ph:'season',last:[],res:[],peak:0,wm:0,ag:0,
      pc:{lv:1,xp:0,tp:0,perks:{},tr:55},champs:[],bdo:[],bdoPrev:{},cards:[],qU:[],qL:[],dv:{},tb:{},dc:[],ucl:null,lib:null,mc:null,cur:null,sum:null,fin:[],hof:[],lr:{},lrw:0};
   S.cs=mkClubs();mkRivals();rcBuild();
@@ -111,10 +115,10 @@ function buildComps(){
     for(const x of [...top.slice(10),...mid.slice(4)]){if(al.length>=16)break;al.push(x)}
     al=al.map(c=>c.id);
     const my=S.club;if(cl(my).l==li&&!al.includes(my))al[al.length-1]=my;
-    return mkComp(L.cup,al,['Oitavas','Quartas','Semifinal','Final'],[5,12,19,26],'dom',li);
+    return mkComp(L.cup,al,['Oitavas','Quartas','Semifinal','Final'],[5,12,19,26].map(wsc),'dom',li);
   });
-  S.ucl=mkComp('Liga dos Campeões',[...S.qU,...S.ex.eu],['Fase de 32','Oitavas','Quartas','Semifinal','Final'],[3,9,15,22,29],'ucl');
-  S.lib=mkComp('Libertadores',[...S.qL,...S.ex.sa],['Oitavas','Quartas','Semifinal','Final'],[6,13,20,27],'lib');
+  S.ucl=mkComp('Liga dos Campeões',[...S.qU,...S.ex.eu],['Fase de 32','Oitavas','Quartas','Semifinal','Final'],[3,9,15,22,29].map(wsc),'ucl');
+  S.lib=mkComp('Libertadores',[...S.qL,...S.ex.sa],['Oitavas','Quartas','Semifinal','Final'],[6,13,20,27].map(wsc),'lib');
   S.mc=null;
 }
 function setupSeason(){
@@ -316,7 +320,7 @@ function trn_(){
 }
 
 /* ---------- semana ---------- */
-const winOpen=()=>S.ph=='off'||S.week==16||S.week==17;
+const winOpen=()=>S.ph=='off'||S.week==MIDW+1||S.week==MIDW+2;
 /* semana em duas fases, como num calendário real: meio de semana (copas e Mundial) e fim de semana (liga) */
 const WD=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const sd0=()=>{const d=new Date(S.y,7,1);while(d.getDay()!=1)d.setDate(d.getDate()+1);return d};
@@ -331,10 +335,10 @@ function wkPlan(){
   if(S.wmid!=w){
     const k=allComps().find(k=>k.ch==null&&k.wk[k.rd]==w&&k.al.includes(S.club));
     if(k)g.push({d:kDay(k.k),ph:'mid',n:k.n+' — '+k.rn[k.rd]});
-    else if(w==30&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final'});
+    else if(w==SEASON&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final'});
   }
-  const m=rounds(c.l<0?0:c.l,c.d)[w-1].find(x=>x.includes(S.club));
-  g.push({d:lgDay(w),ph:'end',n:'Liga — '+dvName(c),h:m?m[0]:null,a:m?m[1]:null});
+  const rd=roundAt(c.l<0?0:c.l,c.d,w),m=(rd||[]).find(x=>x.includes(S.club));
+  g.push({d:lgDay(w),ph:'end',n:rd?'Liga — '+dvName(c):'Semana sem rodada da liga',h:m?m[0]:null,a:m?m[1]:null});
   return g.sort((x,y)=>x.d-y.d);
 }
 function wkBegin(){
@@ -346,25 +350,25 @@ function stepMid(){
   if(S.ph!='season'||S.ev||S.wmid==S.week)return false;
   wkBegin();const w=S.week;
   allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w)ko(k)});
-  if(w==30&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[30],'mc');ko(S.mc)}
+  if(w==SEASON&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[SEASON],'mc');ko(S.mc)}
   S.wmid=w;return true;
 }
 function stepEnd(){
   if(S.ph!='season'||S.ev)return false;
   stepMid();wkBegin();const w=S.week;
   LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{
-    rounds(li,di)[w-1].forEach(([h,a])=>{const r=fx(h,a,'Liga',0,'lg');up(h,a,r.g);(S.lr[li+'-'+di]=S.lr[li+'-'+di]||[]).push([h,a,r.g[0],r.g[1]])});
+    (roundAt(li,di,w)||[]).forEach(([h,a])=>{const r=fx(h,a,'Liga',0,'lg');up(h,a,r.g);(S.lr[li+'-'+di]=S.lr[li+'-'+di]||[]).push([h,a,r.g[0],r.g[1]])});
   }));
   S.cond=C(S.cond-S.wm/90*12*(1-Math.min(.5,pfx('en'))),20,100);S.money+=S.ct.sal*52/SEASON;
   S.last.forEach(r=>{
     S.res.push({w,c:r.comp,t:`${cl(r.h).n} ${r.g[0]} x ${r.g[1]} ${cl(r.a).n}${r.pen?' (pên.)':''}`,rt:r.rt});
     if(r.pl)news(`${r.comp}: ${cl(r.h).n} ${r.g[0]}x${r.g[1]} ${cl(r.a).n}. Nota ${r.rt}${r.gl?' · '+r.gl+' gol(s)':''}.`);
   });
-  if(w==15||w==30)snap(S.y+(w==15?'.1':'.2'));
-  if(w==15){S.of=gen(3);S.ag=0;if(S.of.length){news('📨 Janela aberta: '+S.of.length+' proposta(s) recebida(s).');mail('Agente','Janela de transferências aberta',S.of.length+' proposta(s) recebida(s). Confira em Jogador → Contratos antes que a janela feche.')}}
-  if(w==17)S.of=[];
+  if(w==MIDW||w==SEASON)snap(S.y+(w==MIDW?'.1':'.2'));
+  if(w==MIDW){S.of=gen(3);S.ag=0;if(S.of.length){news('📨 Janela aberta: '+S.of.length+' proposta(s) recebida(s).');mail('Agente','Janela de transferências aberta',S.of.length+' proposta(s) recebida(s). Confira em Jogador → Contratos antes que a janela feche.')}}
+  if(w==MIDW+2)S.of=[];
   S.week++;S.day=0;
-  if(S.week>SEASON)end();else if((S.week==10||S.week==22)&&!S.inj)S.ev=testEv();else if(Math.random()<.11)S.ev=P(EV);
+  if(S.week>SEASON)end();else if((S.week==wsc(10)||S.week==wsc(22))&&!S.inj)S.ev=testEv();else if(Math.random()<.11*30/SEASON)S.ev=P(EV);
   return true;
 }
 const step=()=>stepEnd();
@@ -571,7 +575,7 @@ function loadGame(){
   S=null;return false;
 }
 function importSave(txt){
-  try{const j=JSON.parse(txt);if(!j||j.v!=2||!j.cs||!j.p)throw 0;S=j;afterLoad();save();return true}catch(e){return false}
+  try{const j=JSON.parse(txt);if(!j||j.v!=3||!j.cs||!j.p)throw 0;S=j;afterLoad();save();return true}catch(e){return false}
 }
 
 /* ---------- Nível, habilidades e confiança do técnico (portado do BrasLOL) ---------- */
@@ -757,7 +761,7 @@ function selRank(){
 const mulb=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const SQP=['GOL','GOL','GOL','ZAG','ZAG','ZAG','ZAG','ZAG','ZAG','VOL','VOL','VOL','VOL','MEI','MEI','MEI','MEI','PNT','PNT','PNT','ATA','ATA','ATA'];
 const nmR=(nat,r)=>{const g=NG[(NATS.find(x=>x[0]==nat)||[0,0,'BR'])[2]];return g.f[Math.floor(r()*g.f.length)]+' '+g.l[Math.floor(r()*g.l.length)]};
-function sqPlayer(c,i){
+function sqGen(c,i){
   const a0=19+Math.floor(mulb(hash(c.n+'|'+i))()*15),dy=Math.max(0,S.y-2026),t=a0-18+dy,g=Math.floor(t/18),age=18+t%18;
   const r=mulb(hash(c.n+'|'+i+'|'+g)),L=c.l>=0?LEAGUES[c.l]:null;
   const nat=!L||r()<.3?RNAT[Math.floor(r()*RNAT.length)]:L.nat;
@@ -767,13 +771,41 @@ function sqPlayer(c,i){
   const pot=Math.round(C(ovr+(age<24?(24-age)*1.8*(.5+r()):r()*2),ovr,95));
   return{id:c.id+'.'+i,n:nmR(nat,r),nat,pos,age,ovr,pot,club:c.id,slot:i,q:1};
 }
+
+/* elencos reais (src/squads.js, dados da ESPN): idade avança com os anos; veteranos se aposentam e viram jovens gerados */
+const sqNorm=s=>s.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 -]/g,'').trim();
+const sqAdj=a=>a<19?-7:a<21?-4:a<24?-1.5:a<=30?0:a<=33?-1.5:-3-(a-34)*1.5;
+const SQNAT={BRA:'Brasil',ARG:'Argentina',POR:'Portugal',ESP:'Espanha',FRA:'França',ENG:'Inglaterra',GER:'Alemanha',ITA:'Itália',NED:'Holanda',TUR:'Turquia',URU:'Uruguai',COL:'Colômbia',NGA:'Nigéria',MAR:'Marrocos',JPN:'Japão',USA:'EUA'};
+const SQC={};
+function sqReal(c){
+  const key=c.id+'|'+S.y+'|'+Math.round(c.s);if(SQC[key])return SQC[key];
+  const dy=Math.max(0,S.y-2026),L=c.l>=0?LEAGUES[c.l]:null,pool={GOL:[],ZAG:[],VOL:[],MEI:[],PNT:[],ATA:[]};
+  SQ[c.n].split(';').forEach((z,i)=>{
+    const q=z.split('|'),g=q[1],a0=+q[2]||24,h0=hash(q[0]+c.n);let n=q[0],age=a0+dy,nat=SQNAT[q[3]]||q[3],st=typeof STAR!=='undefined'?STAR[sqNorm(n)]||0:0;
+    if(age>=(g=='G'?40:37)){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-(g=='G'?40:37))%5;st=0}
+    const h=(hash(n+c.n)%1000)/1000,ovr=Math.round(C(st?st+sqAdj(age)-sqAdj(a0):c.s-15+14*h+sqAdj(age),35,97)),pot=Math.round(C(ovr+(age<24?(24-age)*1.6*(.5+h):h*2),ovr,96));
+    const pos=g=='G'?'GOL':g=='D'?'ZAG':g=='M'?(h0%5<2?'VOL':'MEI'):(h0%5<2?'PNT':'ATA');
+    pool[pos].push({n,nat,pos,age,ovr,pot,club:c.id,q:1});
+  });
+  const LIM={GOL:4,ZAG:9,VOL:5,MEI:5,PNT:4,ATA:5};
+  Object.keys(pool).forEach(k=>{pool[k].sort((x,y)=>y.ovr-x.ovr);pool[k]=pool[k].slice(0,LIM[k])});
+  const near={GOL:['GOL'],ZAG:['ZAG','VOL'],VOL:['VOL','MEI','ZAG'],MEI:['MEI','VOL','PNT'],PNT:['PNT','ATA','MEI'],ATA:['ATA','PNT','MEI']},out=[];
+  SQP.forEach(p=>{let x=null;for(const k of near[p]){if(pool[k].length){x=pool[k].shift();break}}if(!x){const k=Object.keys(pool).find(k=>k!='GOL'&&pool[k].length);x=k?pool[k].shift():null}if(x)out.push(x);else{const r=mulb(hash(c.n+'|f'+out.length));out.push({n:nmR(L?L.nat:'Brasil',r),nat:L?L.nat:'Brasil',pos:p,age:22,ovr:Math.round(c.s-14),pot:Math.round(c.s-10),club:c.id,q:1})}});
+  Object.values(pool).forEach(l=>l.forEach(x=>out.push(x)));
+  out.forEach((x,i)=>{x.id=c.id+'.'+i;x.slot=i});
+  SQC[key]=out;return out;
+}
+const sqLen=c=>typeof SQ!=='undefined'&&SQ[c.n]?sqReal(c).length:SQP.length;
+function sqPlayer(c,i){return typeof SQ!=='undefined'&&SQ[c.n]?sqReal(c)[i]:sqGen(c,i)}
 /* 23 jogadores: os craques do mundo (rivais) e o seu jogador ocupam as vagas das posições deles */
 function squadOf(cid){
-  const c=S.cs[cid],base=SQP.map((p,i)=>sqPlayer(c,i)),put=[];
+  const c=S.cs[cid],real=typeof SQ!=='undefined'&&SQ[c.n],base=(real?sqReal(c).map(x=>({...x})):SQP.map((p,i)=>sqPlayer(c,i))),put=[];
   (RC[cid]||[]).forEach(r=>put.push({id:r.id,n:r.n,nat:r.nat,pos:r.pos,age:r.age,ovr:Math.round(r.ovr),pot:r.pot,club:cid,rv:1}));
   if(cid==S.club)put.push({id:'me',n:S.p.name,nat:S.p.nat,pos:S.p.pos,age:S.p.age,ovr:O(),pot:S.p.pot,club:cid,me:1});
   put.forEach(x=>{
-    let k=base.findIndex(b=>b.pos==x.pos&&!b.taken);if(k<0)k=base.findIndex(b=>!b.taken&&b.pos!='GOL');
+    let k=-1;
+    if(real){base.forEach((b,j)=>{if(!b.taken&&b.pos==x.pos&&(k<0||b.ovr<base[k].ovr))k=j});if(k<0)base.forEach((b,j)=>{if(!b.taken&&b.pos!='GOL'&&(k<0||b.ovr<base[k].ovr))k=j})}
+    else{k=base.findIndex(b=>b.pos==x.pos&&!b.taken);if(k<0)k=base.findIndex(b=>!b.taken&&b.pos!='GOL')}
     if(k>=0)base[k]={...x,taken:1}
   });
   return base;

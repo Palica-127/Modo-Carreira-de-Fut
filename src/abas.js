@@ -26,7 +26,7 @@ function pgJogar(){
 function upcoming(){
   const c=cl(S.club),T=rounds(c.l,c.d),rows=[],last=Math.min(SEASON,S.week+5);
   for(let w=S.week+1;w<=last;w++){
-    const m=T[w-1].find(x=>x.includes(S.club));
+    const m=(roundAt(c.l,c.d,w)||[]).find(x=>x.includes(S.club));
     if(m){const home=m[0]==S.club,o=cl(home?m[1]:m[0]);rows.push({c:[dTxt(w,lgDay(w)),'Liga',(home?'vs ':'@ ')+esc(o.n),Math.round(o.s)]})}
     allComps().forEach(k=>{if(k.ch==null&&k.al.includes(S.club))for(let r=k.rd;r<k.rn.length;r++)if(k.wk[r]==w)rows.push({c:[dTxt(w,kDay(k.k)),esc(k.n),esc(k.rn[r])+(r>k.rd?' (se avançar)':''),'—']})});
   }
@@ -39,7 +39,7 @@ function lastRound(l,d){
 }
 function nextRound(l,d){
   if(S.ph!='season'||S.week>SEASON)return '';
-  const rd=rounds(l,d)[S.week-1];
+  const rd=roundAt(l,d,S.week);if(!rd)return '';
   return `<div class="pn full"><h2>Próxima rodada (${S.week}) · ${LEAGUES[l].dn[d]}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(b).id}')">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`;
 }
 function viewRes(){
@@ -60,9 +60,9 @@ function viewTab(){
   return h+lastRound(ui.lg,d)+nextRound(ui.lg,d);
 }
 function viewCal(){
-  const c=cl(S.club),T=rounds(c.l,c.d),ks=[S.dc[c.l],S.ucl,S.lib];
-  let h=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${tbl(['Sem','Data','Jogo','Resultado'],T.map((r,i)=>{const m=r.find(x=>x.includes(S.club)),res=S.res.filter(x=>x.w==i+1&&x.c=='Liga').map(x=>x.t).join('');return{c:[i+1,dTxt(i+1,lgDay(i+1)),m?esc(cl(m[0]).n)+' x '+esc(cl(m[1]).n):'—',res||'—'],cls:i+1==S.week&&S.ph=='season'?'mine':''}}))}</div>`;
-  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+')').join(' · ')],cls:k.ch==null&&k.al.includes(S.club)?'mine':''})).concat([{c:['Mundial de Clubes','Final ('+dTxt(30,2)+'), entre os campeões da Champions e da Libertadores']}]))}</div>`;
+  const c=cl(S.club),T=rounds(c.l,c.d),WS=weeksOf(T.length),ks=[S.dc[c.l],S.ucl,S.lib];
+  let h=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${tbl(['Sem','Data','Jogo','Resultado'],T.map((r,i)=>{const wk=WS[i],m=r.find(x=>x.includes(S.club)),res=S.res.filter(x=>x.w==wk&&x.c=='Liga').map(x=>x.t).join('');return{c:[wk,dTxt(wk,lgDay(wk)),m?esc(cl(m[0]).n)+' x '+esc(cl(m[1]).n):'—',res||'—'],cls:wk==S.week&&S.ph=='season'?'mine':''}}))}</div>`;
+  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+')').join(' · ')],cls:k.ch==null&&k.al.includes(S.club)?'mine':''})).concat([{c:['Mundial de Clubes','Final ('+dTxt(SEASON,2)+'), entre os campeões da Champions e da Libertadores']}]))}</div>`;
   return h;
 }
 const viewCopa=()=>lgPills()+compView(S.dc[ui.lg])+compView(S.ucl)+compView(S.lib)+(S.mc?compView(S.mc):'');
@@ -212,7 +212,7 @@ function pgCtr(){
 function sheetTab(k){ui.sheet.tab=k;render(true)}
 const shTab=(s,items)=>s.tab||items[0][0];
 const shTabs=(s,items)=>`<div class="pills">${items.map(([k,l])=>`<button class="pill" aria-pressed="${shTab(s,items)==k}" onclick="sheetTab('${k}')">${l}</button>`).join('')}</div>`;
-const shelfOf=l=>`<div class="shelf">${l.map(x=>x.k=='bo'?ballTro(x.y):troIcon(x.k,x.y,x.t)).join('')||'<span class="none">Nenhum título ainda.</span>'}</div>`;
+const shelfOf=l=>`<div class="shelf">${l.map(x=>x.k=='bo'?ballTro(x.y):troIcon(x.k,x.y,x.t,troSub(x))).join('')||'<span class="none">Nenhum título ainda.</span>'}</div>`;
 const yrsLine=(n,a)=>`<div class="tl"><b>${n} <span class="tag">${a.length}</span></b><small>${a.length?a.slice().sort((x,y)=>x-y).join(' · '):'—'}</small></div>`;
 function myTitles(){
   return [...S.ti.map(x=>({k:x.k||'lig',y:x.y,t:x.t.replace(/ \(.*/,'')})),...S.aw.filter(a=>a.t.includes('BOLA DE OURO')).map(a=>({k:'bo',y:a.y}))].sort((a,b)=>a.y-b.y);
@@ -226,7 +226,7 @@ function titleLines(list){
 const shHero=(left,name,sub,tags,tiles)=>`<div class="hero2"><div class="h2c">${left}</div><div class="h2m"><h2 class="h2n">${name}</h2><div class="h2s">${sub}</div>${tags.map(t=>`<div class="h2t">${t}</div>`).join('')}</div><div class="h2k">${tiles.map(([l,v])=>`<div><b>${v}</b><small>${l}</small></div>`).join('')}</div></div>`;
 const SHG=[['mc','Mundial de Clubes',1],['ucl','Liga dos Campeões',1],['lib','Libertadores',1],['wc','Copa do Mundo',1],['lig','Ligas',0],['dom','Copas nacionais',0]];
 const shelfBox=(n,it,ico)=>`<div class="sh-t"><span>${n}</span><b>${it.length}</b></div><div class="shelf">${it.map(ico).join('')||'<span class="none">Ainda vazia</span>'}</div>`;
-const shelfRows=list=>SHG.map(([k,n,a])=>{const it=list.filter(x=>x.k==k).sort((p,q)=>(+p.y||0)-(+q.y||0));return it.length||a?shelfBox(n,it,x=>troIcon(k,x.y,'')):''}).join('');
+const shelfRows=list=>SHG.map(([k,n,a])=>{const it=list.filter(x=>x.k==k).sort((p,q)=>(+p.y||0)-(+q.y||0));return it.length||a?shelfBox(n,it,x=>troIcon(k,x.y,'',troSub(x))):''}).join('');
 function ovrChart(pts){
   if(pts.length<2)return `<div class="pn"><h2>Evolução do OVR</h2><p class="note" style="margin:0">O gráfico aparece a partir da segunda temporada.</p></div>`;
   const W=600,H=190,px=30,py=26,mn=Math.min(...pts.map(p=>p[1]))-3,mx=Math.max(...pts.map(p=>p[1]))+3;
@@ -330,7 +330,7 @@ function shL(s){
 }
 /* jogador de elenco (gerado): sem histórico detalhado */
 function shQ(s){
-  const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||SQP[+slot]==null)return null;
+  const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||+slot>=sqLen(c))return null;
   const x=sqPlayer(c,+slot);
   const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Potencial',x.pot],['Idade',x.age],['Posição',x.pos]]);
   return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};

@@ -50,3 +50,8 @@ cd tools && node smoke.js   # precisa de jsdom
 - Títulos de ligas nacionais anteriores a 2026
 - Dividir o arquivo em módulos
 - Mais testes em celular
+
+## Dados e créditos (ligas, elencos e taças)
+- Clubes, divisões e elencos reais: API pública da ESPN (`tools/fetch_espn.py`, `tools/build_world.py` → `src/squads.js`). A força individual é estimada (força do clube + idade); astros têm valor fixo em `tools/stars.json`.
+- Escudos: TheSportsDB e ESPN. Taças em `trofeus/`: TheSportsDB; Copa do Brasil e Mundial de Clubes via Wikimedia Commons (CC BY-SA).
+- A temporada tem 46 semanas; cada divisão joga suas rodadas espalhadas por elas (divisões de 30+ times jogam turno único).

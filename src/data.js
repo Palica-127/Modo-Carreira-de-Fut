@@ -5,45 +5,47 @@
    Elencos e jogadores são fictícios; clubes e divisões são aproximados.
    ============================================================ */
 const GAME_NAME='Habite-se 10';
-const SEASON=30;                       // rodadas da liga (16 clubes, ida e volta)
+const SEASON=46;                       // semanas da temporada (a Championship tem 46 rodadas)
+const MIDW=23;                         // meio da temporada: abre a janela de transferências
+const wsc=x=>Math.max(1,Math.round(x*SEASON/30)); // escala semanas do calendário antigo (30) para SEASON
 
 const LEAGUES=[
-{k:'BRA',n:'Brasil',nat:'Brasil',q:.80,cup:'Copa do Brasil',dn:['Série A','Série B','Série C'],cl:[
-'Palmeiras, Flamengo, Botafogo, Atlético Mineiro, Fluminense, Corinthians, São Paulo, Internacional, Grêmio, Cruzeiro, Vasco da Gama, Bahia, Santos, Fortaleza, Athletico Paranaense, Bragantino',
-'Sport Recife, Ceará, Vitória, Goiás, Coritiba, Juventude, Mirassol, Vila Nova, Criciúma, Avaí, Chapecoense, Operário-PR, América-MG, Novorizontino, Paysandu, Remo',
-'Ponte Preta, Guarani, Botafogo-SP, Náutico, Santa Cruz, Figueirense, CSA, ABC, Confiança, Volta Redonda, Ypiranga, Londrina, Brusque, Ferroviária, Tombense, São Bernardo']},
+{k:'BRA',n:'Brasil',nat:'Brasil',q:0.8,cup:'Copa do Brasil',dn:['Série A','Série B','Série C'],cl:[
+'Palmeiras, Flamengo, Fluminense, Atlético Mineiro, Botafogo, Cruzeiro, São Paulo, Corinthians, Bahia, Internacional, Athletico Paranaense, Santos, Vasco da Gama, Grêmio, Bragantino, Coritiba, Vitória, Mirassol, Chapecoense, Remo',
+'Fortaleza, Sport Recife, Juventude, Goiás, Vila Nova, Criciúma, Ceará, CRB, Novorizontino, Atlético Goianiense, Operário-PR, Avaí, Botafogo-SP, Cuiabá, Athletic, Ponte Preta, Náutico, São Bernardo, Londrina, América Mineiro',
+'América-MG, Paysandu, Guarani, Santa Cruz, Figueirense, CSA, ABC, Confiança, Volta Redonda, Ypiranga, Brusque, Ferroviária, Tombense, Botafogo-PB, Floresta, Caxias, Inter de Limeira, Amazonas, Maranhão, Anápolis']},
 {k:'ENG',n:'Inglaterra',nat:'Inglaterra',q:1,cup:'FA Cup',dn:['Premier League','Championship','League One','League Two'],cl:[
-'Manchester City, Arsenal, Liverpool, Chelsea, Manchester United, Tottenham Hotspur, Newcastle United, Aston Villa, West Ham United, Brighton, Crystal Palace, Brentford, Fulham, Everton, Wolverhampton, Nottingham Forest',
-'Leeds United, Leicester City, Sunderland, Southampton, Burnley, Sheffield United, Middlesbrough, Norwich City, West Bromwich, Coventry City, Watford, Stoke City, Swansea City, Bristol City, Hull City, Blackburn Rovers',
-'Birmingham City, Wrexham, Bolton Wanderers, Huddersfield Town, Derby County, Stockport County, Wigan Athletic, Peterborough, Reading, Charlton Athletic, Barnsley, Blackpool, Lincoln City, Rotherham United, Plymouth Argyle, Preston North End',
-'Notts County, Bradford City, Walsall, Port Vale, Doncaster Rovers, Crewe Alexandra, Swindon Town, Gillingham, AFC Wimbledon, Colchester United, Grimsby Town, Salford City, Chesterfield, Tranmere Rovers, Morecambe, Harrogate Town']},
-{k:'ESP',n:'Espanha',nat:'Espanha',q:.97,cup:'Copa del Rey',dn:['La Liga','Segunda División','Primera Federación'],cl:[
-'Real Madrid, Barcelona, Atlético de Madrid, Athletic Bilbao, Real Sociedad, Villarreal, Real Betis, Sevilla, Valencia, Girona, Celta de Vigo, Osasuna, Mallorca, Getafe, Rayo Vallecano, Espanyol',
-'Deportivo La Coruña, Málaga, Real Zaragoza, Sporting de Gijón, Real Oviedo, Elche, Levante, Granada, Almería, Cádiz, Racing Santander, Eibar, Burgos, Huesca, Albacete, Real Valladolid',
-'Racing Ferrol, Córdoba, Castellón, Tenerife, Alcorcón, Mirandés, Cultural Leonesa, Real Murcia, Ponferradina, Sabadell, Hércules, Lugo, Numancia, Gimnàstic, Linares, Arenteiro']},
-{k:'ITA',n:'Itália',nat:'Itália',q:.93,cup:'Coppa Italia',dn:['Serie A','Serie B','Serie C'],cl:[
-'Inter, Milan, Juventus, Napoli, Atalanta, Roma, Lazio, Fiorentina, Bologna, Torino, Genoa, Udinese, Monza, Lecce, Sassuolo, Cagliari',
-'Parma, Como, Venezia, Palermo, Sampdoria, Empoli, Cremonese, Spezia, Bari, Brescia, Pisa, Cesena, Modena, Catanzaro, Reggiana, Salernitana',
-'Triestina, Padova, Vicenza, Lecco, Ascoli, Avellino, Benevento, Foggia, Perugia, Pescara, Carrarese, Arezzo, Cosenza, Juve Stabia, Taranto, Rimini']},
-{k:'GER',n:'Alemanha',nat:'Alemanha',q:.93,cup:'DFB-Pokal',dn:['Bundesliga','2. Bundesliga','3. Liga'],cl:[
-'Bayern München, Bayer Leverkusen, Borussia Dortmund, RB Leipzig, Eintracht Frankfurt, VfB Stuttgart, Wolfsburg, Mönchengladbach, Freiburg, Hoffenheim, Werder Bremen, Union Berlin, Mainz 05, Augsburg, Heidenheim, Köln',
-'Hamburger SV, Schalke 04, Hertha BSC, Hannover 96, Fortuna Düsseldorf, Nürnberg, Karlsruher SC, Kaiserslautern, Paderborn, Magdeburg, Elversberg, Greuther Fürth, Darmstadt 98, Holstein Kiel, Braunschweig, Preußen Münster',
-'Dynamo Dresden, Arminia Bielefeld, 1860 München, Hansa Rostock, Saarbrücken, Energie Cottbus, Waldhof Mannheim, MSV Duisburg, Erzgebirge Aue, Viktoria Köln, Osnabrück, Wehen Wiesbaden, Ingolstadt, Verl, Jahn Regensburg, Sandhausen']},
-{k:'FRA',n:'França',nat:'França',q:.86,cup:'Coupe de France',dn:['Ligue 1','Ligue 2'],cl:[
-'Paris Saint-Germain, Monaco, Marseille, Lille, Lyon, Lens, Nice, Rennes, Brest, Reims, Toulouse, Strasbourg, Nantes, Montpellier, Lorient, Auxerre',
-'Saint-Étienne, Bordeaux, Metz, Angers, Le Havre, Paris FC, Caen, Guingamp, Rodez, Amiens, Troyes, Pau, Laval, Grenoble, Clermont, Dunkerque']},
-{k:'POR',n:'Portugal',nat:'Portugal',q:.80,cup:'Taça de Portugal',dn:['Primeira Liga','Liga 2'],cl:[
-'Benfica, Porto, Sporting CP, Braga, Vitória SC, Famalicão, Gil Vicente, Moreirense, Estoril, Casa Pia, Arouca, Rio Ave, Boavista, Santa Clara, Nacional, Farense',
-'Marítimo, Vizela, Tondela, Académica, Belenenses, Chaves, Penafiel, Paços de Ferreira, Leixões, Portimonense, Torreense, Feirense, Mafra, Trofense, Oliveirense, Aves']},
-{k:'NED',n:'Holanda',nat:'Holanda',q:.78,cup:'KNVB Beker',dn:['Eredivisie','Eerste Divisie'],cl:[
-'Ajax, PSV, Feyenoord, AZ Alkmaar, Twente, Utrecht, Sparta Rotterdam, Heerenveen, Go Ahead Eagles, NEC Nijmegen, Fortuna Sittard, Groningen, Heracles, PEC Zwolle, Willem II, RKC Waalwijk',
-'Almere City, Vitesse, Roda JC, Cambuur, NAC Breda, Den Bosch, Excelsior, De Graafschap, Dordrecht, VVV-Venlo, ADO Den Haag, Emmen, Helmond Sport, MVV Maastricht, Telstar, Jong Ajax']},
-{k:'ARG',n:'Argentina',nat:'Argentina',q:.74,cup:'Copa Argentina',dn:['Liga Profesional','Primera Nacional'],cl:[
-'River Plate, Boca Juniors, Racing Club, Independiente, San Lorenzo, Estudiantes, Vélez Sarsfield, Talleres, Lanús, Argentinos Juniors, Rosario Central, Newell\'s Old Boys, Huracán, Defensa y Justicia, Belgrano, Banfield',
-'Instituto, Platense, Tigre, Godoy Cruz, Colón, Unión, Gimnasia La Plata, Atlético Tucumán, Quilmes, Chacarita, Almirante Brown, Ferro Carril Oeste, Nueva Chicago, Temperley, Sarmiento, Barracas Central']},
-{k:'TUR',n:'Turquia',nat:'Turquia',q:.70,cup:'Türkiye Kupası',dn:['Süper Lig','1. Lig'],cl:[
-'Galatasaray, Fenerbahçe, Beşiktaş, Trabzonspor, Başakşehir, Samsunspor, Konyaspor, Antalyaspor, Alanyaspor, Kasımpaşa, Sivasspor, Kayserispor, Rizespor, Gaziantep FK, Eyüpspor, Bodrum FK',
-'Bursaspor, Göztepe, Sakaryaspor, Kocaelispor, Boluspor, Ümraniyespor, Pendikspor, Çorum FK, Erzurumspor, Manisa FK, Keçiörengücü, Adanaspor, Altay, Giresunspor, Adana Demirspor, Hatayspor']}
+'Manchester City, Arsenal, Liverpool, Chelsea, Brighton, Tottenham Hotspur, Newcastle United, Aston Villa, AFC Bournemouth, Manchester United, Brentford, Everton, Fulham, Leeds United, Crystal Palace, Nottingham Forest, Ipswich Town, Hull City, Sunderland, Coventry City',
+'Wolverhampton, West Ham United, Southampton, Middlesbrough, Sheffield United, West Bromwich, Stoke City, Norwich City, Swansea City, Burnley, Queens Park Rangers, Birmingham City, Portsmouth, Watford, Blackburn Rovers, Bristol City, Cardiff City, Wrexham, Bolton Wanderers, Millwall, Charlton Athletic, Derby County, Lincoln City, Preston North End',
+'Huddersfield Town, Stockport County, Leicester City, Oxford United, Luton Town, Reading, Cambridge United, Wigan Athletic, Sheffield Wednesday, Plymouth Argyle, Peterborough, Mansfield Town, Milton Keynes Dons, Bradford City, Wycombe Wanderers, Blackpool, Barnsley, Leyton Orient, Burton Albion, Notts County, Stevenage, Doncaster Rovers, AFC Wimbledon, Bromley',
+'Walsall, Barnet, Crewe Alexandra, Cheltenham Town, Rotherham United, York City, Port Vale, Gillingham, Swindon Town, Accrington Stanley, Salford City, Grimsby Town, Exeter City, Newport County, Chesterfield, Colchester United, Shrewsbury Town, Fleetwood Town, Tranmere Rovers, Bristol Rovers, Oldham Athletic, Rochdale, Northampton Town, Crawley Town']},
+{k:'ESP',n:'Espanha',nat:'Espanha',q:0.97,cup:'Copa del Rey',dn:['La Liga','Segunda División','Primera Federación'],cl:[
+'Real Madrid, Barcelona, Atlético de Madrid, Real Sociedad, Athletic Bilbao, Real Betis, Villarreal, Sevilla, Celta de Vigo, Valencia, Osasuna, Deportivo La Coruña, Getafe, Rayo Vallecano, Espanyol, Alavés, Racing Santander, Elche, Málaga, Levante',
+'Girona, Mallorca, Sporting de Gijón, Almería, Granada, Real Oviedo, Eibar, Burgos, Las Palmas, Castellón, Cádiz, Real Valladolid, Córdoba, Albacete, Eldense, Tenerife, RC Celta Fortuna, Sabadell, Real Sociedad II, Leganés, FC Andorra, Ceuta',
+'Real Zaragoza, Huesca, Racing Ferrol, Alcorcón, Mirandés, Cultural Leonesa, Real Murcia, Ponferradina, Hércules, Lugo, Numancia, Gimnàstic, Linares, Arenteiro, Cartagena, Real Unión, Barakaldo, Unionistas, Sestao River, Zamora']},
+{k:'ITA',n:'Itália',nat:'Itália',q:0.93,cup:'Coppa Italia',dn:['Serie A','Serie B','Serie C'],cl:[
+'Inter, Milan, Juventus, Lazio, Roma, Napoli, Atalanta, Frosinone, Bologna, Torino, Fiorentina, Genoa, Como, Cagliari, Lecce, Monza, Udinese, Sassuolo, Parma, Venezia',
+'Palermo, Cremonese, Mantova, Modena, Sampdoria, Pisa, Hellas Verona, Empoli, Cesena, Ascoli, Padova, Avellino, Sudtirol, Benevento, Catanzaro, Vicenza, Carrarese, Arezzo, Juve Stabia, Virtus Entella',
+'Spezia, Bari, Brescia, Reggiana, Salernitana, Triestina, Lecco, Foggia, Perugia, Pescara, Cosenza, Taranto, Rimini, Ternana, Pontedera, Lucchese, Gubbio, Audace Cerignola, Pro Vercelli, Ancona']},
+{k:'GER',n:'Alemanha',nat:'Alemanha',q:0.93,cup:'DFB-Pokal',dn:['Bundesliga','2. Bundesliga','3. Liga'],cl:[
+'Bayern München, Borussia Dortmund, Bayer Leverkusen, RB Leipzig, Freiburg, VfB Stuttgart, Eintracht Frankfurt, Werder Bremen, Hoffenheim, Mönchengladbach, Mainz 05, Union Berlin, Augsburg, Hamburger SV, Elversberg, Köln, Paderborn, Schalke 04',
+'Wolfsburg, Hertha BSC, Heidenheim, Nürnberg, Kaiserslautern, Hannover 96, Magdeburg, Karlsruher SC, VfL Bochum, Greuther Fürth, St. Pauli, Arminia Bielefeld, Darmstadt 98, Braunschweig, Holstein Kiel, Dynamo Dresden, Energie Cottbus, Osnabrück',
+'Fortuna Düsseldorf, Preußen Münster, 1860 München, Hansa Rostock, Saarbrücken, Waldhof Mannheim, MSV Duisburg, Erzgebirge Aue, Viktoria Köln, Wehen Wiesbaden, Ingolstadt, Verl, Jahn Regensburg, Sandhausen, Rot-Weiss Essen, Hallescher FC, Rot-Weiß Erfurt, SSV Ulm, Alemannia Aachen, Rot-Weiß Oberhausen']},
+{k:'FRA',n:'França',nat:'França',q:0.86,cup:'Coupe de France',dn:['Ligue 1','Ligue 2'],cl:[
+'Paris Saint-Germain, Lille, Marseille, Monaco, Lyon, Nice, Lens, Rennes, Brest, Toulouse, Lorient, Paris FC, Strasbourg, Auxerre, Angers, Le Havre, Le Mans, Troyes',
+'Reims, Montpellier, Saint-Étienne, AS Nancy Lorraine, Nantes, Metz, Dijon FCO, Pau, Guingamp, Red Star FC 93, Annecy, Rodez, Boulogne, Laval, Dunkerque, Grenoble, Clermont, Sochaux']},
+{k:'POR',n:'Portugal',nat:'Portugal',q:0.8,cup:'Taça de Portugal',dn:['Primeira Liga','Liga 2'],cl:[
+'Benfica, Porto, Sporting CP, Braga, Gil Vicente, Académico de Viseu, Famalicão, Vitória SC, Moreirense, Arouca, Santa Clara, Alverca, Estoril, Casa Pia, Estrela, Rio Ave, Nacional, Marítimo',
+'Boavista, Farense, Vizela, Tondela, Académica, Belenenses, Chaves, Penafiel, Paços de Ferreira, Leixões, Portimonense, Torreense, Feirense, Mafra, Trofense, Oliveirense, Aves, União de Leiria']},
+{k:'NED',n:'Holanda',nat:'Holanda',q:0.78,cup:'KNVB Beker',dn:['Eredivisie','Eerste Divisie'],cl:[
+'PSV, Ajax, Feyenoord, AZ Alkmaar, Twente, Heerenveen, Go Ahead Eagles, Sparta Rotterdam, Utrecht, Fortuna Sittard, NEC Nijmegen, Groningen, PEC Zwolle, Cambuur, Willem II, Excelsior, ADO Den Haag, Telstar',
+'Heracles, Almere City, RKC Waalwijk, Roda JC, NAC Breda, Vitesse, FC Volendam, Den Bosch, VVV-Venlo, Emmen, De Graafschap, Jong AZ, Dordrecht, MVV Maastricht, Jong PSV, Helmond Sport, Jong Ajax, TOP Oss, Jong FC Utrecht, FC Eindhoven']},
+{k:'ARG',n:'Argentina',nat:'Argentina',q:0.74,cup:'Copa Argentina',dn:['Liga Profesional','Primera Nacional'],cl:[
+'Boca Juniors, Independiente, River Plate, Vélez Sarsfield, Racing Club, San Lorenzo, Estudiantes, Lanús, Talleres, Gimnasia (Mendoza), Newell\'s Old Boys, Defensa y Justicia, Argentinos Juniors, Instituto, Rosario Central, Huracán, Deportivo Riestra, Belgrano, Platense, Banfield, Central Córdoba (Santiago del Estero), Aldosivi, Estudiantes de Río Cuarto, Independiente Rivadavia, Unión, Tigre, Gimnasia La Plata, Atlético Tucumán, Sarmiento, Barracas Central',
+'Godoy Cruz, Colón, Deportivo Morón, Deportivo Madryn, Ciudad de Bolívar, Estudiantes (Buenos Aires), Chaco For Ever, Quilmes, Los Andes, All Boys, Almirante Brown, San Telmo, Chacarita, Mitre (Santiago del Estero), Ferro Carril Oeste, Racing (Córdoba), Defensores de Belgrano, Central Norte, Acassuso, San Miguel, Agropecuario, Almagro, Atlanta, Atletico Rafaela, Colegiales, Deportivo Maipú, Gimnasia y Esgrima (Jujuy), Gimnasia y Tiro (Salta), Güemes, Midland, Patronato, San Martín (San Juan), San Martín (Tucumán), Tristán Suárez, Nueva Chicago, Temperley']},
+{k:'TUR',n:'Turquia',nat:'Turquia',q:0.7,cup:'Türkiye Kupası',dn:['Süper Lig','1. Lig'],cl:[
+'Galatasaray, Fenerbahçe, Beşiktaş, Trabzonspor, Amed SFK, Başakşehir, Kasımpaşa, Samsunspor, Konyaspor, Alanyaspor, Rizespor, Kocaelispor, Göztepe, Gaziantep FK, Çorum FK, Eyüpspor, Erzurumspor, Genclerbirligi',
+'Antalyaspor, Sivasspor, Kayserispor, Bodrum FK, Bursaspor, Sakaryaspor, Boluspor, Ümraniyespor, Pendikspor, Manisa FK, Keçiörengücü, Adanaspor, Altay, Giresunspor, Adana Demirspor, Hatayspor, Bandırmaspor, Ankaragücü, Şanlıurfaspor, Vanspor']}
 ];
 
 /* Clubes convidados: só disputam Champions (EU) e Libertadores (SA) */

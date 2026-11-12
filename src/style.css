@@ -547,3 +547,5 @@ th{background:var(--panel)}
 .wd{text-align:center;padding:7px 2px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
 .wd small{display:block;font:600 11px var(--d);letter-spacing:.1em;text-transform:uppercase;opacity:.7}.wd b{display:block;font:700 20px var(--d)}.wd span{font-size:13px;opacity:.7}
 .wd.past{opacity:.5}.wd.gm{border-color:var(--acc)}.wd.gm span{opacity:1}.wd.now{background:var(--acc);color:#10140a}.wd.now small,.wd.now span{opacity:1}
+
+.hero2{display:flex;gap:16px;align-items:center}.hero2 .hexb{flex:none}.hero2 .h2i{min-width:0}.hero2 h3{font:700 26px/1.05 var(--d);text-transform:uppercase;overflow-wrap:anywhere}.hero2 p{color:var(--muted);margin:4px 0 12px;font-size:13px}.hero2 .ghost{width:auto;padding:8px 16px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:12px}
