@@ -104,7 +104,7 @@ function mcard(r){
   return `<div class="m ${r.h==S.club||r.a==S.club?'mine':''}">${r.pen?'<span class="zb ok">Pênaltis</span>':''}<div class="mt"><div class="tn ${w==r.h?'win':w==r.a?'lose':''} lnk" onclick="sheet('c','${h.id}')">${shield(h,'sm')}<span>${esc(h.n)}</span></div><div class="sc">${r.g[0]}<i>x</i>${r.g[1]}</div><div class="tn b ${w==r.a?'win':w==r.h?'lose':''} lnk" onclick="sheet('c','${a.id}')">${shield(a,'sm')}<span>${esc(a.n)}</span></div></div>
   <div class="mi"><span>${esc(r.comp)}</span><span>Posse ${r.po}% x ${100-r.po}% · Chutes ${r.sh[0]} x ${r.sh[1]}</span></div>
   <div class="mi">${r.pl?`<span>Sua atuação: <b>${r.mn}'</b> · nota <b>${r.rt}</b> · ${r.gl} gol(s) · ${r.as} assist. ${r.yc?'🟨':''}${r.rc?'🟥':''}</span>`:'<span>Você não atuou.</span>'}</div>
-  <details class="det"><summary>Lance a lance</summary><div class="log">${r.ev.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></details></div>`;
+  ${r.st?`<div class="row" style="margin:6px 0"><button class="ghost" onclick="liveOpen(${S.last.indexOf(r)},1)">📊 Estatísticas da partida</button></div>`:''}<details class="det"><summary>Lance a lance</summary><div class="log">${r.ev.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></details></div>`;
 }
 function offBlock(){
   const m=S.sum,L=LEAGUES[m.l];
@@ -125,6 +125,7 @@ function viewProx(){
     ${nm.map(x=>x.h!=null?`<div class="m ${x.h==S.club||x.a==S.club?'mine':''}"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(x.h).id}')">${shield(cl(x.h),'sm')}<span>${esc(cl(x.h).n)}</span></div><div class="sc"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(x.a).id}')">${shield(cl(x.a),'sm')}<span>${esc(cl(x.a).n)}</span></div></div><div class="mi"><span>${esc(x.n)}</span></div></div>`:`<div class="m mine"><div class="mi"><span>🏆 ${esc(x.n)}</span><span>adversário sorteado</span></div></div>`).join('')||'<p class="empty">Sem jogos nesta semana.</p>'}
     <p class="note" style="margin:0 0 10px">Papel: <b>${role()}</b>${S.inj?' · fora por '+S.inj+' sem.':''} · Treino: ${TN[S.tr.a]} (${['leve','normal','intenso'][S.tr.i]})</p>
     <button class="play" onclick="adv()" ${S.ev?'disabled':''}>▶ Jogar semana</button>
+    <div class="row" style="margin:0 0 6px"><button class="ghost" onclick="toggleLive()">📺 Jogo ao vivo: ${lvOn()?'ligado':'desligado'}</button>${S.last&&S.last.some(r=>r.st&&(r.h==S.club||r.a==S.club))?`<button class="ghost" onclick="liveOpen(lvIdx(),1)">📊 Estatísticas do último jogo</button>`:''}</div>
     <div class="row" style="margin:0"><button class="ghost" onclick="simN(5)" ${S.ev?'disabled':''}>⏩ +5 semanas</button><button class="ghost" onclick="simN(30)" ${S.ev?'disabled':''}>⏭ Até um evento ou o fim</button></div></div>`;
     h+=upcoming();
   }

@@ -167,7 +167,7 @@ const role=()=>{const d=O()-cl(S.club).s+(S.pc?(S.pc.tr-50)/8:0);return S.inj?'L
 
 function pm(h,a,label,knock,kind){
   const me=S.club,my=h==me?0:1,o=cl(my?h:a),mc=cl(me),ov=O(),pos=S.p.pos,lu=lnp();
-  const r={comp:label,kind,h,a,ev:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0};
+  const r={comp:label,kind,h,a,ev:[],sc:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0};
   let inn=0,out=0;
   if(lu){inn=lu.s?1:RI(52,78);out=lu.s&&Math.random()<.3?RI(68,90):90}
   const on=m=>lu&&m>=inn&&m<=out,e=(m,t,c='')=>r.ev.push({m,t,c});
@@ -188,10 +188,10 @@ function pm(h,a,label,knock,kind){
     for(let s=0;s<2;s++)if(Math.random()<L[s]/90){
       r.g[s]++;const cn=cl(s?a:h),sc=` (${r.g[0]} x ${r.g[1]})`;
       if(s==my){
-        if(on(m)&&Math.random()<PA/(PA+3.5)){r.gl++;e(m,`⚽ GOOOL! Você marca para o ${cn.n}! ${P(['Finalização perfeita!','No canto, sem chances!','Livre na área, você não perdoa!','Meio-chute, a bola morre na rede!'])}${sc}`,'g')}
-        else if(on(m)&&Math.random()<AA/(AA+3.5)){r.as++;const n=pickScorer(me,isLg);e(m,`⚽ Gol do ${cn.n}! Passe decisivo seu, ${n} marca.${sc}`,'g')}
-        else{const n=pickScorer(me,isLg);e(m,`⚽ Gol do ${cn.n}! ${n} marca.${sc}`,'g')}
-      }else{const n=pickScorer(cn.id,isLg);e(m,`⚽ ${cn.n} marca com ${n}.${sc}`,'b')}
+        if(on(m)&&Math.random()<PA/(PA+3.5)){r.gl++;r.sc.push([m,s,S.p.name,0]);e(m,`⚽ GOOOL! Você marca para o ${cn.n}! ${P(['Finalização perfeita!','No canto, sem chances!','Livre na área, você não perdoa!','Meio-chute, a bola morre na rede!'])}${sc}`,'g')}
+        else if(on(m)&&Math.random()<AA/(AA+3.5)){r.as++;const n=pickScorer(me,isLg);r.sc.push([m,s,n,1]);e(m,`⚽ Gol do ${cn.n}! Passe decisivo seu, ${n} marca.${sc}`,'g')}
+        else{const n=pickScorer(me,isLg);r.sc.push([m,s,n,0]);e(m,`⚽ Gol do ${cn.n}! ${n} marca.${sc}`,'g')}
+      }else{const n=pickScorer(cn.id,isLg);r.sc.push([m,s,n,0]);e(m,`⚽ ${cn.n} marca com ${n}.${sc}`,'b')}
     }
     if(on(m)&&Math.random()<.07){
       const d=S.at,ac=[[d[3],'Você deixa o marcador para trás num belo drible.','Você tenta o drible e perde a bola.'],[(d[2]+d[6])/2,'Passe preciso quebra a linha de marcação.','Passe errado entrega a posse.'],[d[0],'Na velocidade, você vence a disputa pela bola.','Você chega atrasado na corrida.'],[d[4],'Desarme limpo: você recupera a bola.','Você erra o tempo da marcação.']];
@@ -221,7 +221,54 @@ function pm(h,a,label,knock,kind){
     {const dr=(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k;S.rep=C(S.rep+dr*(dr>0?1+pfx('fame'):1),0,100)}S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
     if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).');mail('Departamento médico','Lesão confirmada','Você ficará fora por '+w+' semana(s). Descanso e fisioterapia ajudam na recuperação.')}
   }else{S.mor=C(S.mor-1.5,0,100);if(!S.inj)pcTrust(-.35)}
+  try{mkStats(r,L,my)}catch(x){console.error(x)}
   S.wm+=r.mn;return r;
+}
+
+/* ---------- estatísticas da partida (jogo ao vivo e fim de jogo) ---------- */
+function mkStats(r,L,my){
+  const g=r.g,sd=[r.h,r.a];
+  const sh=[0,1].map(s=>Math.max(g[s],r.sh[s]));
+  const sot=[0,1].map(s=>Math.min(sh[s],g[s]+Math.round((sh[s]-g[s])*R(.3,.5))));
+  const co=[0,1].map(s=>Math.round(sh[s]*R(.35,.6)));
+  const fl=[RI(8,15),RI(8,15)],of=[RI(0,4),RI(0,4)],yc=[0,0],rc=[0,0];
+  r.ev.forEach(x=>{if(x.c=='y')yc[x.t.includes('você')?my:1-my]++});
+  if(r.rc)rc[my]=1;
+  const xg=[0,1].map(s=>Math.round(C(L[s]*R(.8,1.15)+(sot[s]-g[s])*.05,.1,5)*10)/10);
+  const pa=[0,1].map(s=>Math.round(C(74+(s==0?r.po-50:50-r.po)*.35+R(-4,4),60,93)));
+  const sv=[Math.max(0,sot[1]-g[1]),Math.max(0,sot[0]-g[0])];
+  const fe=[],rm=()=>RI(1,90);
+  [0,1].forEach(s=>{
+    const gm=r.sc.filter(z=>z[1]==s).map(z=>z[0]);
+    gm.forEach(m=>fe.push([m,s,'sh'],[m,s,'st']));
+    for(let i=gm.length;i<sh[s];i++){const m=rm();fe.push([m,s,'sh']);if(i<sot[s])fe.push([m,s,'st'])}
+    for(let i=0;i<co[s];i++)fe.push([rm(),s,'co']);
+    for(let i=0;i<fl[s];i++)fe.push([rm(),s,'fl']);
+    for(let i=0;i<of[s];i++)fe.push([rm(),s,'of']);
+  });
+  r.ev.forEach(x=>{if(x.c=='y')fe.push([x.m,x.t.includes('você')?my:1-my,'yc']);if(x.t.includes('expulso'))fe.push([x.m,my,'rc'])});
+  fe.sort((a,b)=>a[0]-b[0]);
+  const mom=[];let v=(r.po-50)/60;
+  for(let i=0;i<18;i++){v=C(v*.6+(r.po-50)/60*.4+R(-.45,.45),-1,1);mom.push(Math.round(v*100)/100)}
+  r.sc.forEach(z=>{const b=Math.min(17,Math.floor((Math.max(1,z[0])-1)/5));mom[b]=C(mom[b]+(z[1]==0?.6:-.6),-1,1)});
+  const PO={GOL:0,ZAG:1,VOL:2,MEI:3,PNT:4,ATA:5};
+  const lineup=s=>{
+    const cid=sd[s],c=cl(cid),out=[],used=new Set();
+    (RC[cid]||[]).slice().sort((x,y)=>y.ovr-x.ovr).slice(0,4).forEach(p=>{out.push({n:p.n,pos:p.pos,ovr:Math.round(p.ovr)});used.add(p.n)});
+    if(s==my&&r.pl)out.unshift({n:S.p.name,pos:S.p.pos,ovr:O(),me:1});
+    for(const i of [0,3,4,5,6,9,10,13,14,17,20,21,18,19,15]){if(out.length>=11)break;const q=sqPlayer(c,i);if(!used.has(q.n)){out.push({n:q.n,pos:q.pos,ovr:q.ovr});used.add(q.n)}}
+    return out;
+  };
+  const pr=[0,1].map(s=>{
+    const c=cl(sd[s]),rows=lineup(s).map(p=>{
+      const gg=r.sc.filter(z=>z[1]==s&&z[2]==p.n).length,aa=p.me?r.as:0;
+      const x=p.me?r.rt:C(6.2+(p.ovr-c.s)*.03+(g[s]>g[1-s]?.35:g[s]<g[1-s]?-.35:0)+((p.pos=='GOL'||p.pos=='ZAG')?(g[1-s]==0?.4:-.1):0)+gg*.95+R(-.6,.6),4,10);
+      return [p.n,p.pos,p.ovr,gg,aa,Math.round(x*10)/10,p.me?1:0];
+    });
+    r.sc.filter(z=>z[1]==s&&!rows.some(q=>q[0]==z[2])).forEach(z=>{if(!rows.some(q=>q[0]==z[2])){const gg=r.sc.filter(y=>y[1]==s&&y[2]==z[2]).length;rows.push([z[2],'ATA',Math.round(c.s),gg,0,Math.round(C(6.6+gg*.95+R(-.3,.5),5,10)*10)/10,0])}});
+    return rows.sort((a,b)=>b[5]-a[5]||PO[a[1]]-PO[b[1]]).slice(0,6);
+  });
+  r.st={sh,sot,co,fl,yc,rc,of,xg,pa,sv,mom,fe};r.pr=pr;
 }
 function aiMatch(h,a,knock,kind){
   const g=aiM(h,a),isLg=kind=='lg';
@@ -291,7 +338,7 @@ function step(){
   if(S.week>SEASON)end();else if((S.week==10||S.week==22)&&!S.inj)S.ev=testEv();else if(Math.random()<.11)S.ev=P(EV);
   return true;
 }
-function adv(){if(step()){save();render()}}
+function adv(){if(step()){save();render();if(typeof lvOn=='function'&&lvOn()){const i=lvIdx();if(i>=0)liveOpen(i)}}}
 /* simula várias semanas; para em evento, janela de transferências ou fim da temporada */
 function simN(n){
   let k=0;
