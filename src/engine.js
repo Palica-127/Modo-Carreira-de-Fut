@@ -161,7 +161,7 @@ function rateClub(cid,gf,ga){
 
 /* ---------- partidas ---------- */
 const pen=(h,a)=>Math.random()<.5+(cl(h).s-cl(a).s)/150?h:a;
-const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s;return[pois(1.4*Math.pow(x/y,2.2)*1.1),pois(1.2*Math.pow(y/x,2.2))]};
+const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s,k=RNDK();return[pois(1.4*Math.pow(x/y,2.2*k)*1.1),pois(1.2*Math.pow(y/x,2.2*k))]};
 function lnp(){
   if(S.inj>0)return null;
   const d=O()-cl(S.club).s+(pcEnsure(),(S.pc.tr-50)/8)+(S.mor-50)/12+(S.form-6.5)*2+(S.cond<45?-8:0)+R(-3,3)+(S.loan?4:0);
@@ -177,7 +177,7 @@ function pm(h,a,label,knock,kind){
   const on=m=>lu&&m>=inn&&m<=out,e=(m,t,c='')=>r.ev.push({m,t,c});
   const pf=.7+S.cond/200+(S.form-6.5)/20;
   const sm=mc.s+(lu?(ov-mc.s)*.12*(out-inn+1)/90*pf:0),sh=my?o.s:sm,sa=my?sm:o.s;
-  const L=[1.4*Math.pow(sh/sa,2.2)*1.1,1.2*Math.pow(sa/sh,2.2)];
+  const L=[1.4*Math.pow(sh/sa,2.2*RNDK())*1.1,1.2*Math.pow(sa/sh,2.2*RNDK())];
   const ycm=lu&&Math.random()<(pos=='ZAG'||pos=='VOL'?.2:.1)?RI(inn,out):0;
   const rcm=lu&&Math.random()<.012?RI(inn,out):0;
   const jm=lu&&Math.random()<.014*(1+(100-S.cond)/60)*(1.4-S.at[5]/140)*(1-Math.min(.6,pfx('inj')))*(out-inn+1)/90?RI(inn,out):0;
@@ -568,11 +568,46 @@ function qualifyOK(){/* vagas já definidas em end(); aqui só garantimos que ex
 function rt(){if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d,o:O(),ag:S.p.age});S.cur=null}S.ph='ret';save();render()}
 
 /* ---------- save / load / export ---------- */
-const SAVE_KEY='h10';
+/* 3 slots de save; o slot 1 mantém a chave antiga 'h10' */
+const SLOTK=['h10','h10-1','h10-2'];
+let SLOT=0,SAVE_KEY='h10';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+function setSlot(i){SLOT=i;SAVE_KEY=SLOTK[i];lsSet('h10-slot',String(i))}
 const save=()=>{try{if(typeof localStorage!='undefined')localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}};
+function slotInfo(i){
+  try{const j=JSON.parse(lsGet(SLOTK[i]));if(!j||j.v!=3||!j.p||!j.cs)return null;
+    const c=j.cs[j.club];return{n:j.p.name,y:j.y,age:j.p.age,club:c?c.n:'—',ret:j.ph=='ret',ovr:Math.round(j.at.reduce((s,v)=>s+v,0)/j.at.length)}}catch(e){return null}
+}
 function loadGame(){
-  try{const j=JSON.parse(localStorage.getItem(SAVE_KEY));if(j&&j.v==2){S=j;afterLoad();return true}}catch(e){}
+  try{const j=JSON.parse(localStorage.getItem(SAVE_KEY));if(j&&j.v==3){S=j;afterLoad();return true}}catch(e){}
   S=null;return false;
+}
+/* ---------- opções (valem para todos os saves) e ajustes da carreira ---------- */
+const OPT0={snd:1,tema:1,zoom:'m',anim:1,live:1};
+let OPT={...OPT0};
+function optLoad(){try{OPT={...OPT0,...JSON.parse(lsGet('h10-opt')||'{}')}}catch(e){OPT={...OPT0}}try{const s=+lsGet('h10-slot');if(s>=0&&s<3)setSlot(s)}catch(e){}optApply()}
+function optApply(){
+  if(typeof document=='undefined')return;
+  const b=document.body;if(!b)return;
+  b.classList.toggle('noanim',!OPT.anim);b.classList.toggle('zs',OPT.zoom=='s');b.classList.toggle('zl',OPT.zoom=='l');
+}
+function setOpt(k,v){OPT[k]=v;lsSet('h10-opt',JSON.stringify(OPT));optApply();if(k=='snd'&&v)sfx('click');render(true)}
+/* por carreira: aleatoriedade e dificuldade */
+const sopt=k=>(S&&S.opt&&S.opt[k])||'normal';
+function setSopt(k,v){S.opt=S.opt||{};S.opt[k]=v;save();render(true)}
+const RNDK=()=>({baixa:1.3,normal:1,alta:.7})[sopt('rnd')]||1;
+const DIFX=()=>{const d=sopt('dif');return d=='facil'?{xpw:.2,xpm:.2,inj:.25,tra:.1}:d=='dificil'?{xpw:-.15,xpm:-.15,inj:-.3,tra:-.08}:{}};
+/* sons curtos (WebAudio), sem arquivos */
+let _ac=null;
+function tone(f,d,t,ty,v){try{_ac=_ac||new(window.AudioContext||window.webkitAudioContext)();const o=_ac.createOscillator(),g=_ac.createGain(),s=_ac.currentTime+t;o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v||.07,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(_ac.destination);o.start(s);o.stop(s+d+.05)}catch(e){}}
+function sfx(k){
+  if(typeof window=='undefined'||!OPT.snd)return;
+  if(k=='click')tone(520,.08,0,'triangle',.05);
+  else if(k=='win'){tone(523,.14,0);tone(659,.14,.13);tone(784,.3,.26)}
+  else if(k=='draw'){tone(440,.15,0);tone(440,.2,.16)}
+  else if(k=='lose'){tone(330,.2,0,'sawtooth',.04);tone(247,.35,.18,'sawtooth',.04)}
+  else if(k=='cup'){[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.22,i*.15,'triangle',.08))}
 }
 function importSave(txt){
   try{const j=JSON.parse(txt);if(!j||j.v!=3||!j.cs||!j.p)throw 0;S=j;afterLoad();save();return true}catch(e){return false}
@@ -580,7 +615,7 @@ function importSave(txt){
 
 /* ---------- Nível, habilidades e confiança do técnico (portado do BrasLOL) ---------- */
 function pcEnsure(){if(!S.mail){S.mail=[];S.mailN=0}if(!S.wc)S.wc=[];if(!S.pc)S.pc={lv:1,xp:0,tp:0,perks:{},tr:55};const p=S.pc;if(!p.perks)p.perks={};if(p.tr==null)p.tr=55;if(p.lv==null){p.lv=1;p.xp=0;p.tp=0}}
-const pfx=k=>{pcEnsure();let v=0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
+const pfx=k=>{pcEnsure();let v=(DIFX()[k])||0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
 function pcXp(n){
   pcEnsure();const p=S.pc;if(p.lv>=PCLV)return;p.xp+=n;
   while(p.lv<PCLV&&p.xp>=pcNeed(p.lv)){p.xp-=pcNeed(p.lv);p.lv++;const g=1+(p.lv%5==0?1:0);p.tp+=g;news('⭐ Nível '+p.lv+'! +'+g+' ponto'+(g>1?'s':'')+' de habilidade.');if(p.lv%5==0)mail('Comissão técnica','Você chegou ao nível '+p.lv,'Você ganhou '+g+' ponto(s) de habilidade. Gaste em Jogador → Habilidades.')}

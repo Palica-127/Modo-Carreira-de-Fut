@@ -1,7 +1,7 @@
 import re,urllib.parse
 src='src/'
 rd=lambda f:open(src+f,encoding='utf-8').read()
-data=rd('data.js');sqd=rd('squads.js');hist=rd('hist.js');eng=rd('engine.js');ui=rd('ui.js');abas=rd('abas.js');live=rd('live.js');css=rd('style.css')
+data=rd('data.js');sqd=rd('squads.js');hist=rd('hist.js');eng=rd('engine.js');ui=rd('ui.js');abas=rd('abas.js');live=rd('live.js');menu=rd('menu.js');css=rd('style.css')
 strip=lambda t:t.replace("'use strict';\n","",1)
 import os,json,base64
 crest={}
@@ -10,8 +10,8 @@ if os.path.exists('tools/crests_report.json'):
         f='assets/crests/'+sl+'.webp'
         if r.get('ok') and os.path.exists(f):crest[r['n']]='data:image/webp;base64,'+base64.b64encode(open(f,'rb').read()).decode()
 crests='const CREST='+json.dumps(crest,ensure_ascii=False)+';\n'
-boot="\nif(typeof document!='undefined'){loadGame();if(S&&cl(S.club).l>=0)ui.lg=cl(S.club).l;render();if(typeof lvBoot=='function')lvBoot()}\n"
-js="'use strict';\n"+crests+strip(data)+"\n"+strip(sqd)+"\n"+strip(hist)+"\n"+strip(eng)+"\n"+strip(ui)+"\n"+strip(abas)+"\n"+strip(live)+boot
+boot="\nif(typeof document!='undefined'){optLoad();S=null;render()}\n"
+js="'use strict';\n"+crests+strip(data)+"\n"+strip(sqd)+"\n"+strip(hist)+"\n"+strip(eng)+"\n"+strip(ui)+"\n"+strip(abas)+"\n"+strip(live)+"\n"+strip(menu)+boot
 icon="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='#060A22' stroke='#00F5A0' stroke-width='3'/><path d='M20 10l7 5-2.7 8.3h-8.6L13 15z' fill='#00C2FF'/></svg>"
 html=f'''<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">

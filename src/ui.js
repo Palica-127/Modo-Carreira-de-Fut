@@ -15,6 +15,7 @@ const IC={
  rk:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  mk:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
  pf:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+ aj:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
  el:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6M15 14.3c3 0 6 1.7 6 5.7"/>'
 };
 IC.jogar=IC.jg;IC.bdo=IC.rk;IC.lend=IC.lg;IC.elen=IC.el;IC.jog=IC.pf;
@@ -80,7 +81,7 @@ function hud(){
   return `<header class="hud"><div class="logo lnk" onclick="sheet('c','${c.id}')">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
     <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
 }
-const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador']];
+const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador'],['aj','Ajustes']];
 const nav=()=>`<nav class="nav" role="tablist">${NAVS.map(([k,n])=>`<button class="nb" role="tab" aria-selected="${ui.pg==k}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${n}</button>`).join('')}</nav>`;
 const evm=()=>`<div class="ov"><div class="pn"><h2>${S.ev[0]}</h2><p>${S.ev[1]}</p>${S.ev[2].map((o,i)=>`<button class="ghost opt" onclick="pick(${i})">${o[0]}</button>`).join('')}</div></div>`;
 function go(p){ui.pg=p;render();window.scrollTo(0,0)}
@@ -237,23 +238,23 @@ function intro(){
   <label>Liga inicial<select id="fl">${LEAGUES.map((l,i)=>`<option value="${i}">${l.n} — começa na ${l.dn[l.dn.length-1]}</option>`).join('')}</select></label>
   <label>Posição<select id="fp">${Object.entries(PN).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
   <div class="row"><label style="flex:1">Altura (cm)<input id="fh" type="number" min="160" max="205" value="180"></label><label style="flex:1">Peso (kg)<input id="fw" type="number" min="55" max="110" value="72"></label></div>
-  <button class="play" onclick="start()">Começar carreira</button></div>`;
+  <button class="play" onclick="start()">Começar carreira</button><button class="ghost" style="margin-top:8px" onclick="ttlOpen()">← Menu inicial</button></div>`;
 }
 function start(){
   const h=C(+$('#fh').value||180,160,205),w=C(+$('#fw').value||72,55,110);
   newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value});
   ui=UI0();ui.lg=cl(S.club).l;render();
 }
-function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;ui=UI0();render()}}
+function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE=null;ui=UI0();render()}}
 function retire(){if(confirm('Encerrar a carreira definitivamente?'))rt()}
 
 /* ---------- render ---------- */
-const PG={jogar:pgJogar,bdo:pgBdo,lend:pgLend,elen:pgElen,jog:pgPf};
+const PG={jogar:pgJogar,bdo:pgBdo,lend:pgLend,elen:pgElen,jog:pgPf,aj:pgAj};
 
 /* tema por clube (como no BrasLOL): cores do time do jogador mudam todo o app */
 function applyTheme(){
   const r=document.documentElement.style,c=S?cl(S.club):null;
-  if(!c){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc','--muted'].forEach(k=>r.removeProperty(k));return}
+  if(!c||!OPT.tema){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc','--muted'].forEach(k=>r.removeProperty(k));return}
   const q=pal(c);let h=c.hue,sat=45,as=90;
   if(q.k){
     const sa=x=>{const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255;return Math.max(R,G,B)-Math.min(R,G,B)};
@@ -271,7 +272,8 @@ function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=
 function render(keep){
   try{applyTheme()}catch(e){}
   const a=$('#app'),y=window.scrollY;
-  if(!S){a.innerHTML=intro();return}
+  document.body.classList.toggle('ttlon',!!TITLE&&!S);
+  if(!S){a.innerHTML=TITLE?titleHtml():intro();return}
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')+(ui.sheet?sheetHtml():'')}
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);

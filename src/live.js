@@ -75,8 +75,11 @@ function avancar(){
 function jogarJogo(){
   if(ADV||S.ph!='season'||S.ev)return;
   const g=wkPlan()[0];if(!g||(S.day|0)<g.d)return;
+  const nt=S.ti.length;
   if(g.ph=='mid')stepMid();else stepEnd();
-  const i=lvIdx();S.lvp=i>=0?i+1:0;save();render();if(i>=0)liveOpen(i);
+  const i=lvIdx();S.lvp=OPT.live&&i>=0?i+1:0;save();render();
+  {const r=S.last.find(x=>x.pl);if(r){const my=r.h==S.club?0:1;sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}}
+  if(i>=0&&OPT.live)liveOpen(i);
 }
 function weekStrip(){
   const w=S.week,pl=wkPlan(),day=S.day|0;

@@ -559,6 +559,50 @@ th{background:var(--panel)}
 
 .hero2{display:flex;gap:16px;align-items:center}.hero2 .hexb{flex:none}.hero2 .h2i{min-width:0}.hero2 h3{font:700 26px/1.05 var(--d);text-transform:uppercase;overflow-wrap:anywhere}.hero2 p{color:var(--muted);margin:4px 0 12px;font-size:13px}.hero2 .ghost{width:auto;padding:8px 16px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:12px}
 
+/* menu inicial e ajustes */
+:root{--gold-rgb:217 179 95}
+body.ttlon{padding:0;overflow:hidden;background:#03070d}html:has(body.ttlon){background:#03070d}
+body.ttlon #app{max-width:none;padding:0}
+.ttl{position:fixed;inset:0;display:grid;place-items:center;overflow:auto;padding:28px 16px;isolation:isolate}
+.tbg{position:fixed;inset:-20%;display:flex;gap:12px;justify-content:center;z-index:-3;opacity:.38;transform:rotate(-9deg);pointer-events:none}
+.tcol{display:flex;flex-direction:column;gap:12px;flex:0 0 clamp(64px,12vw,110px);animation:tscroll var(--dur,60s) linear infinite}
+.tcol:nth-child(even){animation-direction:reverse}
+.tcol img{width:100%;aspect-ratio:1;object-fit:contain;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgb(var(--gold-rgb) / .22);border-radius:14px;filter:saturate(.85) brightness(.85)}
+@keyframes tscroll{to{transform:translateY(-50%)}}
+.ttl::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse 70% 55% at 50% 42%,rgba(5,12,21,.15),rgba(3,7,13,.88) 75%),linear-gradient(180deg,rgba(3,7,13,.78),rgba(3,7,13,.15) 32%,rgba(3,7,13,.92))}
+.ttl::after{content:"";position:fixed;left:50%;top:-10%;width:900px;height:520px;margin-left:-450px;z-index:-1;background:radial-gradient(closest-side,rgb(var(--gold-rgb) / .2),transparent);pointer-events:none;animation:tglow 7s ease-in-out infinite alternate}
+@keyframes tglow{from{opacity:.55;transform:scale(.94)}to{opacity:1;transform:scale(1.06)}}
+.tbox{width:min(100%,420px);text-align:center;animation:tup .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes tup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.tmark{width:120px;height:120px;margin:0 auto 16px;display:grid;place-items:center;filter:drop-shadow(0 8px 26px rgb(var(--gold-rgb) / .35))}.tmark svg{width:100%;height:100%}
+.tey{font:600 12px var(--b);letter-spacing:.34em;text-transform:uppercase;color:var(--teal);margin:0 0 6px;padding-left:.34em}
+.tname{margin:0;font:800 clamp(58px,17vw,92px)/.9 var(--d);text-transform:uppercase;background:linear-gradient(180deg,#fff6d6,var(--gold) 52%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 22px rgb(var(--gold-rgb) / .3))}
+.tname span{background:linear-gradient(180deg,#d9fbff,var(--teal) 60%,#1f8e99);-webkit-background-clip:text;background-clip:text}
+.tsub{margin:12px auto 28px;max-width:340px;font-size:14px;color:var(--silver)}
+.tmenu,.tslot{display:grid;gap:12px}.tslot{gap:8px}
+.tbtn{position:relative;display:block;width:100%;padding:15px 18px 14px;text-align:center;cursor:pointer;color:var(--ink);font:700 16px var(--d);letter-spacing:.16em;text-transform:uppercase;background:rgba(12,26,42,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgb(var(--gold-rgb) / .38);border-radius:4px;animation:tup .6s both;transition:transform .15s,border-color .15s,background .15s}
+.tbtn:nth-child(2){animation-delay:.08s}.tbtn:nth-child(3){animation-delay:.16s}.tbtn:nth-child(4){animation-delay:.24s}
+.tbtn small{display:block;margin-top:3px;font:500 12px var(--b);letter-spacing:.02em;text-transform:none;color:var(--muted)}
+.tbtn:hover:not([disabled]),.tbtn:focus-visible{transform:translateX(6px);border-color:var(--gold-hi);background:rgba(20,40,62,.88);box-shadow:inset 3px 0 0 var(--gold)}
+.tbtn.pri{color:var(--on-gold);border-color:var(--gold-hi);background:linear-gradient(180deg,var(--gold-hi),var(--gold) 55%,var(--gold-lo))}
+.tbtn.pri small{color:rgba(27,20,5,.72)}
+.tbtn[disabled]{opacity:.38;cursor:not-allowed}.tbtn.dng{border-color:var(--bad);color:var(--bad)}
+.ttitle{margin:0 0 4px;font:700 30px var(--d);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-hi)}
+.tnote{margin:0 0 18px;font-size:13px;color:var(--muted)}
+.topt{text-align:left;display:grid;gap:12px;margin:14px 0 18px}
+.topt .os{padding:12px 14px;background:rgba(12,26,42,.78);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:4px}
+.topt h3{margin:0 0 3px;font:700 17px var(--d);letter-spacing:.1em;text-transform:uppercase;color:var(--gold-hi)}
+.topt p{margin:0 0 9px;font-size:12px;color:var(--muted)}
+.tfoot{margin-top:26px;font-size:11px;color:#5d7288}
+.sgb{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;color:var(--ink);font:700 20px var(--d);letter-spacing:.08em;text-transform:uppercase;padding:2px 0;cursor:pointer}
+.sgb span{transition:transform .2s}.sgb[aria-expanded="false"] span{transform:rotate(-90deg)}
+.sset{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.sset h3{margin:0 0 4px;font:700 16px var(--d);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-hi)}
+.sset textarea{width:100%;min-height:90px;margin-top:10px}
+body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!important;transition:none!important}
+body.zs #app{zoom:.92}body.zl #app{zoom:1.12}
+@media (prefers-reduced-motion:reduce){.tcol,.ttl::after,.tbox,.tbtn{animation:none}}
+@media (max-height:640px){.tmark{width:76px;height:76px;margin-bottom:8px}.tsub{margin-bottom:14px}}
+
 </style></head>
 <body><div id="app" class="wrap"></div>
 <script>
@@ -1609,7 +1653,7 @@ function rateClub(cid,gf,ga){
 
 /* ---------- partidas ---------- */
 const pen=(h,a)=>Math.random()<.5+(cl(h).s-cl(a).s)/150?h:a;
-const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s;return[pois(1.4*Math.pow(x/y,2.2)*1.1),pois(1.2*Math.pow(y/x,2.2))]};
+const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s,k=RNDK();return[pois(1.4*Math.pow(x/y,2.2*k)*1.1),pois(1.2*Math.pow(y/x,2.2*k))]};
 function lnp(){
   if(S.inj>0)return null;
   const d=O()-cl(S.club).s+(pcEnsure(),(S.pc.tr-50)/8)+(S.mor-50)/12+(S.form-6.5)*2+(S.cond<45?-8:0)+R(-3,3)+(S.loan?4:0);
@@ -1625,7 +1669,7 @@ function pm(h,a,label,knock,kind){
   const on=m=>lu&&m>=inn&&m<=out,e=(m,t,c='')=>r.ev.push({m,t,c});
   const pf=.7+S.cond/200+(S.form-6.5)/20;
   const sm=mc.s+(lu?(ov-mc.s)*.12*(out-inn+1)/90*pf:0),sh=my?o.s:sm,sa=my?sm:o.s;
-  const L=[1.4*Math.pow(sh/sa,2.2)*1.1,1.2*Math.pow(sa/sh,2.2)];
+  const L=[1.4*Math.pow(sh/sa,2.2*RNDK())*1.1,1.2*Math.pow(sa/sh,2.2*RNDK())];
   const ycm=lu&&Math.random()<(pos=='ZAG'||pos=='VOL'?.2:.1)?RI(inn,out):0;
   const rcm=lu&&Math.random()<.012?RI(inn,out):0;
   const jm=lu&&Math.random()<.014*(1+(100-S.cond)/60)*(1.4-S.at[5]/140)*(1-Math.min(.6,pfx('inj')))*(out-inn+1)/90?RI(inn,out):0;
@@ -2016,11 +2060,46 @@ function qualifyOK(){/* vagas já definidas em end(); aqui só garantimos que ex
 function rt(){if(S.cur){const c=cl(S.cur.c);S.hist.push({...S.cur,l:c.l,d:c.d,o:O(),ag:S.p.age});S.cur=null}S.ph='ret';save();render()}
 
 /* ---------- save / load / export ---------- */
-const SAVE_KEY='h10';
+/* 3 slots de save; o slot 1 mantém a chave antiga 'h10' */
+const SLOTK=['h10','h10-1','h10-2'];
+let SLOT=0,SAVE_KEY='h10';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+function setSlot(i){SLOT=i;SAVE_KEY=SLOTK[i];lsSet('h10-slot',String(i))}
 const save=()=>{try{if(typeof localStorage!='undefined')localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}};
+function slotInfo(i){
+  try{const j=JSON.parse(lsGet(SLOTK[i]));if(!j||j.v!=3||!j.p||!j.cs)return null;
+    const c=j.cs[j.club];return{n:j.p.name,y:j.y,age:j.p.age,club:c?c.n:'—',ret:j.ph=='ret',ovr:Math.round(j.at.reduce((s,v)=>s+v,0)/j.at.length)}}catch(e){return null}
+}
 function loadGame(){
-  try{const j=JSON.parse(localStorage.getItem(SAVE_KEY));if(j&&j.v==2){S=j;afterLoad();return true}}catch(e){}
+  try{const j=JSON.parse(localStorage.getItem(SAVE_KEY));if(j&&j.v==3){S=j;afterLoad();return true}}catch(e){}
   S=null;return false;
+}
+/* ---------- opções (valem para todos os saves) e ajustes da carreira ---------- */
+const OPT0={snd:1,tema:1,zoom:'m',anim:1,live:1};
+let OPT={...OPT0};
+function optLoad(){try{OPT={...OPT0,...JSON.parse(lsGet('h10-opt')||'{}')}}catch(e){OPT={...OPT0}}try{const s=+lsGet('h10-slot');if(s>=0&&s<3)setSlot(s)}catch(e){}optApply()}
+function optApply(){
+  if(typeof document=='undefined')return;
+  const b=document.body;if(!b)return;
+  b.classList.toggle('noanim',!OPT.anim);b.classList.toggle('zs',OPT.zoom=='s');b.classList.toggle('zl',OPT.zoom=='l');
+}
+function setOpt(k,v){OPT[k]=v;lsSet('h10-opt',JSON.stringify(OPT));optApply();if(k=='snd'&&v)sfx('click');render(true)}
+/* por carreira: aleatoriedade e dificuldade */
+const sopt=k=>(S&&S.opt&&S.opt[k])||'normal';
+function setSopt(k,v){S.opt=S.opt||{};S.opt[k]=v;save();render(true)}
+const RNDK=()=>({baixa:1.3,normal:1,alta:.7})[sopt('rnd')]||1;
+const DIFX=()=>{const d=sopt('dif');return d=='facil'?{xpw:.2,xpm:.2,inj:.25,tra:.1}:d=='dificil'?{xpw:-.15,xpm:-.15,inj:-.3,tra:-.08}:{}};
+/* sons curtos (WebAudio), sem arquivos */
+let _ac=null;
+function tone(f,d,t,ty,v){try{_ac=_ac||new(window.AudioContext||window.webkitAudioContext)();const o=_ac.createOscillator(),g=_ac.createGain(),s=_ac.currentTime+t;o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v||.07,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(_ac.destination);o.start(s);o.stop(s+d+.05)}catch(e){}}
+function sfx(k){
+  if(typeof window=='undefined'||!OPT.snd)return;
+  if(k=='click')tone(520,.08,0,'triangle',.05);
+  else if(k=='win'){tone(523,.14,0);tone(659,.14,.13);tone(784,.3,.26)}
+  else if(k=='draw'){tone(440,.15,0);tone(440,.2,.16)}
+  else if(k=='lose'){tone(330,.2,0,'sawtooth',.04);tone(247,.35,.18,'sawtooth',.04)}
+  else if(k=='cup'){[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.22,i*.15,'triangle',.08))}
 }
 function importSave(txt){
   try{const j=JSON.parse(txt);if(!j||j.v!=3||!j.cs||!j.p)throw 0;S=j;afterLoad();save();return true}catch(e){return false}
@@ -2028,7 +2107,7 @@ function importSave(txt){
 
 /* ---------- Nível, habilidades e confiança do técnico (portado do BrasLOL) ---------- */
 function pcEnsure(){if(!S.mail){S.mail=[];S.mailN=0}if(!S.wc)S.wc=[];if(!S.pc)S.pc={lv:1,xp:0,tp:0,perks:{},tr:55};const p=S.pc;if(!p.perks)p.perks={};if(p.tr==null)p.tr=55;if(p.lv==null){p.lv=1;p.xp=0;p.tp=0}}
-const pfx=k=>{pcEnsure();let v=0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
+const pfx=k=>{pcEnsure();let v=(DIFX()[k])||0;for(const x of PERKS)if(S.pc.perks[x.id]&&x.fx&&x.fx[k])v+=x.fx[k];return v};
 function pcXp(n){
   pcEnsure();const p=S.pc;if(p.lv>=PCLV)return;p.xp+=n;
   while(p.lv<PCLV&&p.xp>=pcNeed(p.lv)){p.xp-=pcNeed(p.lv);p.lv++;const g=1+(p.lv%5==0?1:0);p.tp+=g;news('⭐ Nível '+p.lv+'! +'+g+' ponto'+(g>1?'s':'')+' de habilidade.');if(p.lv%5==0)mail('Comissão técnica','Você chegou ao nível '+p.lv,'Você ganhou '+g+' ponto(s) de habilidade. Gaste em Jogador → Habilidades.')}
@@ -2275,6 +2354,7 @@ const IC={
  rk:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  mk:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
  pf:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+ aj:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
  el:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6M15 14.3c3 0 6 1.7 6 5.7"/>'
 };
 IC.jogar=IC.jg;IC.bdo=IC.rk;IC.lend=IC.lg;IC.elen=IC.el;IC.jog=IC.pf;
@@ -2340,7 +2420,7 @@ function hud(){
   return `<header class="hud"><div class="logo lnk" onclick="sheet('c','${c.id}')">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
     <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
 }
-const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador']];
+const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador'],['aj','Ajustes']];
 const nav=()=>`<nav class="nav" role="tablist">${NAVS.map(([k,n])=>`<button class="nb" role="tab" aria-selected="${ui.pg==k}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${n}</button>`).join('')}</nav>`;
 const evm=()=>`<div class="ov"><div class="pn"><h2>${S.ev[0]}</h2><p>${S.ev[1]}</p>${S.ev[2].map((o,i)=>`<button class="ghost opt" onclick="pick(${i})">${o[0]}</button>`).join('')}</div></div>`;
 function go(p){ui.pg=p;render();window.scrollTo(0,0)}
@@ -2497,23 +2577,23 @@ function intro(){
   <label>Liga inicial<select id="fl">${LEAGUES.map((l,i)=>`<option value="${i}">${l.n} — começa na ${l.dn[l.dn.length-1]}</option>`).join('')}</select></label>
   <label>Posição<select id="fp">${Object.entries(PN).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
   <div class="row"><label style="flex:1">Altura (cm)<input id="fh" type="number" min="160" max="205" value="180"></label><label style="flex:1">Peso (kg)<input id="fw" type="number" min="55" max="110" value="72"></label></div>
-  <button class="play" onclick="start()">Começar carreira</button></div>`;
+  <button class="play" onclick="start()">Começar carreira</button><button class="ghost" style="margin-top:8px" onclick="ttlOpen()">← Menu inicial</button></div>`;
 }
 function start(){
   const h=C(+$('#fh').value||180,160,205),w=C(+$('#fw').value||72,55,110);
   newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value});
   ui=UI0();ui.lg=cl(S.club).l;render();
 }
-function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;ui=UI0();render()}}
+function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE=null;ui=UI0();render()}}
 function retire(){if(confirm('Encerrar a carreira definitivamente?'))rt()}
 
 /* ---------- render ---------- */
-const PG={jogar:pgJogar,bdo:pgBdo,lend:pgLend,elen:pgElen,jog:pgPf};
+const PG={jogar:pgJogar,bdo:pgBdo,lend:pgLend,elen:pgElen,jog:pgPf,aj:pgAj};
 
 /* tema por clube (como no BrasLOL): cores do time do jogador mudam todo o app */
 function applyTheme(){
   const r=document.documentElement.style,c=S?cl(S.club):null;
-  if(!c){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc','--muted'].forEach(k=>r.removeProperty(k));return}
+  if(!c||!OPT.tema){['--acc','--acc2','--bg','--bg2','--panel','--line','--glow','--on-acc','--muted'].forEach(k=>r.removeProperty(k));return}
   const q=pal(c);let h=c.hue,sat=45,as=90;
   if(q.k){
     const sa=x=>{const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255;return Math.max(R,G,B)-Math.min(R,G,B)};
@@ -2531,7 +2611,8 @@ function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=
 function render(keep){
   try{applyTheme()}catch(e){}
   const a=$('#app'),y=window.scrollY;
-  if(!S){a.innerHTML=intro();return}
+  document.body.classList.toggle('ttlon',!!TITLE&&!S);
+  if(!S){a.innerHTML=TITLE?titleHtml():intro();return}
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')+(ui.sheet?sheetHtml():'')}
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
@@ -3060,8 +3141,11 @@ function avancar(){
 function jogarJogo(){
   if(ADV||S.ph!='season'||S.ev)return;
   const g=wkPlan()[0];if(!g||(S.day|0)<g.d)return;
+  const nt=S.ti.length;
   if(g.ph=='mid')stepMid();else stepEnd();
-  const i=lvIdx();S.lvp=i>=0?i+1:0;save();render();if(i>=0)liveOpen(i);
+  const i=lvIdx();S.lvp=OPT.live&&i>=0?i+1:0;save();render();
+  {const r=S.last.find(x=>x.pl);if(r){const my=r.h==S.club?0:1;sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}}
+  if(i>=0&&OPT.live)liveOpen(i);
 }
 function weekStrip(){
   const w=S.week,pl=wkPlan(),day=S.day|0;
@@ -3074,6 +3158,70 @@ function playBlock(){
   ${ready?`<button class="play" onclick="jogarJogo()" ${evb}>⚽ Jogar — ${esc(g.n)}</button><p class="note" style="margin:6px 0">É dia de jogo. A partida é transmitida ao vivo.</p>`:`<button class="play" onclick="avancar()" ${evb}>▶ Avançar</button><p class="note" style="margin:6px 0">Faltam ${g.d-S.day} dia(s) para o jogo. O tempo corre direto até lá.</p>`}`;
 }
 
-if(typeof document!='undefined'){loadGame();if(S&&cl(S.club).l>=0)ui.lg=cl(S.club).l;render();if(typeof lvBoot=='function')lvBoot()}
+/* ============================================================
+   MENU INICIAL (3 slots, opções) e aba AJUSTES — no estilo do BrasLOL
+   ============================================================ */
+let TITLE='main',ttlAsk=-1,ttlMsg='';
+const ttlUsed=()=>[0,1,2].filter(i=>slotInfo(i));
+const ttlInfo=i=>{const f=slotInfo(i);return f?`${esc(f.n)} · ${f.y} · ${esc(f.club)} · OVR ${f.ovr}${f.ret?' · aposentado':''}`:'vazio'};
+function ttlGo(v){TITLE=v;ttlAsk=-1;sfx('click');render()}
+function ttlOpen(){if(S)save();S=null;TITLE='main';ttlAsk=-1;render()}
+function ttlLoad(i){setSlot(i);if(loadGame()){TITLE=null;ui=UI0();ui.lg=cl(S.club).l;sfx('click');render()}else{ttlMsg='Esse save não pôde ser aberto.';render()}}
+function ttlCont(){const u=ttlUsed();if(u.length==1)ttlLoad(u[0]);else ttlGo('cont')}
+function ttlNew(i){setSlot(i);try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE=null;ttlAsk=-1;ui=UI0();sfx('click');render()}
+function ttlAskNew(i){ttlAsk=i;render()}
+function ttlBg(){
+  const names=Object.keys(typeof CREST!='undefined'?CREST:{}).sort((a,b)=>hash(a)-hash(b));if(!names.length)return '';
+  return `<div class="tbg" aria-hidden="true">${[0,1,2,3,4,5,6].map(c=>{const l=names.filter((_,i)=>i%7==c).slice(0,8);return `<div class="tcol" style="--dur:${52+c*7}s">${l.concat(l).map(n=>`<img src="${CREST[n]}" alt="" draggable="false">`).join('')}</div>`}).join('')}</div>`;
+}
+const optPills=(k,cur,items,fn='setOpt')=>`<div class="pills" style="margin:0">${items.map(([v,l])=>`<button class="pill" aria-pressed="${String(cur)==String(v)}" onclick="${fn}('${k}',${typeof v=='number'?v:`'${v}'`})">${l}</button>`).join('')}</div>`;
+function titleHtml(){
+  const used=ttlUsed(),back=`<button class="tbtn" onclick="ttlGo('main')">Voltar</button>`;
+  let body;
+  if(TITLE=='cont'){
+    body=`<h2 class="ttitle">Continuar</h2><p class="tnote">Escolha a carreira que quer retomar.</p><div class="tslot">${used.map(i=>`<button class="tbtn" onclick="ttlLoad(${i})">Slot ${i+1}<small>${ttlInfo(i)}</small></button>`).join('')}${back}</div>`;
+  }else if(TITLE=='new'){
+    body=`<h2 class="ttitle">Novo jogo</h2><p class="tnote">Escolha onde salvar a nova carreira.</p><div class="tslot">${[0,1,2].map(i=>{const u=used.includes(i);return ttlAsk==i?`<button class="tbtn dng" onclick="ttlNew(${i})">Confirmar: apagar o slot ${i+1}<small>${ttlInfo(i)}</small></button>`:`<button class="tbtn" onclick="${u?'ttlAskNew':'ttlNew'}(${i})">Slot ${i+1}${u?' · sobrescrever':''}<small>${ttlInfo(i)}</small></button>`}).join('')}${back}</div>`;
+  }else if(TITLE=='opt'){
+    body=`<h2 class="ttitle">Opções</h2><div class="topt">
+    <div class="os"><h3>Sons</h3><p>Efeitos curtos ao jogar, vencer, perder e conquistar títulos.</p>${optPills('snd',OPT.snd,[[1,'Ligados'],[0,'Desligados']])}</div>
+    <div class="os"><h3>Tema do clube</h3><p>As cores do app seguem as do seu clube.</p>${optPills('tema',OPT.tema,[[1,'Ligado'],[0,'Neutro']])}</div>
+    <div class="os"><h3>Jogo ao vivo</h3><p>Abre a transmissão minuto a minuto quando você joga.</p>${optPills('live',OPT.live,[[1,'Ligado'],[0,'Desligado']])}</div>
+    <div class="os"><h3>Tamanho da interface</h3><p>Aumenta ou reduz textos e botões.</p>${optPills('zoom',OPT.zoom,[['s','Compacto'],['m','Normal'],['l','Grande']])}</div>
+    <div class="os"><h3>Animações</h3><p>Desligue para economizar bateria ou se o movimento incomodar.</p>${optPills('anim',OPT.anim,[[1,'Ligadas'],[0,'Reduzidas']])}</div></div>
+    <div class="tslot">${back}</div>`;
+  }else{
+    const last=used.includes(SLOT)?SLOT:used[0];
+    body=`<div class="tmark">${BALL}</div><p class="tey">Futebol · Carreira de craque</p><h1 class="tname">Habite<span>-se 10</span></h1><p class="tsub">Do sub-17 ao topo: 10 ligas, Champions, Libertadores, Copa do Mundo e a disputa pela Bola de Ouro.</p>
+    <div class="tmenu"><button class="tbtn pri" onclick="ttlCont()" ${used.length?'':'disabled'}>Continuar<small>${used.length?(used.length>1?used.length+' carreiras salvas':'Slot '+(last+1)+' · '+ttlInfo(last)):'nenhuma carreira salva ainda'}</small></button>
+    <button class="tbtn" onclick="ttlGo('new')">Novo jogo</button><button class="tbtn" onclick="ttlGo('opt')">Opções</button></div>
+    ${ttlMsg?`<p class="tnote" style="margin-top:14px">${esc(ttlMsg)}</p>`:''}<p class="tfoot">Simulador independente. Clubes e jogadores reais, desempenho fictício.</p>`;
+  }
+  return `${ttlBg()}<main class="ttl"><div class="tbox">${body}</div></main>`;
+}
+/* ---------- aba Ajustes ---------- */
+let ajOpen={car:true,jog:true,ifc:true,adv:false},ajAsk='';
+function ajTog(k){ajOpen[k]=!ajOpen[k];render(true)}
+function ajAskSet(v){ajAsk=v;render(true)}
+function ajDel(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE='main';ajAsk='';render()}
+const ajSec=(k,t,body)=>`<div class="pn cmp"><button class="sgb" onclick="ajTog('${k}')" aria-expanded="${!!ajOpen[k]}">${t}<span>▾</span></button>${ajOpen[k]?body:''}</div>`;
+const ajRow=(t,d,ctl)=>`<div class="sset"><h3>${t}</h3><p class="note" style="margin:0 0 10px">${d}</p>${ctl}</div>`;
+function pgAj(){
+  const f=slotInfo(SLOT);
+  const car=`<div class="sset"><h3>Carreira atual</h3><p class="note" style="margin:0 0 10px">Slot ${SLOT+1} · ${f?ttlInfo(SLOT):'—'}. O progresso é salvo automaticamente neste navegador.</p>
+    <div class="row" style="margin:0"><button class="ghost" onclick="ttlOpen()">Menu inicial</button><button class="ghost" onclick="reset()">Nova carreira</button><button class="ghost danger" onclick="retire()" ${S.ph=='ret'?'disabled':''}>Aposentar-se</button></div></div>`;
+  const jog=ajRow('Jogo ao vivo','Ligado: a partida abre minuto a minuto. Desligado: o resultado sai direto e você vê as estatísticas depois.',optPills('live',OPT.live,[[1,'Ligado'],[0,'Desligado']]))
+   +ajRow('Aleatoriedade','Menor: o favorito se impõe e zebras ficam raras. Maior: qualquer time surpreende. Vale para os próximos jogos desta carreira.',optPills('rnd',sopt('rnd'),[['baixa','Menor'],['normal','Normal'],['alta','Maior']],'setSopt'))
+   +ajRow('Dificuldade','Fácil: +20% de XP, 25% menos lesões e treino mais eficiente. Difícil: 15% menos XP, 30% mais lesões e treino mais lento.',optPills('dif',sopt('dif'),[['facil','Fácil'],['normal','Normal'],['dificil','Difícil']],'setSopt'));
+  const ifc=ajRow('Sons','Efeitos curtos ao jogar, vencer, perder e conquistar títulos.',optPills('snd',OPT.snd,[[1,'Ligados'],[0,'Desligados']]))
+   +ajRow('Tema do clube','As cores do app seguem as do seu clube. Neutro usa a paleta padrão.',optPills('tema',OPT.tema,[[1,'Ligado'],[0,'Neutro']]))
+   +ajRow('Tamanho da interface','Aumenta ou reduz textos e botões.',optPills('zoom',OPT.zoom,[['s','Compacto'],['m','Normal'],['l','Grande']]))
+   +ajRow('Animações','Desligue para economizar bateria ou se o movimento incomodar.',optPills('anim',OPT.anim,[[1,'Ligadas'],[0,'Reduzidas']]));
+  const adv=`<div class="sset"><h3>Backup do save</h3><p class="note" style="margin:0 0 8px">Exporte este slot para levar a carreira a outro aparelho ou navegador.</p><div class="row" style="margin:0"><button class="ghost" onclick="expSave()">Exportar</button><button class="ghost" onclick="impSave()">Importar</button></div><textarea id="sv" placeholder="Cole aqui um save exportado para importar"></textarea></div>
+   <div class="sset"><h3>Apagar este slot</h3><p class="note" style="margin:0 0 10px">Remove a carreira do slot ${SLOT+1} e volta ao menu inicial. Não dá para desfazer.</p>${ajAsk=='del'?`<div class="row" style="margin:0"><button class="ghost danger" onclick="ajDel()">Confirmar e apagar</button><button class="ghost" onclick="ajAskSet('')">Cancelar</button></div>`:`<button class="ghost danger" onclick="ajAskSet('del')">Apagar slot</button>`}</div>`;
+  return `<div class="pn"><h2>Ajustes</h2><p class="note" style="margin:0">Opções de jogabilidade e interface. As de interface valem para todos os slots; aleatoriedade e dificuldade valem só para esta carreira.</p></div>`+ajSec('car','Carreira',car)+ajSec('jog','Jogabilidade',jog)+ajSec('ifc','Interface',ifc)+ajSec('adv','Avançado',adv);
+}
+
+if(typeof document!='undefined'){optLoad();S=null;render()}
 
 </script></body></html>

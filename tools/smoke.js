@@ -7,14 +7,14 @@ const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'h
   beforeParse(w){w.scrollTo=()=>{};w.confirm=()=>true;w.addEventListener('error',e=>errors.push('ERR '+e.message));w.console.error=(...a)=>errors.push('console.error '+a.join(' '))}});
 const w=dom.window;
 const ev=c=>w.eval(c);
-ev(`document.querySelector('#fl').value='1';start()`);
+ev(`TITLE=null;render()`);ev(`document.querySelector('#fl').value='1';start()`);
 const bad=()=>{const t=w.document.querySelector('#app').textContent;return t.includes('Erro ao exibir')};
 const chk=(tag)=>{if(bad())errors.push(tag+': '+w.document.querySelector('#app').textContent.slice(0,200))};
 const sheetOk=(tag,code)=>{ev(`ui.sheet=null;${code}`);const ok=!!w.document.querySelector('.sheet');if(bad()||!ok)errors.push(tag+' ficha '+code);ev('ui.sheet=null;render()')};
 let counts={pages:0,sheets:0};
 function allPages(tag){
   /* páginas principais */
-  for(const p of ['jogar','bdo','lend','elen','jog']){ev(`ui.pg='${p}';render()`);chk(tag+' pg '+p);counts.pages++}
+  for(const p of ['jogar','bdo','lend','elen','jog','aj']){ev(`ui.pg='${p}';render()`);chk(tag+' pg '+p);counts.pages++}
   /* Jogar */
   for(const k of ['prox','res','tab','cal','copa','camp']){ev(`ui.pg='jogar';ui.jg='${k}';render()`);chk(tag+' jogar '+k);counts.pages++}
   for(let l=0;l<10;l++)for(const m of ['tab','copa','camp']){ev(`ui.pg='jogar';ui.jg='${m}';ui.lg=${l};ui.dv=null;render()`);chk(tag+' jogar '+m+' liga '+l)}
