@@ -27,5 +27,5 @@ html=f'''<!DOCTYPE html>
 {js}
 </script></body></html>
 '''
-open('pro-football-career.html','w').write(html)
+for _f in ('pro-football-career.html','index.html'):open(_f,'w',encoding='utf-8',newline='').write(html)
 print(len(html)//1024,'KB')

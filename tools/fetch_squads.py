@@ -15,7 +15,8 @@ def resolve(name,ctry):
     best=None
     for x in (r or {}).get('search',[]):
         d=(x.get('description') or '').lower()
-        if 'football' in d and ('club' in d or 'team' in d) and not any(w in d for w in ('women','youth','futsal','american','rugby')):
+        if 'football' in d and ('club' in d or 'team' in d) and not any(w in d for w in ('women','youth','futsal','american','rugby','reserve','b team','academy')):
+            if re.search(r'\b(b|ii|u\d\d)$', x.get('label', '').lower()): continue
             s=(2 if ctry.lower() in d else 0)+(1 if x.get('label','').lower()==q.lower() else 0)
             if best is None or s>best[0]: best=(s,x['id'],x['label'])
     return best
@@ -37,7 +38,8 @@ def main():
         if n in res: continue
         b=resolve(n,CT[c['nat']]);time.sleep(.5)
         if not b: res[n]={'qid':None,'rows':[]};print('SEM QID',n);json.dump(res,open(out,'w'));continue
-        d=get('https://query.wikidata.org/sparql?format=json&query='+urllib.parse.quote(Q%b[1]));time.sleep(1)
+        d=get('https://query.wikidata.org/sparql?format=json&query='+urllib.parse.quote(Q%b[1]));time.sleep(2)
+        if d is None: print('FALHA REDE',n);continue
         rows=[]
         for x in (d or {}).get('results',{}).get('bindings',[]):
             g=lambda k:x.get(k,{}).get('value')
