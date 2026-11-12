@@ -425,3 +425,19 @@ th{background:var(--panel)}
 .toast{background:var(--panel);border-color:var(--line)}
 .ov{background:rgba(0,0,0,.7)}
 .natb{background:transparent}
+
+/* fichas */
+.rank li[onclick]{cursor:pointer}.rank li[onclick]:active{filter:brightness(1.15)}
+.ov .pn.sheet{position:relative;max-height:88vh;overflow:auto;padding-top:14px}
+.sheet .x{position:absolute;top:8px;right:10px;background:none;border:0;color:inherit;font-size:26px;line-height:1;cursor:pointer;opacity:.7}
+.sheet h3{margin:14px 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.sheet .shc{display:flex;justify-content:center;margin:6px 0 10px}
+.kvs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.kvs>div{background:rgba(255,255,255,.06);border-radius:8px;padding:6px 4px;text-align:center}
+.kvs small{display:block;font-size:10px;opacity:.65}.kvs b{font-size:14px}
+.sbars .sb{display:grid;grid-template-columns:34px 1fr 28px;align-items:center;gap:8px;margin:4px 0;font-size:12px}
+.sbars .sb i{height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.sbars .sb u{display:block;height:100%;border-radius:4px;background:#00F5A0}
+.sbars .sb u.t1{background:#b08d57}.sbars .sb u.t2{background:#9fb0c2}.sbars .sb u.t3{background:#ffd84d}.sbars .sb u.t4{background:#00f5a0}
+.sheet .ghost{width:100%;margin-top:12px}
+@media(max-width:420px){.kvs{grid-template-columns:repeat(2,1fr)}}
