@@ -462,3 +462,19 @@ th{background:var(--panel)}
 .plan{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 6px;text-align:center}
 .plan.on{border-color:#00F5A0;background:rgba(0,245,160,.1)}.plan b{display:block;font-size:12px}.plan small{display:block;font-size:10px;opacity:.75}
 @media(max-width:420px){.mails li{grid-template-columns:1fr auto}.mails li b{grid-column:1/-1}.plans{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- abas novas: Jogar · Bola de Ouro · Lendas · Elenco · Jogador ---------- */
+.nav{grid-template-columns:repeat(5,1fr)}
+.nb{text-align:center;line-height:1.05;letter-spacing:.04em;padding:6px 2px 4px}
+@media (min-width:1000px){.nav{grid-template-columns:1fr}}
+.lnk{cursor:pointer;border-bottom:1px dotted var(--muted)}.lnk:hover{color:var(--acc)}
+.acts2{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn-s{border:1px solid var(--acc);background:transparent;color:var(--acc);border-radius:10px;padding:6px 10px;min-height:34px;font:700 12px var(--b);cursor:pointer;white-space:nowrap}
+.btn-s.alt{border-color:var(--line);color:var(--ink)}
+.btn-s:active{filter:brightness(1.2)}
+.rank.sq .pos{font-size:12px;letter-spacing:.04em;color:var(--muted)}
+.tl{padding:8px 0;border-top:1px solid var(--line)}.tl:first-of-type{border-top:0}
+.tl small{display:block;margin-top:2px;overflow-wrap:anywhere}
+.sheet .pills{margin:8px 0 10px}
+.pts{font:700 20px/1 var(--d);color:var(--gold)}
+@media(max-width:420px){.nb{font-size:9px}.acts2{flex-direction:column}.btn-s{min-height:32px}}

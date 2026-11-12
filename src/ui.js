@@ -1,10 +1,11 @@
 'use strict';
 /* ============================================================
    HABITE-SE 10 — INTERFACE
-   Páginas: Carreira · Jogos · Ligas · Ranking · Mercado · Perfil
+   Abas: Jogar · Bola de Ouro · Lendas · Elenco · Jogador  (páginas novas em abas.js)
    ============================================================ */
 const $=q=>document.querySelector(q);
-let ui={pg:'car',lg:0,dv:null,lgm:'tab',rk:'bdo',pf:'at',jg:'last'};
+const UI0=()=>({pg:'jogar',jg:'prox',lg:0,dv:null,bk:'bdo',by:null,ld:'jog',el:null,ec:null,pf:'at'});
+let ui=UI0();
 
 /* ---------- peças visuais ---------- */
 const IC={
@@ -13,8 +14,10 @@ const IC={
  lg:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 21h8M10 17h4"/>',
  rk:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  mk:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
- pf:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'
+ pf:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+ el:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6M15 14.3c3 0 6 1.7 6 5.7"/>'
 };
+IC.jogar=IC.jg;IC.bdo=IC.rk;IC.lend=IC.lg;IC.elen=IC.el;IC.jog=IC.pf;
 const BALL='<svg viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00F5A0"/><stop offset="1" stop-color="#00C2FF"/></linearGradient></defs><circle cx="20" cy="20" r="18" fill="none" stroke="url(#bg1)" stroke-width="3"/><path d="M20 10l7 5-2.7 8.3h-8.6L13 15z" fill="url(#bg1)"/><path d="M20 10V3M27 15l7-2M24.3 23.3l4.2 6.2M15.7 23.3l-4.2 6.2M13 15l-7-2" stroke="url(#bg1)" stroke-width="2.4" stroke-linecap="round"/></svg>';
 const short=n=>{const p=String(n).split(' ');return p.length>1?p[0][0]+'. '+p.slice(1).join(' '):n};
 const ab=n=>{const w=n.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(x=>x.length>2||/\d/.test(x));return(w.length>1?w[0][0]+w[1][0]:n.replace(/[^A-Za-zÀ-ÿ]/g,'').slice(0,3)).toUpperCase()};
@@ -44,7 +47,7 @@ const entryCard=(x,sz,extra={})=>card({ovr:x.ovr,pos:x.pos,nat:natCode(x.nat),na
 const hx=(v,sz='')=>`<span class="hx t${tierOf(v)} ${sz}">${v}</span>`;
 const tn=(c,cls='')=>`<span class="tn ${cls}">${shield(c,'sm')}<span>${esc(c.n)}</span></span>`;
 const tbl=(heads,rows)=>`<div class="tw"><table class="tb"><tr>${heads.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr class="${r.cls||''}">${r.c.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`;
-const pills=(items,cur,fn)=>`<div class="pills">${items.map(([k,l])=>`<button class="pill" aria-pressed="${cur==k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
+const pills=(items,cur,fn,cls='')=>`<div class="pills ${cls}">${items.map(([k,l])=>`<button class="pill" aria-pressed="${cur==k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
 const TRO={wc:['#2EC4B6','Copa'],lig:['#3AC6D3','Liga'],dom:['#B9C4D0','Copa'],ucl:['#7AA2FF','UCL'],lib:['#F2D58C','LIB'],mc:['#C58BFF','Mundial'],bo:['#FFD84D','Bola']};
 const troIcon=(k,y,lab)=>{const c=TRO[k][0];return `<div class="tro"><svg viewBox="0 0 44 54"><path d="M12 4h20v14c0 8-4.5 13-10 13s-10-5-10-13zM12 8H5v3c0 5 3 8 8 9M32 8h7v3c0 5-3 8-8 9" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><rect x="19" y="30" width="6" height="9" fill="${c}"/><rect x="13" y="39" width="18" height="6" rx="1.5" fill="${c}"/><rect x="11" y="45" width="22" height="5" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>${esc(lab||TRO[k][1])}</span></div>`};
 const ballTro=y=>`<div class="tro"><svg viewBox="0 0 44 54"><circle cx="22" cy="24" r="17" fill="#FFD84D" stroke="rgba(0,0,0,.35)" stroke-width="1.4"/><path d="M22 14l7 5-2.7 8h-8.6L15 19z" fill="#B8860B"/><rect x="11" y="43" width="22" height="7" rx="1.5" fill="#6b4a1f"/></svg><b>${y}</b><span>Bola de Ouro</span></div>`;
@@ -68,7 +71,7 @@ function hud(){
   return `<header class="hud"><div class="logo">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
     <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
 }
-const NAVS=[['car','Carreira'],['jg','Jogos'],['lg','Ligas'],['rk','Ranking'],['mk','Mercado'],['pf','Perfil']];
+const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador']];
 const nav=()=>`<nav class="nav" role="tablist">${NAVS.map(([k,n])=>`<button class="nb" role="tab" aria-selected="${ui.pg==k}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${n}</button>`).join('')}</nav>`;
 const evm=()=>`<div class="ov"><div class="pn"><h2>${S.ev[0]}</h2><p>${S.ev[1]}</p>${S.ev[2].map((o,i)=>`<button class="ghost opt" onclick="pick(${i})">${o[0]}</button>`).join('')}</div></div>`;
 function go(p){ui.pg=p;render();window.scrollTo(0,0)}
@@ -76,7 +79,7 @@ function sub(k,v){ui[k]=v;if(k=='lg')ui.dv=null;render(true)}
 function setDv(d){ui.dv=+d;render(true)}
 function setTr(a,i){if(a!=null)S.tr.a=a;if(i!=null)S.tr.i=i;save();render(true)}
 
-/* ---------- Carreira ---------- */
+/* ---------- Jogar: próximos jogos ---------- */
 function nextMatches(){
   const c=cl(S.club),w=S.week,o=[];
   const m=rounds(c.l<0?0:c.l,c.d)[w-1].find(x=>x.includes(S.club));
@@ -102,13 +105,12 @@ function offBlock(){
   const o=[top3[1],top3[0],top3[2]].filter(Boolean).join('');
   return `<div class="cele"><small>Temporada ${m.y} encerrada</small><b>${m.pos}º lugar · ${L.dn[m.d]}</b><span class="muted">Campeão: ${esc(m.champ)} · ${m.ap} jogos · ${m.g} gols · ${m.a} assist. · nota ${m.avg.toFixed(2)}</span>
    ${m.move>0?'<div class="chip" style="color:var(--acc)">⬆ Acesso</div>':m.move<0?'<div class="chip" style="color:var(--bad)">⬇ Rebaixamento</div>':''}${m.aw.map(x=>`<div class="chip" style="color:var(--gold)">${x}</div>`).join('')}</div>
-  <div class="pn"><h2>Bola de Ouro ${m.y}</h2><div class="podium">${o}</div><p class="note">${m.rk?`Você terminou em ${m.rk}º lugar.`:'Você não entrou na disputa (poucos jogos na temporada).'} Veja o top 10 na aba Ranking.</p></div>
+  <div class="pn"><h2>Bola de Ouro ${m.y}</h2><div class="podium">${o}</div><p class="note">${m.rk?`Você terminou em ${m.rk}º lugar.`:'Você não entrou na disputa (poucos jogos na temporada).'} Veja o top 10 na aba Bola de Ouro.</p></div>
   <div class="pn"><h2>Campeões do ano</h2><div class="kv"><div><small>Liga dos Campeões</small><b>${m.ucl!=null?esc(cl(m.ucl).n):'—'}</b></div><div><small>Libertadores</small><b>${m.lib!=null?esc(cl(m.lib).n):'—'}</b></div><div><small>Mundial de Clubes</small><b>${m.mc!=null?esc(cl(m.mc).n):'—'}</b></div></div></div>
   <button class="play" onclick="roll()">Iniciar temporada ${S.y+1}</button>`;
 }
-function pgCar(){
-  if(S.ph=='ret')return ana();
-  const c=cl(S.club),L=lg(c);let h='';
+function viewProx(){
+  let h='';
   if(S.ph=='off')h+=offBlock();
   else{
     const nm=nextMatches();
@@ -117,32 +119,15 @@ function pgCar(){
     <p class="note" style="margin:0 0 10px">Papel: <b>${role()}</b>${S.inj?' · fora por '+S.inj+' sem.':''} · Treino: ${TN[S.tr.a]} (${['leve','normal','intenso'][S.tr.i]})</p>
     <button class="play" onclick="adv()" ${S.ev?'disabled':''}>▶ Jogar semana</button>
     <div class="row" style="margin:0"><button class="ghost" onclick="simN(5)" ${S.ev?'disabled':''}>⏩ +5 semanas</button><button class="ghost" onclick="simN(30)" ${S.ev?'disabled':''}>⏭ Até um evento ou o fim</button></div></div>`;
+    h+=upcoming();
   }
-  const ct=S.ct;
-  h+=`<div class="pn"><h2>Seu jogador</h2><div class="heroc">${myCard('big')}<div class="info"><h3>${esc(S.p.name)}</h3><div class="tm">${shield(c,'sm')}<span>${esc(c.n)} · ${dvName(c)} (${L.n})</span></div>
-    <div class="kv"><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Potencial</small><b>${C(S.p.pot-3,0,99)}–${C(S.p.pot+3,0,99)}</b></div><div><small>Contrato</small><b>${ct.yrs} ano(s)</b></div><div><small>Salário</small><b>${F(ct.sal)}/sem</b></div><div><small>Valor de mercado</small><b>${F(val())}</b></div><div><small>Papel</small><b>${role()}</b></div></div>${S.loan?`<p class="note">Emprestado de ${esc(cl(S.loan.from).n)} até o fim da temporada.</p>`:''}</div></div></div>
-  <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
-  if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Jogos.</p></div>`;
+  h+=`<div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
+  if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
   h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
     <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
     <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade e é limitada pelo potencial (valor após “/”).</p>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
-  if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Perfil → Sistema).</div>`;
-  return h;
-}
-
-/* ---------- Jogos ---------- */
-function pgJg(){
-  let h=pills([['last','Última rodada'],['sea','Temporada'],['cal','Calendário']],ui.jg,'jgSet');
-  if(ui.jg=='last')h+=S.last.length?S.last.map(r=>`<div class="pn full" style="padding:10px">${mcard(r)}</div>`).join(''):'<div class="pn full"><p class="empty">Nenhuma partida na última semana.</p></div>';
-  else if(ui.jg=='sea'){
-    const cu=S.cur||Z;
-    h+=`<div class="pn"><h2>Temporada ${S.y}</h2><div class="cab"><div><b>${cu.ap}</b><small>Jogos</small></div><div><b>${cu.g}</b><small>Gols</small></div><div><b>${cu.a}</b><small>Assist.</small></div></div><p class="note">Nota média: ${cu.ap?(cu.rs/cu.ap).toFixed(2):'—'} · Gols na liga: ${cu.lg}</p></div>
-    <div class="pn"><h2>Resultados</h2>${S.res.length?tbl(['Sem','Competição','Resultado','Nota'],S.res.slice().reverse().map(r=>({c:[r.w,r.c.replace(/ — .*/,''),r.t,r.rt||'—']}))):'<p class="empty">Ainda sem jogos.</p>'}</div>`;
-  }else{
-    const c=cl(S.club),T=rounds(c.l,c.d);
-    h+=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${tbl(['Sem','Jogo','Resultado'],T.map((r,i)=>{const m=r.find(x=>x.includes(S.club)),res=S.res.filter(x=>x.w==i+1&&x.c=='Liga').map(x=>x.t).join('');return{c:[i+1,m?esc(cl(m[0]).n)+' x '+esc(cl(m[1]).n):'—',res||'—'],cls:i+1==S.week&&S.ph=='season'?'mine':''}}))}</div>`;
-  }
+  if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
 }
 
@@ -169,22 +154,6 @@ function champHist(l){
   const tt=(key,title)=>`<div class="pn"><h2>Quadro de títulos — ${title}</h2>${tbl(['','Clube','Títulos'],t(key).map(([id,n],i)=>({c:[i+1,tn(cl(+id)),`<b>${n}</b>`]})))}</div>`;
   return `<div class="pn full"><h2>Campeões por temporada</h2>${tbl(['Ano','Champions','Libertadores','Mundial',L.dn[0],'Copa'],S.champs.slice().reverse().map(c=>({c:[c.y,nmc(c.ucl.c),nmc(c.lib.c),nmc(c.mc),nmc(c.lg[L.k]),nmc(c.dom[L.k])]})))}</div>${tt('ucl','Liga dos Campeões')}${tt('lib','Libertadores')}`;
 }
-function pgLg(){
-  const L=LEAGUES[ui.lg];if(ui.dv==null)ui.dv=cl(S.club).l==ui.lg?cl(S.club).d:0;
-  let h=`<div class="pills scroll full">${LEAGUES.map((x,i)=>`<button class="pill" aria-pressed="${ui.lg==i}" onclick="sub('lg',${i})">${x.k}</button>`).join('')}</div>`;
-  h+=`<div class="pills">${[['tab','Tabelas'],['cup','Copas'],['champ','Campeões']].map(([k,n])=>`<button class="pill" aria-pressed="${ui.lgm==k}" onclick="sub('lgm','${k}')">${n}</button>`).join('')}</div>`;
-  if(ui.lgm=='tab'){
-    h+=`<div class="pills">${L.dn.map((n,i)=>`<button class="pill" aria-pressed="${ui.dv==i}" onclick="setDv(${i})">${n}</button>`).join('')}</div>`;
-    const d=ui.dv,sc=scorers(ui.lg,d).slice(0,10);
-    h+=`<div class="pn"><h2>${L.dn[d]} · ${L.n}</h2>${stTable(ui.lg,d)}</div>
-    <div class="pn"><h2>Artilharia</h2>${sc.length?tbl(['#','Jogador','Clube','Gols'],sc.map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
-    if(S.ph=='season'){const rd=rounds(ui.lg,d)[Math.min(S.week,SEASON)-1];h+=`<div class="pn full"><h2>Rodada ${Math.min(S.week,SEASON)}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`}
-  }else if(ui.lgm=='cup'){
-    h+=compView(S.dc[ui.lg])+compView(S.ucl)+compView(S.lib)+(S.mc?compView(S.mc):'');
-  }else h+=champHist(ui.lg);
-  return h;
-}
-
 /* ---------- Ranking ---------- */
 function bdoRows(list,prev,showMv=true){
   return `<ul class="rank">${list.map((x,i)=>{const c=cl(x.club),p=prev?prev(x):0,mv=!showMv?'':!p?'<span class="mv new">NOVO</span>':p>i+1?`<span class="mv up">▲${p-i-1}</span>`:p<i+1?`<span class="mv dn">▼${i+1-p}</span>`:'';
@@ -194,66 +163,14 @@ function podiumOf(list){
   const t=list.slice(0,3).map((x,i)=>`<div class="pd p${i+1}">${entryCard(x,'',{kind:i==0?'bo':''})}<b>${esc(short(x.n))}</b><small>${Math.round(x.pts)} pts</small><span class="bs">${i+1}º</span></div>`);
   return `<div class="podium">${[t[1],t[0],t[2]].filter(Boolean).join('')}</div>`;
 }
-function pgRk(){
-  let h=pills([['bdo','Bola de Ouro'],['ovr','Top 10 OVR'],['art','Artilheiros'],['clb','Clubes'],['his','Vencedores'],['leg','Lendas']],ui.rk,"rkSet");
-  if(ui.rk=='bdo'){
-    const off=S.ph!='season',last=S.bdo[S.bdo.length-1];
-    if(off&&last){
-      h+=podiumOf(last.top)+`<div class="pn"><h2>Bola de Ouro ${last.y}</h2>${bdoRows(last.top,x=>x.prev,S.bdo.length>1)}<p class="note">${last.me?`Você terminou em ${last.me}º.`:'Você ficou fora da disputa.'}</p></div>`;
-    }else{
-      const l=bdoList(false);
-      if(!l.length)h+='<div class="pn"><p class="empty">A corrida da Bola de Ouro começa depois das primeiras rodadas. A pontuação combina nota média, gols, assistências, títulos, OVR, reputação e força da liga.</p></div>';
-      else{
-        const top=l.slice(0,10),me=l.findIndex(x=>x.me);
-        h+=podiumOf(l)+`<div class="pn"><h2>Corrida da Bola de Ouro</h2><p class="note" style="margin-top:0">Parcial da semana ${S.week-1} de ${SEASON}, projetada.${Object.keys(S.bdoPrev).length?' As setas comparam com a temporada passada.':''}</p>${bdoRows(top,x=>S.bdoPrev[x.id]||0,Object.keys(S.bdoPrev).length>0)}${me>=10?`<p class="note">Sua posição: <b>${me+1}º</b> com ${Math.round(l[me].pts)} pontos.</p>`:me<0?'<p class="note">Você precisa de mais jogos para entrar na disputa.</p>':''}</div>`;
-      }
-    }
-  }else if(ui.rk=='ovr'){
-    const l=[...S.rv.map(r=>({id:r.id,n:r.n,club:r.club,pos:r.pos,age:r.age,ovr:Math.round(r.ovr),nat:r.nat,pts:r.ovr})),{id:'me',n:S.p.name,club:S.club,pos:S.p.pos,age:S.p.age,ovr:O(),nat:S.p.nat,pts:O(),me:1}].sort((a,b)=>b.pts-a.pts);
-    const me=l.findIndex(x=>x.me);
-    h+=`<div class="pn full"><h2>Melhores jogadores do mundo</h2><div class="futr">${l.slice(0,5).map(x=>entryCard(x,'sm',{tag:'#'+(l.indexOf(x)+1)})).join('')}</div></div>
-    <div class="pn"><h2>Top 10 por OVR</h2><ul class="rank">${l.slice(0,10).map((x,i)=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.id?'p':'l'}','${x.me?'me':x.id||encodeURIComponent(x.n)}')"><span class="pos">${i+1}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':''}<small>${esc(cl(x.club).n)} · ${x.pos} · ${x.age} anos</small></span><span class="pt">${x.ovr}<small>OVR</small></span></li>`).join('')}</ul>${me>=10?`<p class="note">Você é o ${me+1}º melhor do mundo.</p>`:''}</div>`;
-  }else if(ui.rk=='art'){
-    const all=[];
-    Object.values(S.sc).forEach(e=>{if(S.cs[e.c].d==0&&e.g>0)all.push({n:e.n,c:e.c,g:e.g})});
-    S.rv.forEach(r=>{if(S.cs[r.club].d==0&&r.cur.lg>0)all.push({n:r.n,c:r.club,g:r.cur.lg})});
-    const mc=cl(S.club);if(mc.d==0&&S.cur&&S.cur.lg>0)all.push({n:S.p.name,c:S.club,g:S.cur.lg,me:1});
-    all.sort((a,b)=>b.g-a.g);
-    h+=`<div class="pn full"><h2>Chuteira de Ouro — 1ªs divisões</h2>${all.length?tbl(['#','Jogador','Clube','Liga','Gols'],all.slice(0,10).map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),LEAGUES[cl(x.c).l].k,`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
-  }else if(ui.rk=='clb'){
-    const l=S.cs.filter(c=>c.l>=0).sort((a,b)=>b.s-a.s).slice(0,10);
-    h+=`<div class="pn full"><h2>Top 10 clubes do mundo</h2><ul class="rank">${l.map((c,i)=>`<li class="${c.id==S.club?'me':''}" onclick="sheet('c','${c.id}')"><span class="pos">${i+1}</span>${shield(c,'sm')}<span class="nm2">${esc(c.n)}<small>${LEAGUES[c.l].n} · ${dvName(c)}</small></span><span class="pt">${Math.round(c.s)}<small>força</small></span></li>`).join('')}</ul></div>`;
-  }else if(ui.rk=='leg'){
-    const t=tot(false),bo=S.aw.filter(x=>x.t.includes('BOLA DE OURO')).length,uc=S.ti.filter(x=>x.k=='ucl').length,lb=S.ti.filter(x=>x.k=='lib').length;
-    const mine={n:S.p.name,nat:S.p.nat,pos:S.p.pos,bo,wc:0,ucl:uc,lib:lb,lg:S.ti.filter(x=>x.k=='lig').length,g:t.g,ap:t.ap,me:1};
-    const l=[...LEG,mine].map(x=>({...x,pts:legPts(x)})).sort((a,b)=>b.pts-a.pts),mi=l.findIndex(x=>x.me);
-    h+=`<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map((x,i)=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.id?'p':'l'}','${x.me?'me':x.id||encodeURIComponent(x.n)}')"><span class="pos">${i+1}</span><span class="natb">${x.nat}</span><span class="nm2">${esc(x.n)}${x.me?' <span class="tag">você</span>':''}<small>${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}<p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, ligas e gols. Números de carreira aproximados (fontes públicas); a Seleção ainda não existe no jogo, então os Mundiais só contam para as lendas.</p></div>`;
-  }else{
-    h+=`<div class="pn full"><h2>Vencedores da Bola de Ouro</h2>${S.bdo.length?tbl(['Ano','Vencedor','Clube','Pts','Você'],S.bdo.slice().reverse().map(b=>{const w=b.top[0];return{c:[b.y,esc(w.n)+(w.me?' <span class="tag">você</span>':''),tn(cl(w.club)),Math.round(w.pts),b.me?b.me+'º':'—'],cls:w.me?'mine':''}})):'<p class="empty">A primeira Bola de Ouro será entregue ao fim da temporada.</p>'}</div>`;
-  }
-  return h;
-}
-function rkSet(k){ui.rk=k;render(true)}
-function jgSet(k){ui.jg=k;render(true)}
-
-/* ---------- Mercado ---------- */
-function pgMk(){
-  const ct=S.ct,win=winOpen();
-  let h=`<div class="pn"><h2>Contrato atual</h2><div class="kv"><div><small>Salário</small><b>${F(ct.sal)}/sem</b></div><div><small>Por ano</small><b>${F(ct.sal*52)}</b></div><div><small>Restante</small><b>${ct.yrs} ano(s)</b></div><div><small>Bônus por gol</small><b>${F(ct.bon)}</b></div><div><small>Multa</small><b>${F(ct.cl)}</b></div><div><small>Valor de mercado</small><b>${F(val())}</b></div></div></div>
-  <div class="pn"><h2>Mercado</h2><p>Janela: <b style="color:${win?'var(--acc)':'var(--bad)'}">${win?'aberta':'fechada'}</b>${win?'':' (abre na semana 16 e no fim da temporada)'}</p><button class="play" style="font-size:18px;min-height:48px" onclick="agent()" ${win&&!S.ag?'':'disabled'}>Pedir ao agente novas propostas</button><p class="note">Propostas chegam de clubes das 10 ligas, conforme seu OVR, reputação e popularidade.</p></div>`;
-  h+=S.of.length?S.of.map((o,i)=>{const c=cl(o.club),L=lg(c);return `<div class="pn"><div class="offer">${shield(c,'lg')}<div><h3 style="margin:0">${o.t=='ren'?'Renovação':o.t=='emp'?'Empréstimo':'Transferência'} · ${esc(c.n)}</h3><small>${dvName(c)} · ${L.n} · força ${Math.round(c.s)}</small></div></div>
-    <div class="kv" style="margin:10px 0"><div><small>Salário</small><b>${F(o.sal)}/sem</b></div><div><small>Duração</small><b>${o.yrs} ano(s)</b></div><div><small>Bônus</small><b>${F(o.bon)}/gol</b></div><div><small>Multa</small><b>${F(o.cl)}</b></div>${o.t=='perm'?`<div><small>Valor</small><b>${F(o.fee)}</b></div>`:''}</div>
-    <div class="acts"><button class="buy" onclick="acc(${i})">Aceitar</button><button class="buy" style="border-color:var(--line);color:var(--ink)" onclick="neg(${i})" ${o.n?'disabled':''}>Negociar</button><button class="buy" style="border-color:var(--line);color:var(--muted)" onclick="rej(${i})">Recusar</button></div></div>`}).join(''):'<div class="pn"><p class="empty">Nenhuma proposta no momento. Bom desempenho e reputação atraem clubes.</p></div>';
-  return h;
-}
-
 /* ---------- Perfil ---------- */
 const KL={bo:'Bola de Ouro',tit:'Campeão continental',art:'Artilheiro',top:'Top 10 Bola de Ouro'};
 function pgPf(){
-  let h=pills([['at','Atributos'],['cards','Cartas'],['hist','Histórico'],['tro','Troféus'],['hab','Habilidades'],['mail',mailLbl()],['sel','Seleção'],['conq','Conquistas'],['fin','Finanças'],['sys','Sistema']],ui.pf,"pfSet");
+  let h=pills([['at','Visão geral'],['cards','Cartas'],['hab','Habilidades'],['ctr','Contratos'],['hist','Estatísticas'],['tro','Troféus'],['sel','Seleção'],['conq','Conquistas'],['mail',mailLbl()],['sys','Sistema']],ui.pf,"pfSet",'scroll');
   const t=tot(false);
   if(ui.pf=='at'){
-    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div></div></div></div>
+    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Potencial</small><b>${C(S.p.pot-3,0,99)}–${C(S.p.pot+3,0,99)}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
+    <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${role()}</b><small>Papel</small></div></div>
     <div class="cnt" style="margin-top:12px"><div><b>${t.ap}</b><small>Jogos</small></div><div><b>${t.g}</b><small>Gols</small></div><div><b>${t.a}</b><small>Assist.</small></div><div><b>${S.ti.length}</b><small>Títulos</small></div></div></div>
     <div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div><div class="pn full"><h2>Evolução</h2>${evo()}</div>`;
   }else if(ui.pf=='cards'){
@@ -261,7 +178,9 @@ function pgPf(){
     <div class="pn full"><h2>Carta atual</h2><div class="futr">${myCard('big')}</div></div>`;
   }else if(ui.pf=='hist'){
     const yrs=[...new Set(S.hist.map(x=>x.y))],gl=yrs.map(y=>S.hist.filter(x=>x.y==y).reduce((s,x)=>s+x.g,0));
-    h+=`<div class="pn full"><h2>Histórico</h2>${S.hist.length?tbl(['Ano','Clube','Divisão','Pos.','J','G','A','Nota'],S.hist.map(x=>{const c=cl(x.c);return{c:[x.y,tn(c),LEAGUES[x.l].dn[x.d],x.pos?x.pos+'º':'—',x.ap,x.g,x.a,x.ap?(x.rs/x.ap).toFixed(2):'—']}})):'<p class="empty">Sem temporadas concluídas.</p>'}</div>
+    const live=S.cur&&S.ph=='season'?[{...S.cur,l:cl(S.cur.c).l,d:cl(S.cur.c).d,pos:0,live:1}]:[];
+    h+=`<div class="pn full"><h2>Carreira</h2><div class="cnt"><div><b>${t.ap}</b><small>Jogos</small></div><div><b>${t.g}</b><small>Gols</small></div><div><b>${t.a}</b><small>Assist.</small></div><div><b>${t.ap?(t.rs/t.ap).toFixed(2):'—'}</b><small>Nota média</small></div><div><b>${t.ap?(t.g/t.ap).toFixed(2):'0.00'}</b><small>Gols/jogo</small></div><div><b>${Math.round(t.mn/60)}h</b><small>Em campo</small></div><div><b>${Math.max(S.peak,O())}</b><small>Melhor OVR</small></div></div></div>
+    <div class="pn full"><h2>Temporadas</h2>${S.hist.length||live.length?tbl(['Ano','Clube','Divisão','Pos.','J','G','A','Nota'],S.hist.concat(live).map(x=>{const c=cl(x.c);return{c:[x.y+(x.live?' ⏱':''),tn(c),LEAGUES[x.l].dn[x.d],x.pos?x.pos+'º':'—',x.ap,x.g,x.a,x.ap?(x.rs/x.ap).toFixed(2):'—'],cls:x.live?'mine':''}})):'<p class="empty">Sem temporadas concluídas.</p>'}</div>
     ${yrs.length>1?`<div class="pn"><h2>Gols por temporada</h2>${bars(yrs,gl)}</div>`:''}
     <div class="pn"><h2>Prêmios</h2>${S.aw.length?S.aw.slice().reverse().map(x=>`<p style="margin:4px 0">🏅 <b>${x.y}</b> — ${x.t}</p>`).join(''):'<p class="empty">Nenhum prêmio ainda.</p>'}</div>`;
   }else if(ui.pf=='mail'){
@@ -272,8 +191,8 @@ function pgPf(){
     h+=pgHab();
   }else if(ui.pf=='conq'){
     h+=pgConq();
-  }else if(ui.pf=='fin'){
-    h+=pgFin();
+  }else if(ui.pf=='ctr'){
+    h+=pgCtr();
   }else if(ui.pf=='tro'){
     const tr=S.ti.map(x=>troIcon(x.k||'lig',x.y,x.t.replace(/ \(.*/,'')));
     const bo=S.aw.filter(a=>a.t.includes('BOLA DE OURO')).map(a=>ballTro(a.y));
@@ -286,7 +205,7 @@ function pgPf(){
 }
 function pfSet(k){ui.pf=k;render(true)}
 function expSave(){const t=JSON.stringify(S);$('#sv').value=t;try{navigator.clipboard.writeText(t);toast('Save copiado')}catch(e){toast('Copie o texto do campo')}}
-function impSave(){const t=$('#sv').value.trim();if(!t)return toast('Cole um save no campo');if(!confirm('Substituir a carreira atual por este save?'))return;if(importSave(t)){ui.pg='car';render();toast('Save importado')}else toast('Save inválido')}
+function impSave(){const t=$('#sv').value.trim();if(!t)return toast('Cole um save no campo');if(!confirm('Substituir a carreira atual por este save?'))return;if(importSave(t)){ui.pg='jogar';render();toast('Save importado')}else toast('Save inválido')}
 
 /* ---------- fim de carreira ---------- */
 function ana(){
@@ -314,13 +233,13 @@ function intro(){
 function start(){
   const h=C(+$('#fh').value||180,160,205),w=C(+$('#fw').value||72,55,110);
   newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value});
-  ui={pg:'car',lg:cl(S.club).l,dv:null,lgm:'tab',rk:'bdo',pf:'at',jg:'last'};render();
+  ui=UI0();ui.lg=cl(S.club).l;render();
 }
-function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;ui.pg='car';render()}}
+function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;ui=UI0();render()}}
 function retire(){if(confirm('Encerrar a carreira definitivamente?'))rt()}
 
 /* ---------- render ---------- */
-const PG={car:pgCar,jg:pgJg,lg:pgLg,rk:pgRk,mk:pgMk,pf:pgPf};
+const PG={jogar:pgJogar,bdo:pgBdo,lend:pgLend,elen:pgElen,jog:pgPf};
 
 /* tema por clube (como no BrasLOL): cores do time do jogador mudam todo o app */
 function applyTheme(){
@@ -432,47 +351,3 @@ const statBars=st=>`<div class="sbars">${st.map(([l,v])=>`<div class="sb"><span>
 const kv=(a)=>`<div class="kvs">${a.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('')}</div>`;
 function sheet(t,id){ui.sheet={t,id:decodeURIComponent(id)};render(true)}
 function closeSheet(){ui.sheet=null;render(true)}
-function sheetHtml(){
-  const s=ui.sheet;let body='',title='';
-  try{
-    if(s.t=='p'||s.t=='me'){
-      const me=s.t=='me'||s.id=='me',r=me?null:S.rv.find(x=>x.id==s.id);
-      if(!me&&!r){closeSheetSilent();return ''}
-      const x=me?{id:'me',n:S.p.name,nat:S.p.nat,pos:S.p.pos,age:S.p.age,ovr:O(),pot:S.p.pot,club:S.club,me:1,cur:S.cur||Z}:r;
-      const c=cl(x.club),cu=x.cur||Z,nota=cu.ap?(cu.rs/cu.ap).toFixed(2):'—';
-      const bo=S.bdo.filter(b=>b.top[0]&&(me?b.top[0].me:b.top[0].id==x.id)).length;
-      const top3=S.bdo.filter(b=>b.top.slice(0,3).some(e=>me?e.me:e.id==x.id)).length;
-      title=x.n;
-      body=`<div class="shc">${entryCard({...x,club:x.club},'',{tag:me?'Você':''})}</div>
-      ${kv([['Clube',esc(c.n)],['Posição',x.pos],['Idade',x.age+' anos'],['Nação',x.nat],['OVR',x.ovr],['Potencial',x.pot],['Bolas de Ouro',bo],['Pódios',top3]])}
-      <h3>Atributos</h3>${statBars(me?myStats():rvStats(x))}
-      <h3>Temporada atual</h3>${kv([['Jogos',cu.ap],['Gols',cu.g],['Assist.',cu.a],['Nota média',nota]])}
-      <button class="ghost" onclick="sheet('c','${x.club}')">Ver ficha do ${esc(c.n)}</button>`;
-    }else if(s.t=='c'){
-      const c=cl(+s.id);if(!c){closeSheetSilent();return ''}
-      const L=c.l>=0?LEAGUES[c.l]:null,tab=L?stand(c.l,c.d):[],pos=tab.findIndex(z=>z.id==c.id)+1;
-      const squad=(RC[c.id]||[]).slice().sort((a,b)=>b.ovr-a.ovr).slice(0,10);
-      const win=k=>S.champs.filter(h=>h[k]!=null&&(h[k].c!=null?h[k].c:h[k])==c.id).length;
-      const nlg=L?S.champs.filter(h=>h.lg&&h.lg[L.k]==c.id).length:0;
-      const mine=c.id==S.club;
-      title=c.n;
-      body=`<div class="shc">${shield(c,'lg')}</div>
-      ${kv([['Liga',L?L.n:'—'],['Divisão',dvName(c)],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Champions',win('ucl')],['Libertadores',win('lib')],['Mundial',win('mc')],['Ligas',nlg]])}
-      <h3>Elenco (destaques)</h3>${squad.length?`<ul class="rank">${squad.map(z=>`<li onclick="sheet('p','${z.id}')"><span class="pos">${z.pos}</span>${hx(Math.round(z.ovr))}<span class="nm2">${esc(z.n)}<small>${z.age} anos · ${z.nat}</small></span></li>`).join('')}</ul>`:'<p class="empty">Sem jogadores rivais cadastrados neste clube.</p>'}
-      ${mine?'<p class="note">Este é o seu clube.</p>':''}`;
-    }else if(s.t=='m'){
-      const m=(S.mail||[]).find(z=>String(z.id)==s.id);if(!m){closeSheetSilent();return ''}
-      if(!m.rd){m.rd=1;save()}
-      title=m.sub;body=`<p class="note" style="margin-top:0"><b>${esc(m.from)}</b> · ${m.y} · semana ${m.w}</p><p>${esc(m.body)}</p>`;
-    }else if(s.t=='l'){
-      const all=[...LEG].map(x=>({...x,pts:legPts(x)})).sort((a,b)=>b.pts-a.pts),i=all.findIndex(x=>x.n==s.id),x=all[i];
-      if(!x){closeSheetSilent();return ''}
-      title=x.n;
-      body=`${kv([['Posição',x.pos],['País',x.nat],['Ranking',(i+1)+'º'],['Pontos',Math.round(x.pts)],['Bolas de Ouro',x.bo],['Copas',x.wc],['Champions',x.ucl||0],['Libertadores',x.lib||0],['Mundiais de Clubes',x.mc||0],['Ligas',x.lg],['Gols',x.g],['Jogos',x.ap]])}
-      <p class="note">Pontuação: Bolas de Ouro, Copas, Champions, Libertadores, Mundiais, ligas e gols.</p>`;
-    }
-  }catch(e){console.error(e);return ''}
-  return `<div class="ov" onclick="if(event.target==this)closeSheet()"><div class="pn sheet"><button class="x" aria-label="Fechar" onclick="closeSheet()">×</button><h2>${esc(title)}</h2>${body}</div></div>`;
-}
-function closeSheetSilent(){ui.sheet=null}
-if(typeof document!='undefined'){loadGame();render()}

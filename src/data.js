@@ -80,9 +80,10 @@ const A=['Velocidade','Finalização','Passe','Drible','Defesa','Físico','Visã
 const TN=[...A,'Descanso ativo','Treino tático','Fisioterapia'];
 const PW={ATA:[.2,.35,.08,.15,0,.12,.1],PNT:[.3,.18,.12,.25,0,.05,.1],MEI:[.1,.15,.25,.18,.05,.07,.2],VOL:[.07,.04,.22,.1,.28,.17,.12],ZAG:[.1,0,.1,.04,.4,.3,.06]};
 const PN={ATA:'Atacante',PNT:'Ponta',MEI:'Meia',VOL:'Volante',ZAG:'Zagueiro'};
+const PNQ={GOL:'Goleiro',...PN};                     // posições dos elencos (inclui goleiro)
 const POSL=['ATA','ATA','ATA','PNT','PNT','MEI','MEI','MEI','VOL','VOL','ZAG','ZAG','ZAG'];
 /* perfil das 6 estatísticas da carta (VEL FIN PAS DRI DEF FIS) por posição, em relação ao OVR */
-const PROF={ATA:[2,5,-8,1,-32,-2],PNT:[6,1,-4,6,-34,-8],MEI:[-2,-2,5,3,-14,-6],VOL:[-4,-14,2,-4,8,3],ZAG:[-4,-34,-8,-14,7,8]};
+const PROF={GOL:[-14,-45,-12,-30,12,0],ATA:[2,5,-8,1,-32,-2],PNT:[6,1,-4,6,-34,-8],MEI:[-2,-2,5,3,-14,-6],VOL:[-4,-14,2,-4,8,3],ZAG:[-4,-34,-8,-14,7,8]};
 
 /* Eventos de vestiário e mídia: [título, texto, [[opção, efeitos, resultado]]] */
 const EV=[
@@ -117,12 +118,27 @@ const LEG=[
  {n:'Cristiano Ronaldo',ex:6,nat:'POR',pos:'ATA',bo:5,wc:0,ucl:5,lg:7,g:950,ap:1300,eu:1},
  {n:'Pelé',wcb:1,ex:8,nat:'BRA',pos:'ATA',bo:0,wc:3,ucl:0,lg:10,g:760,ap:830,lib:2,mc:2},
  {n:'Diego Maradona',wcb:1,ex:14,nat:'ARG',pos:'MEI',bo:0,wc:1,ucl:0,lg:5,g:345,ap:680},
- {n:'Johan Cruyff',wcb:1,ex:4,nat:'HOL',pos:'ATA',bo:3,wc:0,ucl:3,lg:9,g:400,ap:700},
+ {n:'Johan Cruyff',wcb:1,ex:4,nat:'NED',pos:'ATA',bo:3,wc:0,ucl:3,lg:9,g:400,ap:700},
  {n:'Ronaldo Nazário',wcb:1,ex:4,nat:'BRA',pos:'ATA',bo:2,wc:2,ucl:0,lg:3,g:415,ap:616},
- {n:'Franz Beckenbauer',ex:4,nat:'ALE',pos:'ZAG',bo:2,wc:1,ucl:3,lg:5,g:100,ap:800,eu:1},
+ {n:'Franz Beckenbauer',ex:4,nat:'GER',pos:'ZAG',bo:2,wc:1,ucl:3,lg:5,g:100,ap:800,eu:1},
  {n:'Michel Platini',ex:6,nat:'FRA',pos:'MEI',bo:3,wc:0,ucl:1,lg:2,g:260,ap:500,eu:1},
  {n:'Alfredo Di Stéfano',nat:'ARG',pos:'ATA',bo:2,wc:0,ucl:5,lg:8,g:510,ap:710},
- {n:'Zinedine Zidane',wcb:1,ex:6,nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1}];
+ {n:'Zinedine Zidane',wcb:1,ex:6,nat:'FRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:125,ap:690,eu:1},
+ {n:'Ferenc Puskás',nat:'HUN',pos:'ATA',bo:0,wc:0,ucl:3,lg:10,g:700,ap:750,ex:3},
+ {n:'Gerd Müller',nat:'GER',pos:'ATA',bo:1,wc:1,ucl:3,lg:4,g:735,ap:790,eu:1},
+ {n:'Eusébio',nat:'POR',pos:'ATA',bo:1,wc:0,ucl:1,lg:11,g:733,ap:745},
+ {n:'Marco van Basten',nat:'NED',pos:'ATA',bo:3,wc:0,ucl:2,lg:3,g:280,ap:280,eu:1,mc:1},
+ {n:'Zico',nat:'BRA',pos:'MEI',bo:0,wc:0,ucl:0,lg:3,g:800,ap:1100,lib:1,mc:1},
+ {n:'Romário',nat:'BRA',pos:'ATA',bo:0,wc:1,ucl:0,lg:5,g:780,ap:1000,ex:2},
+ {n:'Ronaldinho',nat:'BRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:230,ap:750,lib:1,ex:3},
+ {n:'Kaká',nat:'BRA',pos:'MEI',bo:1,wc:1,ucl:1,lg:2,g:170,ap:620,mc:1},
+ {n:'Bobby Charlton',nat:'ENG',pos:'MEI',bo:1,wc:1,ucl:1,lg:3,g:249,ap:758},
+ {n:'Thierry Henry',nat:'FRA',pos:'ATA',bo:0,wc:1,ucl:1,lg:4,g:411,ap:800,eu:1},
+ {n:'Xavi',nat:'ESP',pos:'MEI',bo:0,wc:1,ucl:4,lg:8,g:85,ap:900,eu:2,mc:2},
+ {n:'Andrés Iniesta',nat:'ESP',pos:'MEI',bo:0,wc:1,ucl:4,lg:9,g:60,ap:900,eu:2,mc:3},
+ {n:'Garrincha',nat:'BRA',pos:'PNT',bo:0,wc:2,ucl:0,lg:3,g:250,ap:600,ex:1},
+ {n:'Lev Yashin',nat:'URS',pos:'GOL',bo:1,wc:0,ucl:0,lg:5,g:0,ap:812,eu:1},
+ {n:'Roberto Baggio',nat:'ITA',pos:'ATA',bo:1,wc:0,ucl:0,lg:2,g:318,ap:700}];
 const legPts=l=>l.bo*18+(l.wcb||0)*7+(l.ex||0)+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
 
 /* ---------- Árvore de habilidades (portado do BrasLOL, adaptado ao futebol) ----------
