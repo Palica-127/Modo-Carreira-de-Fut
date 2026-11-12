@@ -4,6 +4,7 @@
    Jogar · Bola de Ouro · Lendas · Elenco  (Jogador usa pgPf, em ui.js)
    + fichas de jogador, clube, seleção e lenda com títulos e temporadas
    ============================================================ */
+const legImg=(n,c='lgph')=>typeof LEGIMG!=='undefined'&&LEGIMG[n]?`<img class="${c}" src="${LEGIMG[n]}" alt="">`:'';
 const ek=s=>encodeURIComponent(s).replace(/'/g,'%27');
 const lnk=(on,t)=>`<span class="lnk" onclick="${on}">${t}</span>`;
 const clubLnk=(n,id)=>{const i=id!=null?id:cn2id(n);return i!=null?lnk(`sheet('c','${i}')`,esc(n)):esc(n)};
@@ -138,7 +139,7 @@ const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:`sheet('l','${
 const lgTag=x=>x.me?'<span class="tag">você</span>':x.st=='ativo'?'<span class="tag">ativo</span>':x.st=='ret'?'<span class="tag">aposentado</span>':'';
 function lendJog(){
   const l=legList(),mi=l.findIndex(x=>x.me);
-  const row=(x,i)=>`<li class="${x.me?'me':''}" onclick="${lgOn(x)}"><span class="pos">${i+1}</span><span class="natb">${esc(x.nat)}</span><span class="nm2">${esc(x.n)}${lgTag(x)}<small>${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''}${x.lib?' · '+x.lib+' Libertadores':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`;
+  const row=(x,i)=>`<li class="${x.me?'me':''}" onclick="${lgOn(x)}"><span class="pos">${i+1}</span>${legImg(x.n,'lgav')}<span class="natb">${esc(x.nat)}</span><span class="nm2">${esc(x.n)}${lgTag(x)}<small>${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''}${x.lib?' · '+x.lib+' Libertadores':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`;
   return `<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map(row).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}
   <p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, Mundiais, ligas e gols. As lendas reais têm números aproximados até 2025. Os craques do jogo entram no ranking conforme acumulam prêmios e títulos, e continuam nele depois de se aposentar.</p></div>
   <div class="pn full"><details class="det"><summary>11º ao 30º</summary><ul class="rank">${l.slice(10,30).map((x,i)=>row(x,i+10)).join('')}</ul></details></div>`;
@@ -179,7 +180,7 @@ function pgElen(){
   if(ui.ec!=null)return squadView(ui.ec);
   const E=elState(),L=LEAGUES[E.l];if(E.d>=L.dn.length)E.d=0;
   let h=`<div class="pills scroll">${LEAGUES.map((x,i)=>`<button class="pill" aria-pressed="${E.l==i}" onclick="elSet('l',${i})">${x.k}</button>`).join('')}</div><div class="pills">${L.dn.map((n,i)=>`<button class="pill" aria-pressed="${E.d==i}" onclick="elSet('d',${i})">${n}</button>`).join('')}</div>`;
-  h+=`<div class="pn full"><h2>${L.dn[E.d]} · ${L.n}</h2><ul class="rank">${stand(E.l,E.d).map((c,i)=>`<li class="${c.id==S.club?'me':''}"><span class="pos">${i+1}</span>${shield(c,'sm')}<span class="nm2">${esc(c.n)}${c.id==S.club?'<span class="tag">seu clube</span>':''}<small>${S.tb[c.id].Pt} pts · força ${Math.round(c.s)}</small></span><span class="acts2"><button class="btn-s" onclick="verElenco(${c.id})">Ver elenco</button><button class="btn-s alt" onclick="sheet('c','${c.id}')">Ficha</button></span></li>`).join('')}</ul></div>`;
+  h+=`<div class="pn full"><h2>${L.dn[E.d]} · ${L.n}</h2><ul class="rank">${stand(E.l,E.d).map((c,i)=>`<li class="lnk ${c.id==S.club?'me':''}" onclick="sheet('c','${c.id}')"><span class="pos">${i+1}</span>${shield(c,'sm')}<span class="nm2">${esc(c.n)}${c.id==S.club?'<span class="tag">seu clube</span>':''}<small>${S.tb[c.id].Pt} pts · força ${Math.round(c.s)}</small></span><span class="acts2"><button class="btn-s alt" onclick="event.stopPropagation();verElenco(${c.id})">Elenco</button></span></li>`).join('')}</ul></div>`;
   return h;
 }
 const SQO=['GOL','ZAG','VOL','MEI','PNT','ATA'];
@@ -321,7 +322,7 @@ function shL(s){
   const yrs=BDO_REAL.filter(z=>z.n==x.n).map(z=>z.y),n=(k,v)=>Array.from({length:Math.min(v||0,14)},()=>({k,y:''}));
   const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...n('lig',x.lg)];
   const i=all.indexOf(x);
-  const hero=shHero(`<div class="h2b"><b class="h2big">${natCode(x.nat)}</b><small>${PNQ[x.pos]||x.pos}</small></div>`,esc(x.n),`${PNQ[x.pos]||x.pos} · ${esc(x.nat)}`,
+  const hero=shHero(legImg(x.n,'lgph')||`<div class="h2b"><b class="h2big">${natCode(x.nat)}</b><small>${PNQ[x.pos]||x.pos}</small></div>`,esc(x.n),`${PNQ[x.pos]||x.pos} · ${esc(x.nat)}`,
     ['<b>LENDA</b> histórico real',i<10?`<b>TOP ${i+1}</b> na história do jogo`:`<b>${i+1}º</b> no ranking de lendas`],
     [['Bolas de Ouro',x.bo],['Champions',x.ucl||0],['Libertadores',x.lib||0],['Copas do Mundo',x.wc],['Mundiais',x.mc||0],['Ligas',x.lg],['Pontos',Math.round(x.pts)]]);
   const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfRows(it)}</div><div class="pn"><h2>Estante da Bola de Ouro</h2>${shelfBox('Bola de Ouro',yrs.map(y=>({y})),z=>ballTro(z.y))}</div>`;
@@ -336,12 +337,28 @@ function shQ(s){
   return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};
 }
 /* seleção */
+/* elenco de uma seleção: melhores jogadores da nacionalidade entre todos os clubes do jogo */
+const SELSQ={};
+function selSquad(n){
+  const w=WCN.find(x=>x[0]==n),cc=w?w[1]:'',key=n+'|'+S.y;
+  if(!SELSQ[key]){
+    const all=[];
+    S.cs.forEach(c=>{if(typeof SQ!=='undefined'&&SQ[c.n])sqReal(c).forEach(x=>{if(x.nat==n||x.nat==cc)all.push({...x,cid:c.id})})});
+    all.sort((a,z)=>z.ovr-a.ovr);
+    const gk=all.filter(x=>x.pos=='GOL').slice(0,3),rest=all.filter(x=>x.pos!='GOL').slice(0,20);
+    SELSQ[key]=[...gk,...rest];
+  }
+  const L=SELSQ[key];if(!L.length)return '<p class="empty">Sem jogadores desta seleção nos clubes do jogo.</p>';
+  const xi=L.slice().sort((a,z)=>z.ovr-a.ovr).slice(0,11),avg=Math.round(xi.reduce((s,x)=>s+x.ovr,0)/xi.length*10)/10;
+  return kv([['Convocados',L.length],['Média dos 11 melhores',avg],['Melhor jogador',esc(L[0]&&xi[0].n)]])+['GOL','ZAG','VOL','MEI','PNT','ATA'].map(p=>{const g=L.filter(x=>x.pos==p);return g.length?`<h3>${PNQ[p]}s · ${g.length}</h3><ul class="rank sq">${g.map(x=>`<li class="lnk" onclick="sheet('c','${x.cid}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}<small>${x.age} anos · ${esc(cl(x.cid).n)}</small></span></li>`).join('')}</ul>`:''}).join('');
+}
 function shS(s){
   const n=s.id,st=selStat(n),w=WCN.find(x=>x[0]==n),rk=selRank(),i=rk.findIndex(x=>x.n==n);
   if(i<0)return null;
-  const tabs=[['res','Resumo'],['cp','Copas']],tb=shTab(s,tabs);
+  const tabs=[['res','Resumo'],['el','Elenco'],['cp','Copas']],tb=shTab(s,tabs);
   let b=shTabs(s,tabs);
   if(tb=='res')b+=kv([['Código',esc(rk[i].c)],['Ranking',(i+1)+'º'],['Títulos',st.t.length],['Vices',st.v.length],['Semifinais (jogo)',st.sf.length],['Pontos',st.pts],['Força',w?w[2]:'—'],['Sua seleção',n==S.p.nat?'Sim':'—']])+yrsLine('Anos dos títulos',st.t)+yrsLine('Anos dos vices',st.v);
+  else if(tb=='el')b+=selSquad(n);
   else{
     const rows=[...WC_H.map(x=>({y:x.y,c:x.c,r:x.r})),...S.wc.map(z=>({y:z.y,c:z.champ,r:z.ru,sf:z.sf,g:1}))].filter(x=>x.c==n||x.r==n||(x.sf||[]).includes(n)).sort((a,z)=>z.y-a.y);
     b+=rows.length?tbl(['Ano','Resultado','Campeã','Vice'],rows.map(x=>({c:[x.y+(x.g?' ⚽':''),x.c==n?'🏆 Campeã':x.r==n?'Vice':'Semifinal',esc(x.c),esc(x.r)]}))):'<p class="empty">Sem títulos, vices ou semifinais registrados.</p>';

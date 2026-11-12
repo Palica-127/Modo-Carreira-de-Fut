@@ -816,10 +816,13 @@ function sqReal(c){
   const key=c.id+'|'+S.y+'|'+Math.round(c.s);if(SQC[key])return SQC[key];
   const dy=Math.max(0,S.y-2026),L=c.l>=0?LEAGUES[c.l]:null,pool={GOL:[],ZAG:[],VOL:[],MEI:[],PNT:[],ATA:[]};
   SQ[c.n].split(';').forEach((z,i)=>{
-    const q=z.split('|'),g=q[1],a0=+q[2]||24,h0=hash(q[0]+c.n);let n=q[0],age=a0+dy,nat=SQNAT[q[3]]||q[3],st=typeof STAR!=='undefined'?STAR[sqNorm(n)]||0:0;
-    if(age>=(g=='G'?40:37)){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-(g=='G'?40:37))%5;st=0}
-    const h=(hash(n+c.n)%1000)/1000,ovr=Math.round(C(st?st+sqAdj(age)-sqAdj(a0):c.s-15+14*h+sqAdj(age),35,97)),pot=Math.round(C(ovr+(age<24?(24-age)*1.6*(.5+h):h*2),ovr,96));
-    const pos=g=='G'?'GOL':g=='D'?'ZAG':g=='M'?(h0%5<2?'VOL':'MEI'):(h0%5<2?'PNT':'ATA');
+    const q=z.split('|'),g=q[1],a0=+q[2]||24,h0=hash(q[0]+c.n),ev=q[4];let n=q[0],age=a0+dy,nat=SQNAT[q[3]]||q[3],fix=ev&&ev!='y'?+ev:0;
+    if(age>=(g=='G'||g=='GK'?40:37)){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-(g=='G'||g=='GK'?40:37))%5;fix=0}
+    const h=(hash(n+c.n)%1000)/1000;
+    /* notas do EA FC (src/squads.js); sem nota: base/juvenil (50-64) ou, em clubes fora da base, estimativa pela força do clube */
+    let ovr=fix?fix+sqAdj(age)-sqAdj(a0):ev=='y'||!fix&&q[4]=='y'?50+14*h+(age>21?-2:0):C(c.s-22+16*h,45,80)+sqAdj(age);
+    ovr=Math.round(C(ovr,35,97));const pot=Math.round(C(ovr+(age<24?(24-age)*1.6*(.5+h):h*2),ovr,96));
+    const pos=g=='G'||g=='GK'?'GOL':g=='D'||g=='CB'||g=='LB'||g=='RB'?'ZAG':g=='CDM'?'VOL':g=='CM'||g=='CAM'?'MEI':g=='LW'||g=='RW'?'PNT':g=='ST'?'ATA':g=='M'?(h0%5<2?'VOL':'MEI'):(h0%5<2?'PNT':'ATA');
     pool[pos].push({n,nat,pos,age,ovr,pot,club:c.id,q:1});
   });
   const LIM={GOL:4,ZAG:9,VOL:5,MEI:5,PNT:4,ATA:5};

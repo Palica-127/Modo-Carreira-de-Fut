@@ -104,8 +104,23 @@ if __name__=='__main__':
     BS=chr(92)
     q=lambda s:"'"+s.replace(BS,BS+BS).replace("'",BS+"'")+"'"
     lines=["'use strict';","/* Elencos reais (ESPN, nov/2026) — gerado por tools/build_world.py. Formato: Nome|Pos|Idade|País;... Pos: G D M F */","const SQ={"]
+    import fc_match
+    CODEPOS={'GK':'GK','CB':'CB','LB':'LB','RB':'RB','LWB':'LB','RWB':'RB','CDM':'CDM','CM':'CM','CAM':'CAM','LM':'LW','RM':'RW','LW':'LW','RW':'RW','CF':'ST','ST':'ST'}
+    nm_hit=nm_tot=0
     for n,pl in squads.items():
-        lines.append(q(n)+':'+q(';'.join('%s|%s|%s|%s'%(p[0].replace('|','').replace(';',''),p[1][:1],p[2],p[3]) for p in pl))+',')
+        rows=[]
+        for p_ in pl:
+            r=fc_match.find(p_[0],p_[2] or 25)
+            rows.append((p_,r))
+        cov=sum(1 for _,r in rows if r)/max(1,len(rows));nm_hit+=sum(1 for _,r in rows if r);nm_tot+=len(rows)
+        # clubes mal cobertos pela base (ex.: Brasil) mantem estimativa por forca do clube; nos demais, quem nao esta na base e' base/juvenil
+        out=[]
+        for p_,r in rows:
+            nm=p_[0].replace('|','').replace(';','')
+            if r:out.append('%s|%s|%s|%s|%d'%(nm,CODEPOS.get(r[3],p_[1][:1]),p_[2],p_[3],r[2]))
+            else:out.append('%s|%s|%s|%s|%s'%(nm,p_[1][:1],p_[2],p_[3],'' if cov<.4 else 'y'))
+        lines.append(q(n)+':'+q(';'.join(out))+',')
+    print('casados com a base EA:',nm_hit,'/',nm_tot)
     lines.append('};')
     used_stars={norm_n(p[0]):stars[norm_n(p[0])] for pl in squads.values() for p in pl if norm_n(p[0]) in stars}
     lines.append('const STAR='+json.dumps(used_stars,ensure_ascii=False)+';')

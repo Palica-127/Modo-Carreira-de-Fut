@@ -593,3 +593,9 @@ body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!importan
 body.zs #app{zoom:.92}body.zl #app{zoom:1.12}
 @media (prefers-reduced-motion:reduce){.tcol,.ttl::after,.tbox,.tbtn{animation:none}}
 @media (max-height:640px){.tmark{width:76px;height:76px;margin-bottom:8px}.tsub{margin-bottom:14px}}
+/* escudos maiores */
+.shield{width:38px;height:44px}.shield.xs{width:28px;height:32px}.shield.sm{width:36px;height:42px}.shield.lg{width:84px;height:98px}.shield.xl{width:128px;height:148px}
+.hud .logo .shield{width:54px;height:63px}
+
+.lgav{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;border:1px solid var(--line)}
+.lgph{width:96px;height:96px;border-radius:14px;object-fit:cover;border:2px solid var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.5)}
