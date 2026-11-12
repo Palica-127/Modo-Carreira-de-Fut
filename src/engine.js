@@ -338,7 +338,7 @@ function step(){
   if(S.week>SEASON)end();else if((S.week==10||S.week==22)&&!S.inj)S.ev=testEv();else if(Math.random()<.11)S.ev=P(EV);
   return true;
 }
-function adv(){if(step()){save();render();if(typeof lvOn=='function'&&lvOn()){const i=lvIdx();if(i>=0)liveOpen(i)}}}
+function adv(){if(step()){const i=lvIdx();S.lvp=i>=0?1:0;save();render();if(i>=0)liveOpen(i)}}
 /* simula várias semanas; para em evento, janela de transferências ou fim da temporada */
 function simN(n){
   let k=0;

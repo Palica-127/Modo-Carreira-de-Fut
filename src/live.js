@@ -4,17 +4,17 @@
    A partida já vem simulada em S.last (pm); aqui ela é "transmitida" minuto a minuto.
    ============================================================ */
 let LVT=null;
-const lvOn=()=>!!S&&S.lv!==0;
 const lvMs=[650,320,130,45];
 const lvIdx=()=>S.last.findIndex(r=>r.h==S.club||r.a==S.club);
-function toggleLive(){S.lv=lvOn()?0:1;save();render(true)}
-function lvTick(){const L=ui.lv;if(!L||L.pause)return;L.t=Math.min(90,L.t+1);if(L.t>=90){clearInterval(LVT);LVT=null}lvDraw()}
+function lvTick(){const L=ui.lv;if(!L||L.pause)return;L.t=Math.min(90,L.t+1);if(L.t>=90){clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}lvDraw()}
 function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause)LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
 function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;ui.lv={i,t:fim?90:0,sp:0,pause:false};lvTimer();lvDraw()}
-function lvClose(){clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();render(true)}
+function lvClose(){if(ui.lv&&ui.lv.t<90&&S.lvp)return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();render(true)}
 function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvDraw()}
 function lvPause(){ui.lv.pause=!ui.lv.pause;lvTimer();lvDraw()}
-function lvSkip(){ui.lv.t=90;lvTimer();lvDraw()}
+function lvNext(){lvClose();if(S.ph=='season'&&!S.ev)adv()}
+/* se a página for recarregada no meio da transmissão, ela recomeça */
+function lvBoot(){if(S&&S.lvp&&lvIdx()>=0)liveOpen(lvIdx());else if(S)S.lvp=0}
 /* contagem de um tipo de lance até o minuto t */
 const lvC=(r,k,t)=>[0,1].map(s=>r.st.fe.filter(x=>x[1]==s&&x[2]==k&&x[0]<=t).length);
 const lvPo=(r,t)=>{if(t>=90)return r.po;const f=Math.min(1,t/20);return Math.round(C(r.po*f+50*(1-f)+3*Math.sin(t/5)*(1-t/90),25,75))};
@@ -45,7 +45,7 @@ function lvHtml(){
   const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=t).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
   const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
-  const ctl=fim?`<div class="row"><button class="play" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}<button class="ghost" onclick="lvSkip()">⏭ Fim do jogo</button></div>`;
+  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvNext()" ${S.ph=='season'&&!S.ev?'':'disabled'}>▶ Próximo jogo</button><button class="ghost" onclick="lvClose()">Fechar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}</div>`;
   let body;
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=t).slice(-10).reverse();
@@ -55,7 +55,7 @@ function lvHtml(){
     const me=r.pl?`<div class="pn"><h2>Sua atuação</h2>${kv([['Nota',r.rt],['Minutos',r.mn+"'"],['Gols',r.gl],['Assistências',r.as],['Cartões',(r.yc?'🟨':'')+(r.rc?'🟥':'')||'—']])}</div>`:`<div class="pn"><h2>Sua atuação</h2><p class="note" style="margin:0">${S.inj>0?'Você está lesionado.':'Você não atuou nesta partida.'}</p></div>`;
     body=`<div class="shg"><div><div class="pn"><h2>Estatísticas da partida</h2>${lvRows(r,90)}</div>${me}</div><div><div class="pn"><h2>Destaques da partida</h2>${lvPlayers(r)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)}</span><span><i class="r"></i>${esc(a.n)}</span></p></div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,90)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)} dominando</span><span><i class="r"></i>${esc(a.n)} dominando</span></p></div></div></div>`;
   }
-  return `<div class="pn sheet fp lvsh"><div class="shtop"><button class="ghost" onclick="lvClose()">${fim?'← Fechar':'✕ Fechar transmissão'}</button></div>${head}${ctl}${body}</div>`;
+  return `<div class="pn sheet fp lvsh">${fim?`<div class="shtop"><button class="ghost" onclick="lvClose()">← Fechar</button></div>`:'<div class="shtop"><small class="muted">Transmissão ao vivo — acompanhe até o fim do jogo</small></div>'}${head}${ctl}${body}</div>`;
 }
 function lvDraw(){
   let o=document.getElementById('lvo');
