@@ -121,11 +121,10 @@ function viewProx(){
   if(S.ph=='off')h+=offBlock();
   else{
     const nm=nextMatches();
-    h+=`<div class="pn"><div class="banner"><small>Semana ${S.week} de ${SEASON}</small><b>Próximos jogos</b></div>
+    h+=`<div class="pn"><div class="banner"><small>Semana ${S.week} de ${SEASON} · ${dTxt(S.week,S.day|0)}</small><b>Próximos jogos</b></div>
     ${nm.map(x=>x.h!=null?`<div class="m ${x.h==S.club||x.a==S.club?'mine':''}"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(x.h).id}')">${shield(cl(x.h),'sm')}<span>${esc(cl(x.h).n)}</span></div><div class="sc"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(x.a).id}')">${shield(cl(x.a),'sm')}<span>${esc(cl(x.a).n)}</span></div></div><div class="mi"><span>${esc(x.n)}</span></div></div>`:`<div class="m mine"><div class="mi"><span>🏆 ${esc(x.n)}</span><span>adversário sorteado</span></div></div>`).join('')||'<p class="empty">Sem jogos nesta semana.</p>'}
     <p class="note" style="margin:0 0 10px">Papel: <b>${role()}</b>${S.inj?' · fora por '+S.inj+' sem.':''} · Treino: ${TN[S.tr.a]} (${['leve','normal','intenso'][S.tr.i]})</p>
-    <button class="play" onclick="adv()" ${S.ev?'disabled':''}>▶ Avançar</button>
-    <p class="note" style="margin:6px 0">Avança direto até o próximo jogo ou evento. A partida do seu clube é transmitida ao vivo.</p>${S.last&&S.last.some(r=>r.st&&(r.h==S.club||r.a==S.club))?`<div class="row" style="margin:0"><button class="ghost" onclick="liveOpen(lvIdx(),1)">📊 Estatísticas do último jogo</button></div>`:''}</div>`;
+    ${playBlock()}${lvLast()>=0?`<div class="row" style="margin:0"><button class="ghost" onclick="liveOpen(lvLast(),1)">📊 Estatísticas do último jogo</button></div>`:''}</div>`;
     h+=upcoming();
   }
   h+=`<div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;

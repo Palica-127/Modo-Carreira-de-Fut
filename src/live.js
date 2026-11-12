@@ -5,16 +5,17 @@
    ============================================================ */
 let LVT=null;
 const lvMs=[650,320,130,45];
-const lvIdx=()=>S.last.findIndex(r=>r.h==S.club||r.a==S.club);
+const lvMine=r=>r.h==S.club||r.a==S.club;
+const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
+const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
 function lvTick(){const L=ui.lv;if(!L||L.pause)return;L.t=Math.min(90,L.t+1);if(L.t>=90){clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}lvDraw()}
 function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause)LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
-function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;ui.lv={i,t:fim?90:0,sp:0,pause:false};lvTimer();lvDraw()}
+function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;if(!fim)r.sn=1;ui.lv={i,t:fim?90:0,sp:0,pause:false};lvTimer();lvDraw()}
 function lvClose(){if(ui.lv&&ui.lv.t<90&&S.lvp)return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();render(true)}
 function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvDraw()}
 function lvPause(){ui.lv.pause=!ui.lv.pause;lvTimer();lvDraw()}
-function lvNext(){lvClose();if(S.ph=='season'&&!S.ev)adv()}
 /* se a página for recarregada no meio da transmissão, ela recomeça */
-function lvBoot(){if(S&&S.lvp&&lvIdx()>=0)liveOpen(lvIdx());else if(S)S.lvp=0}
+function lvBoot(){if(S&&S.lvp&&S.last[S.lvp-1])liveOpen(S.lvp-1);else if(S)S.lvp=0}
 /* contagem de um tipo de lance até o minuto t */
 const lvC=(r,k,t)=>[0,1].map(s=>r.st.fe.filter(x=>x[1]==s&&x[2]==k&&x[0]<=t).length);
 const lvPo=(r,t)=>{if(t>=90)return r.po;const f=Math.min(1,t/20);return Math.round(C(r.po*f+50*(1-f)+3*Math.sin(t/5)*(1-t/90),25,75))};
@@ -45,7 +46,7 @@ function lvHtml(){
   const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=t).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
   const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
-  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvNext()" ${S.ph=='season'&&!S.ev?'':'disabled'}>▶ Próximo jogo</button><button class="ghost" onclick="lvClose()">Fechar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}</div>`;
+  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}</div>`;
   let body;
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=t).slice(-10).reverse();
@@ -62,4 +63,28 @@ function lvDraw(){
   if(!ui.lv){if(o)o.remove();return}
   if(!o){o=document.createElement('div');o.id='lvo';o.className='ov fp lvo';document.body.appendChild(o)}
   const st=o.scrollTop;o.innerHTML=lvHtml();o.scrollTop=st;
+}
+
+/* ---------- calendário: avançar os dias até o jogo, depois jogar ---------- */
+let ADV=null;
+function avancar(){
+  if(ADV||S.ph!='season'||S.ev)return;
+  const g=wkPlan()[0];S.day=S.day|0;if(!g||S.day>=g.d)return;
+  ADV=setInterval(()=>{S.day++;if(S.day>=g.d){clearInterval(ADV);ADV=null;save()}render(true)},300);
+}
+function jogarJogo(){
+  if(ADV||S.ph!='season'||S.ev)return;
+  const g=wkPlan()[0];if(!g||(S.day|0)<g.d)return;
+  if(g.ph=='mid')stepMid();else stepEnd();
+  const i=lvIdx();S.lvp=i>=0?i+1:0;save();render();if(i>=0)liveOpen(i);
+}
+function weekStrip(){
+  const w=S.week,pl=wkPlan(),day=S.day|0;
+  return `<div class="wkst">${WD.map((n,d)=>{const g=pl.find(x=>x.d==d);return `<div class="wd ${d==day?'now':''} ${d<day?'past':''} ${g?'gm':''}"><small>${n}</small><b>${String(wkDate(w,d).getDate()).padStart(2,'0')}</b><span>${g?'⚽':d<day?'✓':'·'}</span></div>`}).join('')}</div>`;
+}
+function playBlock(){
+  S.day=S.day|0;const g=wkPlan()[0],ready=S.day>=g.d,opp=g.h!=null?`${cl(g.h).n} x ${cl(g.a).n}`:'';
+  const evb=S.ev?'disabled':'';
+  return `${weekStrip()}<p class="note" style="margin:8px 0">📅 <b>${dTxt(S.week,S.day)}</b> · próximo jogo: <b>${dTxt(S.week,g.d)}</b> — ${esc(g.n)}${opp?' ('+esc(opp)+')':''}</p>
+  ${ready?`<button class="play" onclick="jogarJogo()" ${evb}>⚽ Jogar — ${esc(g.n)}</button><p class="note" style="margin:6px 0">É dia de jogo. A partida é transmitida ao vivo.</p>`:`<button class="play" onclick="avancar()" ${evb}>▶ Avançar</button><p class="note" style="margin:6px 0">Faltam ${g.d-S.day} dia(s) para o jogo. O tempo corre direto até lá.</p>`}`;
 }

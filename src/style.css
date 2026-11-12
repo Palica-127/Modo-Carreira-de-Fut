@@ -542,3 +542,8 @@ th{background:var(--panel)}
 .lvctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.lvctl .ghost,.lvctl .pill{width:auto;flex:0 0 auto;margin:0}
 .tro .troimg{height:64px;width:auto;max-width:56px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.55))}
 .tro svg{width:46px;height:56px}.sheet.fp .tro svg{width:52px;height:60px}
+/* ---- calendário da semana ---- */
+.wkst{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:6px 0}
+.wd{text-align:center;padding:7px 2px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.wd small{display:block;font:600 11px var(--d);letter-spacing:.1em;text-transform:uppercase;opacity:.7}.wd b{display:block;font:700 20px var(--d)}.wd span{font-size:13px;opacity:.7}
+.wd.past{opacity:.5}.wd.gm{border-color:var(--acc)}.wd.gm span{opacity:1}.wd.now{background:var(--acc);color:#10140a}.wd.now small,.wd.now span{opacity:1}

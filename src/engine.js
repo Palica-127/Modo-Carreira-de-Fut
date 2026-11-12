@@ -317,15 +317,44 @@ function trn_(){
 
 /* ---------- semana ---------- */
 const winOpen=()=>S.ph=='off'||S.week==16||S.week==17;
-function step(){
-  if(S.ph!='season'||S.ev)return false;
-  const w=S.week;S.last=[];S.wm=0;S.lr={};S.lrw=w;trn_();
+/* semana em duas fases, como num calendário real: meio de semana (copas e Mundial) e fim de semana (liga) */
+const WD=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const sd0=()=>{const d=new Date(S.y,7,1);while(d.getDay()!=1)d.setDate(d.getDate()+1);return d};
+const wkDate=(w,d)=>{const t=sd0();t.setDate(t.getDate()+(w-1)*7+d);return t};
+const dfmt=t=>String(t.getDate()).padStart(2,'0')+'/'+String(t.getMonth()+1).padStart(2,'0');
+const dTxt=(w,d)=>WD[d]+' '+dfmt(wkDate(w,d));
+const lgDay=w=>(S.club*7+w*13)%3==0?6:5;
+const kDay=k=>k=='ucl'?1:k=='lib'?3:2;
+/* jogos do seu clube que ainda faltam na semana atual, em ordem de dia */
+function wkPlan(){
+  const w=S.week,c=cl(S.club),g=[];
+  if(S.wmid!=w){
+    const k=allComps().find(k=>k.ch==null&&k.wk[k.rd]==w&&k.al.includes(S.club));
+    if(k)g.push({d:kDay(k.k),ph:'mid',n:k.n+' — '+k.rn[k.rd]});
+    else if(w==30&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final'});
+  }
+  const m=rounds(c.l<0?0:c.l,c.d)[w-1].find(x=>x.includes(S.club));
+  g.push({d:lgDay(w),ph:'end',n:'Liga — '+dvName(c),h:m?m[0]:null,a:m?m[1]:null});
+  return g.sort((x,y)=>x.d-y.d);
+}
+function wkBegin(){
+  const w=S.week;if(S.wb==w)return;S.wb=w;
+  S.last=[];S.wm=0;S.lr={};S.lrw=w;trn_();
   S.rv.forEach(r=>{if(r.inj>0)r.inj--;else if(Math.random()<.004)r.inj=RI(3,14)});
+}
+function stepMid(){
+  if(S.ph!='season'||S.ev||S.wmid==S.week)return false;
+  wkBegin();const w=S.week;
+  allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w)ko(k)});
+  if(w==30&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[30],'mc');ko(S.mc)}
+  S.wmid=w;return true;
+}
+function stepEnd(){
+  if(S.ph!='season'||S.ev)return false;
+  stepMid();wkBegin();const w=S.week;
   LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{
     rounds(li,di)[w-1].forEach(([h,a])=>{const r=fx(h,a,'Liga',0,'lg');up(h,a,r.g);(S.lr[li+'-'+di]=S.lr[li+'-'+di]||[]).push([h,a,r.g[0],r.g[1]])});
   }));
-  allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w)ko(k)});
-  if(w==30&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc){S.mc=mkComp('Mundial de Clubes',[S.ucl.ch,S.lib.ch],['Final'],[30],'mc');ko(S.mc)}
   S.cond=C(S.cond-S.wm/90*12*(1-Math.min(.5,pfx('en'))),20,100);S.money+=S.ct.sal*52/SEASON;
   S.last.forEach(r=>{
     S.res.push({w,c:r.comp,t:`${cl(r.h).n} ${r.g[0]} x ${r.g[1]} ${cl(r.a).n}${r.pen?' (pên.)':''}`,rt:r.rt});
@@ -334,11 +363,12 @@ function step(){
   if(w==15||w==30)snap(S.y+(w==15?'.1':'.2'));
   if(w==15){S.of=gen(3);S.ag=0;if(S.of.length){news('📨 Janela aberta: '+S.of.length+' proposta(s) recebida(s).');mail('Agente','Janela de transferências aberta',S.of.length+' proposta(s) recebida(s). Confira em Jogador → Contratos antes que a janela feche.')}}
   if(w==17)S.of=[];
-  S.week++;
+  S.week++;S.day=0;
   if(S.week>SEASON)end();else if((S.week==10||S.week==22)&&!S.inj)S.ev=testEv();else if(Math.random()<.11)S.ev=P(EV);
   return true;
 }
-function adv(){if(step()){const i=lvIdx();S.lvp=i>=0?1:0;save();render();if(i>=0)liveOpen(i)}}
+const step=()=>stepEnd();
+function adv(){if(step()){save();render()}}
 /* simula várias semanas; para em evento, janela de transferências ou fim da temporada */
 function simN(n){
   let k=0;
