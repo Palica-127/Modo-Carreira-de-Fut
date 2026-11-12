@@ -39,6 +39,60 @@ function lvPlayers(r){
   const hd=(s)=>`<div class="lvpc"><h4>${esc(cl(s?r.a:r.h).n)}</h4>${r.pr[s].map(p=>{const mvp=r.mvp&&r.mvp[0]==s&&r.mvp[1]==r.pr[s].indexOf(p);return `<div class="lvpl ${p[6]?'me':''}"><span class="pp">${p[1]}</span><div><span class="pn1"><b>${esc(p[0])}</b>${p[3]?` <em>⚽${p[3]>1?'×'+p[3]:''}</em>`:''}${p[4]?` <em>🅰${p[4]>1?'×'+p[4]:''}</em>`:''}${mvp?' <span class="tag">MVP</span>':''}<strong class="num ${p[5]>=7.5?'hi':p[5]<5.5?'lo':''}">${p[5].toFixed(1)}</strong></span><i class="dbar"><i class="${s?'r':'b'}" style="width:${(p[5]*10).toFixed(0)}%"></i></i></div></div>`}).join('')}</div>`;
   return `<div class="lvpg">${hd(0)}${hd(1)}</div>`;
 }
+/* ---------- campo: 22 jogadores e a bola, animados a cada minuto (determinístico) ---------- */
+const LVX={GOL:.05,ZAG:.2,VOL:.36,MEI:.5,PNT:.64,ATA:.76},LVK={GOL:.04,ZAG:.1,VOL:.17,MEI:.22,PNT:.27,ATA:.3};
+const lvR=(a,b,c)=>{const x=Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453;return x-Math.floor(x)};
+function lvBase(r){
+  return [0,1].map(s=>{
+    const xi=r.xi[s],g={};xi.forEach((p,i)=>{(g[p[1]]=g[p[1]]||[]).push(i)});
+    const out=new Array(xi.length);
+    Object.keys(g).forEach(pos=>{const ix=g[pos];ix.forEach((i,k)=>{const x=LVX[pos]??.5,y=pos=='GOL'?.5:(k+1)/(ix.length+1);out[i]=[s?1-x:x,y,pos]})});
+    return out;
+  });
+}
+function lvBall(r,t){
+  const sd=hash(r.h+r.a+r.comp+(S.y||0)),sf=sd%997;
+  const po=lvPo(r,t),side=lvR(sf,t,1)*100<po?0:1;
+  let d=.3+lvR(sf,t,2)*.42+(side==0?.04:-.04)*(r.st.mom[Math.min(17,Math.floor(t/5))]||0),y=.12+lvR(sf,t,3)*.76;
+  let ev=null;
+  const sc=r.sc.find(z=>z[0]==t&&t>0);
+  if(sc){return{x:sc[1]?.012:.988,y:.5,side:sc[1],ev:['gol',sc[2]]}}
+  const fe=r.st.fe.filter(z=>z[0]==t);
+  const f=fe.find(z=>z[2]=='sh'||z[2]=='st')||fe.find(z=>z[2]=='co')||fe[0];
+  let x;
+  if(f){
+    const s=f[1];
+    if(f[2]=='sh'||f[2]=='st'){x=s?.09:.91;y=.3+lvR(sf,t,4)*.4;return{x,y,side:s,ev:[f[2]=='st'?'no alvo':'chute']}}
+    if(f[2]=='co'){return{x:s?.01:.99,y:lvR(sf,t,5)<.5?.03:.97,side:s,ev:['escanteio']}}
+    ev=[{fl:'falta',of:'impedimento',yc:'cartão amarelo',rc:'cartão vermelho'}[f[2]]];
+    x=side?1-d:d;return{x,y,side:f[1],ev};
+  }
+  x=side?1-d:d;
+  return{x,y,side,ev:null};
+}
+function lvPitchHtml(r){
+  const c=[cl(r.h),cl(r.a)],pl=[pal(c[0]),pal(c[1])];
+  const dots=[0,1].map(s=>r.xi[s].map((p,i)=>`<i class="pd t${s}${p[2]?' me':''}${p[1]=='GOL'?' gk':''}" data-s="${s}" data-i="${i}" style="--c1:${pl[s].p};--c2:${pl[s].s}" title="${esc(p[0])}">${i+1}</i>`).join('')).join('');
+  return `<div id="lvpitch" class="lvpit" data-k="${S.last.indexOf(r)}"><svg class="lvf" viewBox="0 0 105 68" preserveAspectRatio="none" aria-hidden="true"><rect x=".5" y=".5" width="104" height="67"/><line x1="52.5" y1=".5" x2="52.5" y2="67.5"/><circle cx="52.5" cy="34" r="9.15"/><rect x=".5" y="13.85" width="16.5" height="40.3"/><rect x=".5" y="24.85" width="5.5" height="18.3"/><rect x="88" y="13.85" width="16.5" height="40.3"/><rect x="99" y="24.85" width="5.5" height="18.3"/><rect class="gl" x="-1.2" y="29" width="1.7" height="10"/><rect class="gl" x="104.5" y="29" width="1.7" height="10"/></svg>${dots}<b class="pb"></b><div class="pchip"></div></div>`;
+}
+function lvPitchSet(pit,r,t){
+  const L=ui.lv,ms=Math.min(560,lvMs[L.sp]*.9),B=lvBall(r,t),bs=lvBase(r);
+  let near=null,nd=9;
+  pit.querySelectorAll('.pd').forEach(d=>{
+    const s=+d.dataset.s,i=+d.dataset.i,b=bs[s][i],k=LVK[b[2]]||.2;
+    let x=b[0]+(B.x-b[0])*k+(s?-1:1)*(B.side==s?.045:-.02),y=b[1]+(B.y-b[1])*k*1.3+(lvR(i+1,t,s+7)-.5)*.05;
+    if(b[2]=='GOL'){x=b[0];y=.5+(B.y-.5)*.22}
+    x=C(x,.02,.98);y=C(y,.04,.96);
+    d.style.transitionDuration=ms+'ms';d.style.left=(x*100).toFixed(1)+'%';d.style.top=(y*100).toFixed(1)+'%';
+    const dd=Math.hypot((x-B.x)*105,(y-B.y)*68);if(dd<nd){nd=dd;near=[s,i]}
+  });
+  pit.querySelectorAll('.pd.hot').forEach(d=>d.classList.remove('hot'));
+  const ball=pit.querySelector('.pb');ball.style.transitionDuration=(ms*.8)+'ms';ball.style.left=(B.x*100).toFixed(1)+'%';ball.style.top=(B.y*100).toFixed(1)+'%';
+  const h=near&&pit.querySelector(`.pd[data-s="${near[0]}"][data-i="${near[1]}"]`);if(h)h.classList.add('hot');
+  const ch=pit.querySelector('.pchip'),nm=near?r.xi[near[0]][near[1]][0]:'';
+  ch.className='pchip'+(B.ev&&B.ev[0]=='gol'?' gol':'');
+  ch.textContent=B.ev?(B.ev[0]=='gol'?'GOL! '+B.ev[1]:B.ev[0]+(nm?' · '+nm:'')):nm;
+}
 function lvHtml(){
   const L=ui.lv,r=S.last[L.i];if(!r||!r.st)return '';
   const t=L.t,fim=t>=90,h=cl(r.h),a=cl(r.a),my=r.h==S.club?0:1,gs=[0,1].map(s=>r.sc.filter(z=>z[1]==s&&z[0]<=t).length);
@@ -51,7 +105,7 @@ function lvHtml(){
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=t).slice(-10).reverse();
     const flash=r.sc.find(z=>z[0]==t&&t>0);
-    body=`${flash?`<div class="lvfl ${flash[1]==my?'w':'l'}">⚽ GOOOL! <b>${esc(flash[2])}</b></div>`:''}<div class="shg"><div><div class="pn"><h2>Lance a lance</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></div></div><div><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,t)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,t)}</div></div></div>`;
+    body=`${r.xi?'<div id="lvslot"></div>':''}${flash?`<div class="lvfl ${flash[1]==my?'w':'l'}">⚽ GOOOL! <b>${esc(flash[2])}</b></div>`:''}<div class="shg"><div><div class="pn"><h2>Lance a lance</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></div></div><div><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,t)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,t)}</div></div></div>`;
   }else{
     const me=r.pl?`<div class="pn"><h2>Sua atuação</h2>${kv([['Nota',r.rt],['Minutos',r.mn+"'"],['Gols',r.gl],['Assistências',r.as],['Cartões',(r.yc?'🟨':'')+(r.rc?'🟥':'')||'—']])}</div>`:`<div class="pn"><h2>Sua atuação</h2><p class="note" style="margin:0">${S.inj>0?'Você está lesionado.':'Você não atuou nesta partida.'}</p></div>`;
     body=`<div class="shg"><div><div class="pn"><h2>Estatísticas da partida</h2>${lvRows(r,90)}</div>${me}</div><div><div class="pn"><h2>Destaques da partida</h2>${lvPlayers(r)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)}</span><span><i class="r"></i>${esc(a.n)}</span></p></div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,90)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)} dominando</span><span><i class="r"></i>${esc(a.n)} dominando</span></p></div></div></div>`;
@@ -62,7 +116,16 @@ function lvDraw(){
   let o=document.getElementById('lvo');
   if(!ui.lv){if(o)o.remove();return}
   if(!o){o=document.createElement('div');o.id='lvo';o.className='ov fp lvo';document.body.appendChild(o)}
-  const st=o.scrollTop;o.innerHTML=lvHtml();o.scrollTop=st;
+  const st=o.scrollTop,old=document.getElementById('lvpitch');if(old)old.remove();
+  o.innerHTML=lvHtml();o.scrollTop=st;
+  const r=S.last[ui.lv.i],slot=document.getElementById('lvslot');
+  if(slot&&r&&r.xi){
+    let pit=old&&old.dataset.k==String(ui.lv.i)?old:null;
+    if(!pit){const w=document.createElement('div');w.innerHTML=lvPitchHtml(r);pit=w.firstChild}
+    slot.appendChild(pit);
+    if(!old||pit!==old){pit.querySelectorAll('.pd,.pb').forEach(d=>d.style.transitionDuration='0ms');lvPitchSet(pit,r,ui.lv.t);void pit.offsetWidth}
+    else lvPitchSet(pit,r,ui.lv.t);
+  }
 }
 
 /* ---------- calendário: avançar os dias até o jogo, depois jogar ---------- */

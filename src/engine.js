@@ -229,6 +229,17 @@ function pm(h,a,label,knock,kind){
   S.wm+=r.mn;return r;
 }
 
+/* ---------- escalação: melhor 11 do elenco numa formação (4-3-3, 4-4-2 ou 4-2-3-1) ---------- */
+const FORMS=[['4-3-3',[4,1,2,2,1]],['4-4-2',[4,2,0,2,2]],['4-2-3-1',[4,2,1,2,1]]];
+const formOf=cid=>FORMS[hash(cl(cid).n)%3];
+function xiOf(cid,incMe){
+  const sq=squadOf(cid).filter(x=>incMe||!x.me).slice().sort((a,b)=>b.ovr-a.ovr),out=[],used=new Set();
+  const take=(p,k)=>{for(const x of sq){if(k<=0)break;if(x.pos==p&&!used.has(x)){used.add(x);out.push({n:x.n,pos:x.pos,ovr:x.ovr,me:x.me?1:0});k--}}return k};
+  take('GOL',1);['ZAG','VOL','MEI','PNT','ATA'].forEach((p,i)=>take(p,formOf(cid)[1][i]));
+  for(const x of sq){if(out.length>=11)break;if(!used.has(x)&&x.pos!='GOL'){used.add(x);out.push({n:x.n,pos:x.pos,ovr:x.ovr,me:x.me?1:0})}}
+  return out;
+}
+
 /* ---------- estatísticas da partida (jogo ao vivo e fim de jogo) ---------- */
 function mkStats(r,L,my){
   const g=r.g,sd=[r.h,r.a];
@@ -256,13 +267,7 @@ function mkStats(r,L,my){
   for(let i=0;i<18;i++){v=C(v*.6+(r.po-50)/60*.4+R(-.45,.45),-1,1);mom.push(Math.round(v*100)/100)}
   r.sc.forEach(z=>{const b=Math.min(17,Math.floor((Math.max(1,z[0])-1)/5));mom[b]=C(mom[b]+(z[1]==0?.6:-.6),-1,1)});
   const PO={GOL:0,ZAG:1,VOL:2,MEI:3,PNT:4,ATA:5};
-  const lineup=s=>{
-    const cid=sd[s],c=cl(cid),out=[],used=new Set();
-    (RC[cid]||[]).slice().sort((x,y)=>y.ovr-x.ovr).slice(0,4).forEach(p=>{out.push({n:p.n,pos:p.pos,ovr:Math.round(p.ovr)});used.add(p.n)});
-    if(s==my&&r.pl)out.unshift({n:S.p.name,pos:S.p.pos,ovr:O(),me:1});
-    for(const i of [0,3,4,5,6,9,10,13,14,17,20,21,18,19,15]){if(out.length>=11)break;const q=sqPlayer(c,i);if(!used.has(q.n)){out.push({n:q.n,pos:q.pos,ovr:q.ovr});used.add(q.n)}}
-    return out;
-  };
+  const lineup=s=>xiOf(sd[s],s!=my||r.pl);
   const pr=[0,1].map(s=>{
     const c=cl(sd[s]),rows=lineup(s).map(p=>{
       const gg=r.sc.filter(z=>z[1]==s&&z[2]==p.n).length,aa=p.me?r.as:0;
@@ -272,7 +277,7 @@ function mkStats(r,L,my){
     r.sc.filter(z=>z[1]==s&&!rows.some(q=>q[0]==z[2])).forEach(z=>{if(!rows.some(q=>q[0]==z[2])){const gg=r.sc.filter(y=>y[1]==s&&y[2]==z[2]).length;rows.push([z[2],'ATA',Math.round(c.s),gg,0,Math.round(C(6.6+gg*.95+R(-.3,.5),5,10)*10)/10,0])}});
     return rows.sort((a,b)=>b[5]-a[5]||PO[a[1]]-PO[b[1]]).slice(0,6);
   });
-  r.st={sh,sot,co,fl,yc,rc,of,xg,pa,sv,mom,fe};r.pr=pr;
+  r.st={sh,sot,co,fl,yc,rc,of,xg,pa,sv,mom,fe};r.pr=pr;r.xi=[0,1].map(s=>lineup(s).map(p=>[p.n,p.pos,p.me?1:0]));
 }
 function aiMatch(h,a,knock,kind){
   const g=aiM(h,a),isLg=kind=='lg';
