@@ -1,0 +1,2498 @@
+{
+"palmeiras": {
+"n": "Palmeiras",
+"ok": true,
+"team": "Palmeiras",
+"score": 1.15
+},
+"flamengo": {
+"n": "Flamengo",
+"ok": true,
+"team": "Flamengo",
+"score": 1.15
+},
+"botafogo": {
+"n": "Botafogo",
+"ok": true,
+"team": "Botafogo",
+"score": 1.15
+},
+"atletico-mineiro": {
+"n": "Atl\u00e9tico Mineiro",
+"ok": true,
+"team": "Atl\u00e9tico Mineiro",
+"score": 1.15
+},
+"fluminense": {
+"n": "Fluminense",
+"ok": true,
+"team": "Fluminense",
+"score": 1.15
+},
+"corinthians": {
+"n": "Corinthians",
+"ok": true,
+"team": "Corinthians",
+"score": 1.15
+},
+"sao-paulo": {
+"n": "S\u00e3o Paulo",
+"ok": true,
+"team": "S\u00e3o Paulo",
+"score": 1.15
+},
+"internacional": {
+"n": "Internacional",
+"ok": true,
+"team": "Internacional",
+"score": 1.15
+},
+"gremio": {
+"n": "Gr\u00eamio",
+"ok": true,
+"team": "Gr\u00eamio",
+"score": 1.15
+},
+"cruzeiro": {
+"n": "Cruzeiro",
+"ok": true,
+"team": "Cruzeiro",
+"score": 1.15
+},
+"vasco-da-gama": {
+"n": "Vasco da Gama",
+"ok": true,
+"team": "Vasco da Gama",
+"score": 1.15
+},
+"bahia": {
+"n": "Bahia",
+"ok": true,
+"team": "Bahia",
+"score": 1.15
+},
+"santos": {
+"n": "Santos",
+"ok": true,
+"team": "Santos",
+"score": 1.15
+},
+"fortaleza": {
+"n": "Fortaleza",
+"ok": true,
+"team": "Fortaleza",
+"score": 1.15
+},
+"athletico-paranaense": {
+"n": "Athletico Paranaense",
+"ok": true,
+"team": "Athletico Paranaense",
+"score": 1.15
+},
+"bragantino": {
+"n": "Bragantino",
+"ok": true,
+"team": "RB Bragantino Women",
+"score": 0.96
+},
+"sport-recife": {
+"n": "Sport Recife",
+"ok": true,
+"team": "Sport Recife",
+"score": 1.15
+},
+"ceara": {
+"n": "Cear\u00e1",
+"ok": true,
+"team": "Cear\u00e1",
+"score": 1.15
+},
+"vitoria": {
+"n": "Vit\u00f3ria",
+"ok": true,
+"team": "Vit\u00f3ria",
+"score": 1.15
+},
+"goias": {
+"n": "Goi\u00e1s",
+"ok": true,
+"team": "Goi\u00e1s",
+"score": 1.15
+},
+"coritiba": {
+"n": "Coritiba",
+"ok": true,
+"team": "Coritiba",
+"score": 1.15
+},
+"juventude": {
+"n": "Juventude",
+"ok": true,
+"team": "Juventude",
+"score": 1.15
+},
+"mirassol": {
+"n": "Mirassol",
+"ok": true,
+"team": "Mirassol",
+"score": 1.15
+},
+"vila-nova": {
+"n": "Vila Nova",
+"ok": true,
+"team": "Vila Nova",
+"score": 1.15
+},
+"criciuma": {
+"n": "Crici\u00fama",
+"ok": true,
+"team": "Crici\u00fama",
+"score": 1.15
+},
+"avai": {
+"n": "Ava\u00ed",
+"ok": true,
+"team": "Ava\u00ed",
+"score": 1.15
+},
+"chapecoense": {
+"n": "Chapecoense",
+"ok": true,
+"team": "Chapecoense",
+"score": 1.15
+},
+"operario-pr": {
+"n": "Oper\u00e1rio-PR",
+"ok": true,
+"team": "Oper\u00e1rio Ferrovi\u00e1rio",
+"score": 1.15
+},
+"america-mg": {
+"n": "Am\u00e9rica-MG",
+"ok": true,
+"team": "Am\u00e9rica Mineiro",
+"score": 1.15
+},
+"novorizontino": {
+"n": "Novorizontino",
+"ok": true,
+"team": "Novorizontino",
+"score": 1.15
+},
+"paysandu": {
+"n": "Paysandu",
+"ok": true,
+"team": "Paysandu",
+"score": 1.15
+},
+"remo": {
+"n": "Remo",
+"ok": true,
+"team": "Remo",
+"score": 1.15
+},
+"ponte-preta": {
+"n": "Ponte Preta",
+"ok": true,
+"team": "Ponte Preta",
+"score": 1.15
+},
+"guarani": {
+"n": "Guarani",
+"ok": true,
+"team": "Guarani",
+"score": 1.15
+},
+"botafogo-sp": {
+"n": "Botafogo-SP",
+"ok": true,
+"team": "Botafogo",
+"score": 0.99
+},
+"nautico": {
+"n": "N\u00e1utico",
+"ok": true,
+"team": "N\u00e1utico",
+"score": 1.15
+},
+"santa-cruz": {
+"n": "Santa Cruz",
+"ok": true,
+"team": "Santa Cruz",
+"score": 1.15
+},
+"figueirense": {
+"n": "Figueirense",
+"ok": true,
+"team": "Figueirense",
+"score": 1.15
+},
+"csa": {
+"n": "CSA",
+"ok": true,
+"team": "CSA",
+"score": 1.15
+},
+"abc": {
+"n": "ABC",
+"ok": true,
+"team": "ABC",
+"score": 1.15
+},
+"confianca": {
+"n": "Confian\u00e7a",
+"ok": true,
+"team": "Confian\u00e7a",
+"score": 1.15
+},
+"volta-redonda": {
+"n": "Volta Redonda",
+"ok": true,
+"team": "Volta Redonda",
+"score": 1.15
+},
+"ypiranga": {
+"n": "Ypiranga",
+"ok": true,
+"team": "Ypiranga",
+"score": 1.15
+},
+"londrina": {
+"n": "Londrina",
+"ok": true,
+"team": "Londrina",
+"score": 1.15
+},
+"brusque": {
+"n": "Brusque",
+"ok": true,
+"team": "Brusque",
+"score": 1.15
+},
+"ferroviaria": {
+"n": "Ferrovi\u00e1ria",
+"ok": true,
+"team": "Ferrovi\u00e1ria",
+"score": 1.15
+},
+"tombense": {
+"n": "Tombense",
+"ok": true,
+"team": "Tombense",
+"score": 1.15
+},
+"sao-bernardo": {
+"n": "S\u00e3o Bernardo",
+"ok": true,
+"team": "S\u00e3o Bernardo",
+"score": 1.15
+},
+"manchester-city": {
+"n": "Manchester City",
+"ok": true,
+"team": "Manchester City",
+"score": 1.15
+},
+"arsenal": {
+"n": "Arsenal",
+"ok": true,
+"team": "Arsenal",
+"score": 1.15
+},
+"liverpool": {
+"n": "Liverpool",
+"ok": true,
+"team": "Liverpool",
+"score": 1.15
+},
+"chelsea": {
+"n": "Chelsea",
+"ok": true,
+"team": "Chelsea",
+"score": 1.15
+},
+"manchester-united": {
+"n": "Manchester United",
+"ok": true,
+"team": "Manchester United",
+"score": 1.15
+},
+"tottenham-hotspur": {
+"n": "Tottenham Hotspur",
+"ok": true,
+"team": "Tottenham Hotspur",
+"score": 1.15
+},
+"newcastle-united": {
+"n": "Newcastle United",
+"ok": true,
+"team": "Newcastle United",
+"score": 1.15
+},
+"aston-villa": {
+"n": "Aston Villa",
+"ok": true,
+"team": "Aston Villa",
+"score": 1.15
+},
+"west-ham-united": {
+"n": "West Ham United",
+"ok": true,
+"team": "West Ham United",
+"score": 1.15
+},
+"brighton": {
+"n": "Brighton",
+"ok": true,
+"team": "Brighton and Hove Albion",
+"score": 1.15
+},
+"crystal-palace": {
+"n": "Crystal Palace",
+"ok": true,
+"team": "Crystal Palace",
+"score": 1.15
+},
+"brentford": {
+"n": "Brentford",
+"ok": true,
+"team": "Brentford",
+"score": 1.15
+},
+"fulham": {
+"n": "Fulham",
+"ok": true,
+"team": "Fulham",
+"score": 1.15
+},
+"everton": {
+"n": "Everton",
+"ok": true,
+"team": "Everton",
+"score": 1.15
+},
+"wolverhampton": {
+"n": "Wolverhampton",
+"ok": true,
+"team": "Wolverhampton Wanderers",
+"score": 1.15
+},
+"nottingham-forest": {
+"n": "Nottingham Forest",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"leeds-united": {
+"n": "Leeds United",
+"ok": true,
+"team": "Leeds United",
+"score": 1.15
+},
+"leicester-city": {
+"n": "Leicester City",
+"ok": true,
+"team": "Leicester City",
+"score": 1.15
+},
+"sunderland": {
+"n": "Sunderland",
+"ok": true,
+"team": "Sunderland",
+"score": 1.15
+},
+"southampton": {
+"n": "Southampton",
+"ok": true,
+"team": "Southampton",
+"score": 1.15
+},
+"burnley": {
+"n": "Burnley",
+"ok": true,
+"team": "Burnley",
+"score": 1.15
+},
+"sheffield-united": {
+"n": "Sheffield United",
+"ok": true,
+"team": "Sheffield United",
+"score": 1.15
+},
+"middlesbrough": {
+"n": "Middlesbrough",
+"ok": true,
+"team": "Middlesbrough",
+"score": 1.15
+},
+"norwich-city": {
+"n": "Norwich City",
+"ok": true,
+"team": "Norwich City",
+"score": 1.15
+},
+"west-bromwich": {
+"n": "West Bromwich",
+"ok": true,
+"team": "West Bromwich Albion",
+"score": 1.15
+},
+"coventry-city": {
+"n": "Coventry City",
+"ok": true,
+"team": "Coventry City",
+"score": 1.15
+},
+"watford": {
+"n": "Watford",
+"ok": true,
+"team": "Watford",
+"score": 1.15
+},
+"stoke-city": {
+"n": "Stoke City",
+"ok": true,
+"team": "Stoke City",
+"score": 1.15
+},
+"swansea-city": {
+"n": "Swansea City",
+"ok": false,
+"why": "sem match",
+"best": "Swansea City"
+},
+"bristol-city": {
+"n": "Bristol City",
+"ok": true,
+"team": "Bristol City",
+"score": 1.15
+},
+"hull-city": {
+"n": "Hull City",
+"ok": true,
+"team": "Hull City",
+"score": 1.15
+},
+"blackburn-rovers": {
+"n": "Blackburn Rovers",
+"ok": true,
+"team": "Blackburn Rovers",
+"score": 1.15
+},
+"birmingham-city": {
+"n": "Birmingham City",
+"ok": true,
+"team": "Birmingham City",
+"score": 1.15
+},
+"wrexham": {
+"n": "Wrexham",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"bolton-wanderers": {
+"n": "Bolton Wanderers",
+"ok": true,
+"team": "Bolton Wanderers",
+"score": 1.15
+},
+"huddersfield-town": {
+"n": "Huddersfield Town",
+"ok": true,
+"team": "Huddersfield Town",
+"score": 1.15
+},
+"derby-county": {
+"n": "Derby County",
+"ok": true,
+"team": "Derby County",
+"score": 1.15
+},
+"stockport-county": {
+"n": "Stockport County",
+"ok": true,
+"team": "Stockport County",
+"score": 1.15
+},
+"wigan-athletic": {
+"n": "Wigan Athletic",
+"ok": true,
+"team": "Wigan Athletic",
+"score": 1.15
+},
+"peterborough": {
+"n": "Peterborough",
+"ok": true,
+"team": "Peterborough United",
+"score": 1.15
+},
+"reading": {
+"n": "Reading",
+"ok": true,
+"team": "Reading",
+"score": 1.15
+},
+"charlton-athletic": {
+"n": "Charlton Athletic",
+"ok": true,
+"team": "Charlton Athletic",
+"score": 1.15
+},
+"barnsley": {
+"n": "Barnsley",
+"ok": true,
+"team": "Barnsley",
+"score": 1.15
+},
+"blackpool": {
+"n": "Blackpool",
+"ok": true,
+"team": "Blackpool",
+"score": 1.15
+},
+"lincoln-city": {
+"n": "Lincoln City",
+"ok": true,
+"team": "Lincoln City",
+"score": 1.15
+},
+"rotherham-united": {
+"n": "Rotherham United",
+"ok": true,
+"team": "Rotherham United",
+"score": 1.15
+},
+"plymouth-argyle": {
+"n": "Plymouth Argyle",
+"ok": true,
+"team": "Plymouth Argyle",
+"score": 1.15
+},
+"preston-north-end": {
+"n": "Preston North End",
+"ok": true,
+"team": "Preston North End",
+"score": 1.15
+},
+"notts-county": {
+"n": "Notts County",
+"ok": true,
+"team": "Notts County",
+"score": 1.15
+},
+"bradford-city": {
+"n": "Bradford City",
+"ok": true,
+"team": "Bradford City",
+"score": 1.15
+},
+"walsall": {
+"n": "Walsall",
+"ok": true,
+"team": "Walsall",
+"score": 1.15
+},
+"port-vale": {
+"n": "Port Vale",
+"ok": true,
+"team": "Port Vale",
+"score": 1.15
+},
+"doncaster-rovers": {
+"n": "Doncaster Rovers",
+"ok": true,
+"team": "Doncaster Rovers",
+"score": 1.15
+},
+"crewe-alexandra": {
+"n": "Crewe Alexandra",
+"ok": true,
+"team": "Crewe Alexandra",
+"score": 1.15
+},
+"swindon-town": {
+"n": "Swindon Town",
+"ok": true,
+"team": "Swindon Town",
+"score": 1.15
+},
+"gillingham": {
+"n": "Gillingham",
+"ok": true,
+"team": "Gillingham",
+"score": 1.15
+},
+"afc-wimbledon": {
+"n": "AFC Wimbledon",
+"ok": true,
+"team": "AFC Wimbledon",
+"score": 1.15
+},
+"colchester-united": {
+"n": "Colchester United",
+"ok": true,
+"team": "Colchester United",
+"score": 1.15
+},
+"grimsby-town": {
+"n": "Grimsby Town",
+"ok": true,
+"team": "Grimsby Town",
+"score": 1.15
+},
+"salford-city": {
+"n": "Salford City",
+"ok": true,
+"team": "Salford City",
+"score": 1.15
+},
+"chesterfield": {
+"n": "Chesterfield",
+"ok": true,
+"team": "Chesterfield",
+"score": 1.15
+},
+"tranmere-rovers": {
+"n": "Tranmere Rovers",
+"ok": true,
+"team": "Tranmere Rovers",
+"score": 1.15
+},
+"morecambe": {
+"n": "Morecambe",
+"ok": true,
+"team": "Morecambe",
+"score": 1.15
+},
+"harrogate-town": {
+"n": "Harrogate Town",
+"ok": true,
+"team": "Harrogate Town",
+"score": 1.15
+},
+"real-madrid": {
+"n": "Real Madrid",
+"ok": true,
+"team": "Real Madrid",
+"score": 1.15
+},
+"barcelona": {
+"n": "Barcelona",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"atletico-de-madrid": {
+"n": "Atl\u00e9tico de Madrid",
+"ok": true,
+"team": "Atl\u00e9tico Madrid",
+"score": 1.15
+},
+"athletic-bilbao": {
+"n": "Athletic Bilbao",
+"ok": true,
+"team": "Athletic Bilbao",
+"score": 1.15
+},
+"real-sociedad": {
+"n": "Real Sociedad",
+"ok": true,
+"team": "Real Sociedad",
+"score": 1.15
+},
+"villarreal": {
+"n": "Villarreal",
+"ok": true,
+"team": "Villarreal",
+"score": 1.15
+},
+"real-betis": {
+"n": "Real Betis",
+"ok": true,
+"team": "Real Betis",
+"score": 1.15
+},
+"sevilla": {
+"n": "Sevilla",
+"ok": true,
+"team": "Sevilla",
+"score": 1.15
+},
+"valencia": {
+"n": "Valencia",
+"ok": true,
+"team": "Valencia",
+"score": 1.15
+},
+"girona": {
+"n": "Girona",
+"ok": true,
+"team": "Girona",
+"score": 1.15
+},
+"celta-de-vigo": {
+"n": "Celta de Vigo",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"osasuna": {
+"n": "Osasuna",
+"ok": true,
+"team": "Osasuna",
+"score": 1.15
+},
+"mallorca": {
+"n": "Mallorca",
+"ok": true,
+"team": "Mallorca",
+"score": 1.15
+},
+"getafe": {
+"n": "Getafe",
+"ok": true,
+"team": "Getafe",
+"score": 1.15
+},
+"rayo-vallecano": {
+"n": "Rayo Vallecano",
+"ok": true,
+"team": "Rayo Vallecano",
+"score": 1.15
+},
+"espanyol": {
+"n": "Espanyol",
+"ok": true,
+"team": "Espanyol",
+"score": 1.15
+},
+"deportivo-la-coruna": {
+"n": "Deportivo La Coru\u00f1a",
+"ok": true,
+"team": "Deportivo Fabril",
+"score": 0.78
+},
+"malaga": {
+"n": "M\u00e1laga",
+"ok": true,
+"team": "M\u00e1laga",
+"score": 1.15
+},
+"real-zaragoza": {
+"n": "Real Zaragoza",
+"ok": true,
+"team": "Real Zaragoza",
+"score": 1.15
+},
+"sporting-de-gijon": {
+"n": "Sporting de Gij\u00f3n",
+"ok": true,
+"team": "Sporting Atl\u00e9tico",
+"score": 0.86
+},
+"real-oviedo": {
+"n": "Real Oviedo",
+"ok": true,
+"team": "Real Oviedo",
+"score": 1.15
+},
+"elche": {
+"n": "Elche",
+"ok": true,
+"team": "Elche",
+"score": 1.15
+},
+"levante": {
+"n": "Levante",
+"ok": true,
+"team": "Levante",
+"score": 1.15
+},
+"granada": {
+"n": "Granada",
+"ok": true,
+"team": "Granada",
+"score": 1.15
+},
+"almeria": {
+"n": "Almer\u00eda",
+"ok": true,
+"team": "Almer\u00eda",
+"score": 1.15
+},
+"cadiz": {
+"n": "C\u00e1diz",
+"ok": true,
+"team": "C\u00e1diz",
+"score": 1.15
+},
+"racing-santander": {
+"n": "Racing Santander",
+"ok": true,
+"team": "Racing de Santander",
+"score": 1.15
+},
+"eibar": {
+"n": "Eibar",
+"ok": true,
+"team": "Eibar",
+"score": 1.15
+},
+"burgos": {
+"n": "Burgos",
+"ok": true,
+"team": "Burgos",
+"score": 1.15
+},
+"huesca": {
+"n": "Huesca",
+"ok": true,
+"team": "Huesca",
+"score": 1.15
+},
+"albacete": {
+"n": "Albacete",
+"ok": true,
+"team": "Albacete",
+"score": 1.15
+},
+"real-valladolid": {
+"n": "Real Valladolid",
+"ok": true,
+"team": "Real Valladolid",
+"score": 1.15
+},
+"racing-ferrol": {
+"n": "Racing Ferrol",
+"ok": true,
+"team": "Racing Club de Ferrol",
+"score": 1.15
+},
+"cordoba": {
+"n": "C\u00f3rdoba",
+"ok": true,
+"team": "C\u00f3rdoba",
+"score": 1.15
+},
+"castellon": {
+"n": "Castell\u00f3n",
+"ok": true,
+"team": "Castell\u00f3n",
+"score": 1.15
+},
+"tenerife": {
+"n": "Tenerife",
+"ok": true,
+"team": "Tenerife",
+"score": 1.15
+},
+"alcorcon": {
+"n": "Alcorc\u00f3n",
+"ok": true,
+"team": "Alcorc\u00f3n",
+"score": 1.15
+},
+"mirandes": {
+"n": "Mirand\u00e9s",
+"ok": true,
+"team": "Mirand\u00e9s",
+"score": 1.15
+},
+"cultural-leonesa": {
+"n": "Cultural Leonesa",
+"ok": true,
+"team": "Cultural Leonesa",
+"score": 1.15
+},
+"real-murcia": {
+"n": "Real Murcia",
+"ok": true,
+"team": "Real Murcia",
+"score": 1.15
+},
+"ponferradina": {
+"n": "Ponferradina",
+"ok": true,
+"team": "Ponferradina",
+"score": 1.15
+},
+"sabadell": {
+"n": "Sabadell",
+"ok": true,
+"team": "Sabadell",
+"score": 1.15
+},
+"hercules": {
+"n": "H\u00e9rcules",
+"ok": true,
+"team": "H\u00e9rcules",
+"score": 1.15
+},
+"lugo": {
+"n": "Lugo",
+"ok": true,
+"team": "Lugo",
+"score": 1.15
+},
+"numancia": {
+"n": "Numancia",
+"ok": true,
+"team": "Numancia",
+"score": 1.15
+},
+"gimnastic": {
+"n": "Gimn\u00e0stic",
+"ok": true,
+"team": "Gimn\u00e0stic",
+"score": 1.15
+},
+"linares": {
+"n": "Linares",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"arenteiro": {
+"n": "Arenteiro",
+"ok": true,
+"team": "Arenteiro",
+"score": 1.15
+},
+"inter": {
+"n": "Inter",
+"ok": true,
+"team": "Inter Milan",
+"score": 1.15
+},
+"milan": {
+"n": "Milan",
+"ok": true,
+"team": "AC Milan",
+"score": 1.15
+},
+"juventus": {
+"n": "Juventus",
+"ok": true,
+"team": "Juventus",
+"score": 1.15
+},
+"napoli": {
+"n": "Napoli",
+"ok": true,
+"team": "Napoli",
+"score": 1.15
+},
+"atalanta": {
+"n": "Atalanta",
+"ok": true,
+"team": "Atalanta",
+"score": 1.15
+},
+"roma": {
+"n": "Roma",
+"ok": true,
+"team": "Roma",
+"score": 1.15
+},
+"lazio": {
+"n": "Lazio",
+"ok": true,
+"team": "Lazio",
+"score": 1.15
+},
+"fiorentina": {
+"n": "Fiorentina",
+"ok": true,
+"team": "Fiorentina",
+"score": 1.15
+},
+"bologna": {
+"n": "Bologna",
+"ok": true,
+"team": "Bologna",
+"score": 1.15
+},
+"torino": {
+"n": "Torino",
+"ok": true,
+"team": "Torino",
+"score": 1.15
+},
+"genoa": {
+"n": "Genoa",
+"ok": true,
+"team": "Genoa",
+"score": 1.15
+},
+"udinese": {
+"n": "Udinese",
+"ok": true,
+"team": "Udinese",
+"score": 1.15
+},
+"monza": {
+"n": "Monza",
+"ok": true,
+"team": "Monza",
+"score": 1.15
+},
+"lecce": {
+"n": "Lecce",
+"ok": true,
+"team": "Lecce",
+"score": 1.15
+},
+"sassuolo": {
+"n": "Sassuolo",
+"ok": true,
+"team": "Sassuolo",
+"score": 1.15
+},
+"cagliari": {
+"n": "Cagliari",
+"ok": true,
+"team": "Cagliari",
+"score": 1.15
+},
+"parma": {
+"n": "Parma",
+"ok": true,
+"team": "Parma",
+"score": 1.15
+},
+"como": {
+"n": "Como",
+"ok": true,
+"team": "Como",
+"score": 1.15
+},
+"venezia": {
+"n": "Venezia",
+"ok": true,
+"team": "Venezia",
+"score": 1.15
+},
+"palermo": {
+"n": "Palermo",
+"ok": true,
+"team": "Palermo",
+"score": 1.15
+},
+"sampdoria": {
+"n": "Sampdoria",
+"ok": true,
+"team": "Sampdoria",
+"score": 1.15
+},
+"empoli": {
+"n": "Empoli",
+"ok": true,
+"team": "Empoli",
+"score": 1.15
+},
+"cremonese": {
+"n": "Cremonese",
+"ok": true,
+"team": "Cremonese",
+"score": 1.15
+},
+"spezia": {
+"n": "Spezia",
+"ok": true,
+"team": "Spezia",
+"score": 1.15
+},
+"bari": {
+"n": "Bari",
+"ok": true,
+"team": "Bari",
+"score": 1.15
+},
+"brescia": {
+"n": "Brescia",
+"ok": true,
+"team": "Brescia",
+"score": 1.15
+},
+"pisa": {
+"n": "Pisa",
+"ok": true,
+"team": "Pisa",
+"score": 1.15
+},
+"cesena": {
+"n": "Cesena",
+"ok": true,
+"team": "Cesena",
+"score": 1.15
+},
+"modena": {
+"n": "Modena",
+"ok": true,
+"team": "Modena",
+"score": 1.15
+},
+"catanzaro": {
+"n": "Catanzaro",
+"ok": true,
+"team": "Catanzaro",
+"score": 1.15
+},
+"reggiana": {
+"n": "Reggiana",
+"ok": true,
+"team": "Reggiana",
+"score": 1.15
+},
+"salernitana": {
+"n": "Salernitana",
+"ok": true,
+"team": "Salernitana",
+"score": 1.15
+},
+"triestina": {
+"n": "Triestina",
+"ok": true,
+"team": "Triestina",
+"score": 1.15
+},
+"padova": {
+"n": "Padova",
+"ok": true,
+"team": "Padova",
+"score": 1.15
+},
+"vicenza": {
+"n": "Vicenza",
+"ok": true,
+"team": "Vicenza",
+"score": 1.15
+},
+"lecco": {
+"n": "Lecco",
+"ok": true,
+"team": "Lecco",
+"score": 1.15
+},
+"ascoli": {
+"n": "Ascoli",
+"ok": true,
+"team": "Ascoli",
+"score": 1.15
+},
+"avellino": {
+"n": "Avellino",
+"ok": true,
+"team": "Avellino",
+"score": 1.15
+},
+"benevento": {
+"n": "Benevento",
+"ok": true,
+"team": "Benevento",
+"score": 1.15
+},
+"foggia": {
+"n": "Foggia",
+"ok": true,
+"team": "Foggia",
+"score": 1.15
+},
+"perugia": {
+"n": "Perugia",
+"ok": true,
+"team": "Perugia",
+"score": 1.15
+},
+"pescara": {
+"n": "Pescara",
+"ok": true,
+"team": "Pescara",
+"score": 1.15
+},
+"carrarese": {
+"n": "Carrarese",
+"ok": true,
+"team": "Carrarese",
+"score": 1.15
+},
+"arezzo": {
+"n": "Arezzo",
+"ok": true,
+"team": "Arezzo",
+"score": 1.15
+},
+"cosenza": {
+"n": "Cosenza",
+"ok": true,
+"team": "Cosenza",
+"score": 1.15
+},
+"juve-stabia": {
+"n": "Juve Stabia",
+"ok": true,
+"team": "Juve Stabia",
+"score": 1.15
+},
+"taranto": {
+"n": "Taranto",
+"ok": true,
+"team": "Taranto",
+"score": 1.15
+},
+"rimini": {
+"n": "Rimini",
+"ok": true,
+"team": "Rimini",
+"score": 1.15
+},
+"bayern-munchen": {
+"n": "Bayern M\u00fcnchen",
+"ok": true,
+"team": "Bayern Munich",
+"score": 1.15
+},
+"bayer-leverkusen": {
+"n": "Bayer Leverkusen",
+"ok": true,
+"team": "Bayer Leverkusen",
+"score": 1.15
+},
+"borussia-dortmund": {
+"n": "Borussia Dortmund",
+"ok": true,
+"team": "Borussia Dortmund",
+"score": 1.15
+},
+"rb-leipzig": {
+"n": "RB Leipzig",
+"ok": true,
+"team": "RB Leipzig",
+"score": 1.15
+},
+"eintracht-frankfurt": {
+"n": "Eintracht Frankfurt",
+"ok": true,
+"team": "Eintracht Frankfurt",
+"score": 1.15
+},
+"vfb-stuttgart": {
+"n": "VfB Stuttgart",
+"ok": true,
+"team": "Stuttgart",
+"score": 0.97
+},
+"wolfsburg": {
+"n": "Wolfsburg",
+"ok": true,
+"team": "Wolfsburg",
+"score": 1.15
+},
+"monchengladbach": {
+"n": "M\u00f6nchengladbach",
+"ok": true,
+"team": "Borussia M\u00f6nchengladbach",
+"score": 0.92
+},
+"freiburg": {
+"n": "Freiburg",
+"ok": true,
+"team": "Freiburg",
+"score": 1.15
+},
+"hoffenheim": {
+"n": "Hoffenheim",
+"ok": true,
+"team": "Hoffenheim",
+"score": 1.15
+},
+"werder-bremen": {
+"n": "Werder Bremen",
+"ok": true,
+"team": "Werder Bremen",
+"score": 1.15
+},
+"union-berlin": {
+"n": "Union Berlin",
+"ok": true,
+"team": "Union Berlin",
+"score": 1.15
+},
+"mainz-05": {
+"n": "Mainz 05",
+"ok": true,
+"team": "Mainz 05 Women",
+"score": 0.88
+},
+"augsburg": {
+"n": "Augsburg",
+"ok": true,
+"team": "Augsburg",
+"score": 1.15
+},
+"heidenheim": {
+"n": "Heidenheim",
+"ok": true,
+"team": "Heidenheim",
+"score": 1.15
+},
+"koln": {
+"n": "K\u00f6ln",
+"ok": true,
+"team": "K\u00f6ln",
+"score": 1.15
+},
+"hamburger-sv": {
+"n": "Hamburger SV",
+"ok": true,
+"team": "Hamburg",
+"score": 1.15
+},
+"schalke-04": {
+"n": "Schalke 04",
+"ok": true,
+"team": "Schalke 04",
+"score": 1.15
+},
+"hertha-bsc": {
+"n": "Hertha BSC",
+"ok": true,
+"team": "Hertha",
+"score": 0.9
+},
+"hannover-96": {
+"n": "Hannover 96",
+"ok": true,
+"team": "Hannover 96",
+"score": 1.15
+},
+"fortuna-dusseldorf": {
+"n": "Fortuna D\u00fcsseldorf",
+"ok": true,
+"team": "Fortuna D\u00fcsseldorf",
+"score": 1.15
+},
+"nurnberg": {
+"n": "N\u00fcrnberg",
+"ok": true,
+"team": "N\u00fcrnberg",
+"score": 1.15
+},
+"karlsruher-sc": {
+"n": "Karlsruher SC",
+"ok": true,
+"team": "Karlsruhe",
+"score": 1.1
+},
+"kaiserslautern": {
+"n": "Kaiserslautern",
+"ok": true,
+"team": "Kaiserslautern",
+"score": 1.15
+},
+"paderborn": {
+"n": "Paderborn",
+"ok": true,
+"team": "Paderborn",
+"score": 1.15
+},
+"magdeburg": {
+"n": "Magdeburg",
+"ok": true,
+"team": "Magdeburg",
+"score": 1.15
+},
+"elversberg": {
+"n": "Elversberg",
+"ok": true,
+"team": "Elversberg",
+"score": 1.15
+},
+"greuther-furth": {
+"n": "Greuther F\u00fcrth",
+"ok": true,
+"team": "Greuther F\u00fcrth",
+"score": 1.15
+},
+"darmstadt-98": {
+"n": "Darmstadt 98",
+"ok": true,
+"team": "Darmstadt",
+"score": 1.01
+},
+"holstein-kiel": {
+"n": "Holstein Kiel",
+"ok": true,
+"team": "Holstein Kiel",
+"score": 1.15
+},
+"braunschweig": {
+"n": "Braunschweig",
+"ok": true,
+"team": "Eintracht Braunschweig",
+"score": 1.15
+},
+"preuen-munster": {
+"n": "Preu\u00dfen M\u00fcnster",
+"ok": true,
+"team": "Preu\u00dfen M\u00fcnster",
+"score": 1.15
+},
+"dynamo-dresden": {
+"n": "Dynamo Dresden",
+"ok": true,
+"team": "Dynamo Dresden",
+"score": 1.15
+},
+"arminia-bielefeld": {
+"n": "Arminia Bielefeld",
+"ok": true,
+"team": "Arminia Bielefeld",
+"score": 1.15
+},
+"1860-munchen": {
+"n": "1860 M\u00fcnchen",
+"ok": true,
+"team": "1860 Munich",
+"score": 1.02
+},
+"hansa-rostock": {
+"n": "Hansa Rostock",
+"ok": true,
+"team": "Hansa Rostock",
+"score": 1.15
+},
+"saarbrucken": {
+"n": "Saarbr\u00fccken",
+"ok": true,
+"team": "Saarbr\u00fccken",
+"score": 1.15
+},
+"energie-cottbus": {
+"n": "Energie Cottbus",
+"ok": true,
+"team": "Energie Cottbus",
+"score": 1.15
+},
+"waldhof-mannheim": {
+"n": "Waldhof Mannheim",
+"ok": true,
+"team": "Waldhof Mannheim",
+"score": 1.15
+},
+"msv-duisburg": {
+"n": "MSV Duisburg",
+"ok": true,
+"team": "Duisburg",
+"score": 0.95
+},
+"erzgebirge-aue": {
+"n": "Erzgebirge Aue",
+"ok": true,
+"team": "Erzgebirge Aue",
+"score": 1.15
+},
+"viktoria-koln": {
+"n": "Viktoria K\u00f6ln",
+"ok": true,
+"team": "Viktoria K\u00f6ln",
+"score": 1.15
+},
+"osnabruck": {
+"n": "Osnabr\u00fcck",
+"ok": true,
+"team": "Osnabr\u00fcck",
+"score": 1.15
+},
+"wehen-wiesbaden": {
+"n": "Wehen Wiesbaden",
+"ok": true,
+"team": "Wehen Wiesbaden",
+"score": 1.15
+},
+"ingolstadt": {
+"n": "Ingolstadt",
+"ok": true,
+"team": "Ingolstadt",
+"score": 1.15
+},
+"verl": {
+"n": "Verl",
+"ok": true,
+"team": "Verl",
+"score": 1.15
+},
+"jahn-regensburg": {
+"n": "Jahn Regensburg",
+"ok": true,
+"team": "Jahn Regensburg",
+"score": 1.15
+},
+"sandhausen": {
+"n": "Sandhausen",
+"ok": true,
+"team": "Sandhausen",
+"score": 1.15
+},
+"paris-saint-germain": {
+"n": "Paris Saint-Germain",
+"ok": false,
+"why": "sem match",
+"best": "Torcy"
+},
+"monaco": {
+"n": "Monaco",
+"ok": false,
+"why": "sem match",
+"best": "Monaco"
+},
+"marseille": {
+"n": "Marseille",
+"ok": true,
+"team": "Marseille",
+"score": 1.15
+},
+"lille": {
+"n": "Lille",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"lyon": {
+"n": "Lyon",
+"ok": true,
+"team": "Lyon",
+"score": 1.15
+},
+"lens": {
+"n": "Lens",
+"ok": true,
+"team": "Lens",
+"score": 1.15
+},
+"nice": {
+"n": "Nice",
+"ok": true,
+"team": "Nice",
+"score": 1.15
+},
+"rennes": {
+"n": "Rennes",
+"ok": true,
+"team": "Rennes",
+"score": 1.15
+},
+"brest": {
+"n": "Brest",
+"ok": true,
+"team": "Brest",
+"score": 1.15
+},
+"reims": {
+"n": "Reims",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"toulouse": {
+"n": "Toulouse",
+"ok": true,
+"team": "Toulouse",
+"score": 1.15
+},
+"strasbourg": {
+"n": "Strasbourg",
+"ok": true,
+"team": "Strasbourg",
+"score": 1.15
+},
+"nantes": {
+"n": "Nantes",
+"ok": true,
+"team": "Nantes",
+"score": 1.15
+},
+"montpellier": {
+"n": "Montpellier",
+"ok": true,
+"team": "Montpellier",
+"score": 1.15
+},
+"lorient": {
+"n": "Lorient",
+"ok": true,
+"team": "Lorient",
+"score": 1.15
+},
+"auxerre": {
+"n": "Auxerre",
+"ok": true,
+"team": "Auxerre",
+"score": 1.15
+},
+"saint-etienne": {
+"n": "Saint-\u00c9tienne",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"bordeaux": {
+"n": "Bordeaux",
+"ok": true,
+"team": "Bordeaux",
+"score": 1.15
+},
+"metz": {
+"n": "Metz",
+"ok": true,
+"team": "Metz",
+"score": 1.15
+},
+"angers": {
+"n": "Angers",
+"ok": true,
+"team": "Angers",
+"score": 1.15
+},
+"le-havre": {
+"n": "Le Havre",
+"ok": true,
+"team": "Le Havre",
+"score": 1.15
+},
+"paris-fc": {
+"n": "Paris FC",
+"ok": true,
+"team": "Paris FC",
+"score": 1.15
+},
+"caen": {
+"n": "Caen",
+"ok": true,
+"team": "Caen",
+"score": 1.15
+},
+"guingamp": {
+"n": "Guingamp",
+"ok": true,
+"team": "Guingamp",
+"score": 1.15
+},
+"rodez": {
+"n": "Rodez",
+"ok": true,
+"team": "Rodez",
+"score": 1.15
+},
+"amiens": {
+"n": "Amiens",
+"ok": true,
+"team": "Amiens",
+"score": 1.15
+},
+"troyes": {
+"n": "Troyes",
+"ok": true,
+"team": "Troyes",
+"score": 1.15
+},
+"pau": {
+"n": "Pau",
+"ok": true,
+"team": "Pau",
+"score": 1.15
+},
+"laval": {
+"n": "Laval",
+"ok": true,
+"team": "Laval",
+"score": 1.15
+},
+"grenoble": {
+"n": "Grenoble",
+"ok": true,
+"team": "Grenoble",
+"score": 1.15
+},
+"clermont": {
+"n": "Clermont",
+"ok": true,
+"team": "Clermont Foot",
+"score": 0.91
+},
+"dunkerque": {
+"n": "Dunkerque",
+"ok": true,
+"team": "Dunkerque",
+"score": 1.15
+},
+"benfica": {
+"n": "Benfica",
+"ok": true,
+"team": "Benfica",
+"score": 1.15
+},
+"porto": {
+"n": "Porto",
+"ok": true,
+"team": "Porto",
+"score": 1.15
+},
+"sporting-cp": {
+"n": "Sporting CP",
+"ok": true,
+"team": "Sporting CP",
+"score": 1.15
+},
+"braga": {
+"n": "Braga",
+"ok": true,
+"team": "Braga",
+"score": 1.15
+},
+"vitoria-sc": {
+"n": "Vit\u00f3ria SC",
+"ok": true,
+"team": "Vit\u00f3ria de Guimar\u00e3es",
+"score": 1.15
+},
+"famalicao": {
+"n": "Famalic\u00e3o",
+"ok": true,
+"team": "Famalicao",
+"score": 1.15
+},
+"gil-vicente": {
+"n": "Gil Vicente",
+"ok": true,
+"team": "Gil Vicente",
+"score": 1.15
+},
+"moreirense": {
+"n": "Moreirense",
+"ok": true,
+"team": "Moreirense",
+"score": 1.15
+},
+"estoril": {
+"n": "Estoril",
+"ok": true,
+"team": "Estoril Praia",
+"score": 0.85
+},
+"casa-pia": {
+"n": "Casa Pia",
+"ok": true,
+"team": "Casa Pia",
+"score": 1.15
+},
+"arouca": {
+"n": "Arouca",
+"ok": true,
+"team": "Arouca",
+"score": 1.15
+},
+"rio-ave": {
+"n": "Rio Ave",
+"ok": true,
+"team": "Rio Ave",
+"score": 1.15
+},
+"boavista": {
+"n": "Boavista",
+"ok": true,
+"team": "Boavista",
+"score": 1.15
+},
+"santa-clara": {
+"n": "Santa Clara",
+"ok": true,
+"team": "Santa Clara",
+"score": 1.15
+},
+"nacional": {
+"n": "Nacional",
+"ok": true,
+"team": "Nacional de Madeira",
+"score": 1.15
+},
+"farense": {
+"n": "Farense",
+"ok": true,
+"team": "Farense",
+"score": 1.15
+},
+"maritimo": {
+"n": "Mar\u00edtimo",
+"ok": true,
+"team": "Mar\u00edtimo",
+"score": 1.15
+},
+"vizela": {
+"n": "Vizela",
+"ok": true,
+"team": "Vizela",
+"score": 1.15
+},
+"tondela": {
+"n": "Tondela",
+"ok": true,
+"team": "Tondela",
+"score": 1.15
+},
+"academica": {
+"n": "Acad\u00e9mica",
+"ok": false,
+"why": "sem match",
+"best": "Academica SC"
+},
+"belenenses": {
+"n": "Belenenses",
+"ok": true,
+"team": "Belenenses",
+"score": 1.15
+},
+"chaves": {
+"n": "Chaves",
+"ok": true,
+"team": "Chaves",
+"score": 1.15
+},
+"penafiel": {
+"n": "Penafiel",
+"ok": true,
+"team": "Penafiel",
+"score": 1.15
+},
+"pacos-de-ferreira": {
+"n": "Pa\u00e7os de Ferreira",
+"ok": true,
+"team": "Pa\u00e7os de Ferreira",
+"score": 1.15
+},
+"leixoes": {
+"n": "Leix\u00f5es",
+"ok": true,
+"team": "Leix\u00f5es",
+"score": 1.15
+},
+"portimonense": {
+"n": "Portimonense",
+"ok": true,
+"team": "Portimonense",
+"score": 1.15
+},
+"torreense": {
+"n": "Torreense",
+"ok": true,
+"team": "Torreense",
+"score": 1.15
+},
+"feirense": {
+"n": "Feirense",
+"ok": true,
+"team": "Feirense",
+"score": 1.15
+},
+"mafra": {
+"n": "Mafra",
+"ok": true,
+"team": "Mafra",
+"score": 1.15
+},
+"trofense": {
+"n": "Trofense",
+"ok": true,
+"team": "Trofense",
+"score": 1.15
+},
+"oliveirense": {
+"n": "Oliveirense",
+"ok": true,
+"team": "Oliveirense",
+"score": 1.15
+},
+"aves": {
+"n": "Aves",
+"ok": true,
+"team": "Aves",
+"score": 1.15
+},
+"ajax": {
+"n": "Ajax",
+"ok": true,
+"team": "Ajax",
+"score": 1.15
+},
+"psv": {
+"n": "PSV",
+"ok": true,
+"team": "PSV Eindhoven",
+"score": 1.15
+},
+"feyenoord": {
+"n": "Feyenoord",
+"ok": true,
+"team": "Feyenoord",
+"score": 1.15
+},
+"az-alkmaar": {
+"n": "AZ Alkmaar",
+"ok": true,
+"team": "AZ Alkmaar",
+"score": 1.15
+},
+"twente": {
+"n": "Twente",
+"ok": true,
+"team": "Twente",
+"score": 1.15
+},
+"utrecht": {
+"n": "Utrecht",
+"ok": true,
+"team": "Utrecht",
+"score": 1.15
+},
+"sparta-rotterdam": {
+"n": "Sparta Rotterdam",
+"ok": true,
+"team": "Sparta Rotterdam",
+"score": 1.15
+},
+"heerenveen": {
+"n": "Heerenveen",
+"ok": true,
+"team": "Heerenveen",
+"score": 1.15
+},
+"go-ahead-eagles": {
+"n": "Go Ahead Eagles",
+"ok": true,
+"team": "Go Ahead Eagles",
+"score": 1.15
+},
+"nec-nijmegen": {
+"n": "NEC Nijmegen",
+"ok": true,
+"team": "NEC Nijmegen",
+"score": 1.15
+},
+"fortuna-sittard": {
+"n": "Fortuna Sittard",
+"ok": true,
+"team": "Fortuna Sittard",
+"score": 1.15
+},
+"groningen": {
+"n": "Groningen",
+"ok": true,
+"team": "Groningen",
+"score": 1.15
+},
+"heracles": {
+"n": "Heracles",
+"ok": true,
+"team": "Heracles Almelo",
+"score": 0.85
+},
+"pec-zwolle": {
+"n": "PEC Zwolle",
+"ok": true,
+"team": "PEC Zwolle",
+"score": 1.15
+},
+"willem-ii": {
+"n": "Willem II",
+"ok": true,
+"team": "Willem II",
+"score": 1.15
+},
+"rkc-waalwijk": {
+"n": "RKC Waalwijk",
+"ok": true,
+"team": "RKC Waalwijk",
+"score": 1.15
+},
+"almere-city": {
+"n": "Almere City",
+"ok": true,
+"team": "Almere City",
+"score": 1.15
+},
+"vitesse": {
+"n": "Vitesse",
+"ok": true,
+"team": "Vitesse",
+"score": 1.15
+},
+"roda-jc": {
+"n": "Roda JC",
+"ok": true,
+"team": "Roda JC",
+"score": 1.15
+},
+"cambuur": {
+"n": "Cambuur",
+"ok": true,
+"team": "Cambuur",
+"score": 1.15
+},
+"nac-breda": {
+"n": "NAC Breda",
+"ok": true,
+"team": "NAC Breda",
+"score": 1.15
+},
+"den-bosch": {
+"n": "Den Bosch",
+"ok": true,
+"team": "Den Bosch",
+"score": 1.15
+},
+"excelsior": {
+"n": "Excelsior",
+"ok": true,
+"team": "Excelsior",
+"score": 1.15
+},
+"de-graafschap": {
+"n": "De Graafschap",
+"ok": true,
+"team": "De Graafschap",
+"score": 1.15
+},
+"dordrecht": {
+"n": "Dordrecht",
+"ok": true,
+"team": "Dordrecht",
+"score": 1.15
+},
+"vvv-venlo": {
+"n": "VVV-Venlo",
+"ok": false,
+"why": "sem match",
+"best": null
+},
+"ado-den-haag": {
+"n": "ADO Den Haag",
+"ok": true,
+"team": "ADO Den Haag",
+"score": 1.15
+},
+"emmen": {
+"n": "Emmen",
+"ok": true,
+"team": "FC Emmen",
+"score": 1.15
+},
+"helmond-sport": {
+"n": "Helmond Sport",
+"ok": true,
+"team": "Helmond Sport",
+"score": 1.15
+},
+"mvv-maastricht": {
+"n": "MVV Maastricht",
+"ok": true,
+"team": "MVV Maastricht",
+"score": 1.15
+},
+"telstar": {
+"n": "Telstar",
+"ok": true,
+"team": "Telstar",
+"score": 1.15
+},
+"jong-ajax": {
+"n": "Jong Ajax",
+"ok": true,
+"team": "Jong Ajax",
+"score": 1.15
+},
+"river-plate": {
+"n": "River Plate",
+"ok": true,
+"team": "River Plate",
+"score": 1.15
+},
+"boca-juniors": {
+"n": "Boca Juniors",
+"ok": true,
+"team": "Boca Juniors",
+"score": 1.15
+},
+"racing-club": {
+"n": "Racing Club",
+"ok": true,
+"team": "Racing Club",
+"score": 1.15
+},
+"independiente": {
+"n": "Independiente",
+"ok": true,
+"team": "Independiente",
+"score": 1.15
+},
+"san-lorenzo": {
+"n": "San Lorenzo",
+"ok": true,
+"team": "San Lorenzo",
+"score": 1.15
+},
+"estudiantes": {
+"n": "Estudiantes",
+"ok": true,
+"team": "Estudiantes de La Plata",
+"score": 1.15
+},
+"velez-sarsfield": {
+"n": "V\u00e9lez Sarsfield",
+"ok": true,
+"team": "V\u00e9lez Sarsfield",
+"score": 1.15
+},
+"talleres": {
+"n": "Talleres",
+"ok": true,
+"team": "Talleres de C\u00f3rdoba",
+"score": 0.82
+},
+"lanus": {
+"n": "Lan\u00fas",
+"ok": true,
+"team": "Lan\u00fas",
+"score": 1.15
+},
+"argentinos-juniors": {
+"n": "Argentinos Juniors",
+"ok": true,
+"team": "Argentinos Juniors",
+"score": 1.15
+},
+"rosario-central": {
+"n": "Rosario Central",
+"ok": true,
+"team": "Rosario Central",
+"score": 1.15
+},
+"newell-s-old-boys": {
+"n": "Newell's Old Boys",
+"ok": true,
+"team": "Newell's Old Boys",
+"score": 1.15
+},
+"huracan": {
+"n": "Hurac\u00e1n",
+"ok": true,
+"team": "Hurac\u00e1n",
+"score": 1.15
+},
+"defensa-y-justicia": {
+"n": "Defensa y Justicia",
+"ok": true,
+"team": "Defensa y Justicia",
+"score": 1.15
+},
+"belgrano": {
+"n": "Belgrano",
+"ok": true,
+"team": "Belgrano",
+"score": 1.15
+},
+"banfield": {
+"n": "Banfield",
+"ok": true,
+"team": "Banfield",
+"score": 1.15
+},
+"instituto": {
+"n": "Instituto",
+"ok": true,
+"team": "Instituto",
+"score": 1.15
+},
+"platense": {
+"n": "Platense",
+"ok": true,
+"team": "Platense",
+"score": 1.15
+},
+"tigre": {
+"n": "Tigre",
+"ok": true,
+"team": "Tigre",
+"score": 1.15
+},
+"godoy-cruz": {
+"n": "Godoy Cruz",
+"ok": true,
+"team": "Godoy Cruz",
+"score": 1.15
+},
+"colon": {
+"n": "Col\u00f3n",
+"ok": true,
+"team": "Col\u00f3n",
+"score": 1.15
+},
+"union": {
+"n": "Uni\u00f3n",
+"ok": true,
+"team": "Uni\u00f3n",
+"score": 1.15
+},
+"gimnasia-la-plata": {
+"n": "Gimnasia La Plata",
+"ok": true,
+"team": "Gimnasia y Esgrima de La Plata",
+"score": 0.92
+},
+"atletico-tucuman": {
+"n": "Atl\u00e9tico Tucum\u00e1n",
+"ok": true,
+"team": "Atl\u00e9tico Tucum\u00e1n",
+"score": 1.15
+},
+"quilmes": {
+"n": "Quilmes",
+"ok": true,
+"team": "Quilmes",
+"score": 1.15
+},
+"chacarita": {
+"n": "Chacarita",
+"ok": true,
+"team": "Chacarita Juniors",
+"score": 1.15
+},
+"almirante-brown": {
+"n": "Almirante Brown",
+"ok": true,
+"team": "Almirante Brown",
+"score": 1.15
+},
+"ferro-carril-oeste": {
+"n": "Ferro Carril Oeste",
+"ok": true,
+"team": "Ferro Carril Oeste",
+"score": 1.15
+},
+"nueva-chicago": {
+"n": "Nueva Chicago",
+"ok": true,
+"team": "Nueva Chicago",
+"score": 1.15
+},
+"temperley": {
+"n": "Temperley",
+"ok": true,
+"team": "Temperley",
+"score": 1.15
+},
+"sarmiento": {
+"n": "Sarmiento",
+"ok": true,
+"team": "Sarmiento",
+"score": 1.15
+},
+"barracas-central": {
+"n": "Barracas Central",
+"ok": true,
+"team": "Barracas Central",
+"score": 1.15
+},
+"galatasaray": {
+"n": "Galatasaray",
+"ok": true,
+"team": "Galatasaray",
+"score": 1.15
+},
+"fenerbahce": {
+"n": "Fenerbah\u00e7e",
+"ok": true,
+"team": "Fenerbah\u00e7e",
+"score": 1.15
+},
+"besiktas": {
+"n": "Be\u015fikta\u015f",
+"ok": true,
+"team": "Be\u015fikta\u015f",
+"score": 1.15
+},
+"trabzonspor": {
+"n": "Trabzonspor",
+"ok": true,
+"team": "Trabzonspor",
+"score": 1.15
+},
+"basaksehir": {
+"n": "Ba\u015fak\u015fehir",
+"ok": true,
+"team": "\u0130stanbul Ba\u015fak\u015fehir",
+"score": 0.84
+},
+"samsunspor": {
+"n": "Samsunspor",
+"ok": true,
+"team": "Samsunspor",
+"score": 1.15
+},
+"konyaspor": {
+"n": "Konyaspor",
+"ok": true,
+"team": "Konyaspor",
+"score": 1.15
+},
+"antalyaspor": {
+"n": "Antalyaspor",
+"ok": true,
+"team": "Antalyaspor",
+"score": 1.15
+},
+"alanyaspor": {
+"n": "Alanyaspor",
+"ok": true,
+"team": "Alanyaspor",
+"score": 1.15
+},
+"kasmpasa": {
+"n": "Kas\u0131mpa\u015fa",
+"ok": true,
+"team": "Kas\u0131mpa\u015fa",
+"score": 1.15
+},
+"sivasspor": {
+"n": "Sivasspor",
+"ok": true,
+"team": "Sivasspor",
+"score": 1.15
+},
+"kayserispor": {
+"n": "Kayserispor",
+"ok": true,
+"team": "Kayserispor",
+"score": 1.15
+},
+"rizespor": {
+"n": "Rizespor",
+"ok": true,
+"team": "Rizespor",
+"score": 1.15
+},
+"gaziantep-fk": {
+"n": "Gaziantep FK",
+"ok": true,
+"team": "Gaziantep",
+"score": 1.01
+},
+"eyupspor": {
+"n": "Ey\u00fcpspor",
+"ok": true,
+"team": "Ey\u00fcpspor",
+"score": 1.15
+},
+"bodrum-fk": {
+"n": "Bodrum FK",
+"ok": true,
+"team": "Bodrum",
+"score": 0.95
+},
+"bursaspor": {
+"n": "Bursaspor",
+"ok": true,
+"team": "Bursaspor",
+"score": 1.15
+},
+"goztepe": {
+"n": "G\u00f6ztepe",
+"ok": true,
+"team": "G\u00f6ztepe",
+"score": 1.15
+},
+"sakaryaspor": {
+"n": "Sakaryaspor",
+"ok": true,
+"team": "Sakaryaspor",
+"score": 1.15
+},
+"kocaelispor": {
+"n": "Kocaelispor",
+"ok": true,
+"team": "Kocaelispor",
+"score": 1.15
+},
+"boluspor": {
+"n": "Boluspor",
+"ok": true,
+"team": "Boluspor",
+"score": 1.15
+},
+"umraniyespor": {
+"n": "\u00dcmraniyespor",
+"ok": true,
+"team": "\u00dcmraniyespor",
+"score": 1.15
+},
+"pendikspor": {
+"n": "Pendikspor",
+"ok": true,
+"team": "Pendikspor",
+"score": 1.15
+},
+"corum-fk": {
+"n": "\u00c7orum FK",
+"ok": true,
+"team": "\u00c7orum",
+"score": 0.92
+},
+"erzurumspor": {
+"n": "Erzurumspor",
+"ok": true,
+"team": "Erzurumspor",
+"score": 1.15
+},
+"manisa-fk": {
+"n": "Manisa FK",
+"ok": true,
+"team": "Manisa",
+"score": 0.95
+},
+"keciorengucu": {
+"n": "Ke\u00e7i\u00f6reng\u00fcc\u00fc",
+"ok": true,
+"team": "Ankara Ke\u00e7i\u00f6reng\u00fcc\u00fc",
+"score": 0.92
+},
+"adanaspor": {
+"n": "Adanaspor",
+"ok": true,
+"team": "Adanaspor",
+"score": 1.15
+},
+"altay": {
+"n": "Altay",
+"ok": true,
+"team": "Altay",
+"score": 1.15
+},
+"giresunspor": {
+"n": "Giresunspor",
+"ok": true,
+"team": "Giresunspor",
+"score": 1.15
+},
+"adana-demirspor": {
+"n": "Adana Demirspor",
+"ok": true,
+"team": "Adana Demirspor",
+"score": 1.15
+},
+"hatayspor": {
+"n": "Hatayspor",
+"ok": true,
+"team": "Hatayspor",
+"score": 1.15
+}
+}

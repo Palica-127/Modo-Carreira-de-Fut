@@ -6,7 +6,7 @@ ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 API='https://www.thesportsdb.com/api/v1/json/123/searchteams.php?t='
 CTRY={'Brasil':'Brazil','Inglaterra':'England','Espanha':'Spain','Itália':'Italy','Alemanha':'Germany','França':'France','Portugal':'Portugal','Holanda':'Netherlands','Argentina':'Argentina','Turquia':'Turkey'}
 # nomes em português/abreviados -> nome mais provável na base
-ALIAS={'Inter':'Inter Milan','Milan':'AC Milan','Brighton':'Brighton and Hove Albion','Wolverhampton':'Wolverhampton Wanderers','Peterborough':'Peterborough United','West Bromwich':'West Bromwich Albion','Bragantino':'RB Bragantino','Atlético de Madrid':'Atletico Madrid','Barcelona':'FC Barcelona','Sporting de Gijón':'Sporting Gijon','Celta de Vigo':'Celta Vigo','Bayern München':'Bayern Munich','Borussia Mönchengladbach':"Borussia Monchengladbach"}
+ALIAS={'Swansea City':'Swansea','Wrexham':'Wrexham AFC','PSV':'PSV Eindhoven','Paris Saint-Germain':'Paris SG','Hamburger SV':'Hamburg','Braunschweig':'Eintracht Braunschweig','Nottingham Forest':'Nottingham Forest','Girona':'Girona FC','Celta de Vigo':'Celta Vigo','Saint-Étienne':'Saint-Etienne','Vitória SC':'Vitoria Guimaraes','Académica':'Academica','Linares':'Linares Deportivo','Chacarita':'Chacarita Juniors','Estudiantes':'Estudiantes de La Plata','Jong Ajax':'Jong Ajax','Operário-PR':'Operario Ferroviario','América-MG':'America Mineiro','Botafogo-SP':'Botafogo SP','Nacional':'Nacional Madeira','Inter':'Inter Milan','Milan':'AC Milan','Brighton':'Brighton and Hove Albion','Wolverhampton':'Wolverhampton Wanderers','Peterborough':'Peterborough United','West Bromwich':'West Bromwich Albion','Bragantino':'RB Bragantino','Atlético de Madrid':'Atletico Madrid','Barcelona':'FC Barcelona','Sporting de Gijón':'Sporting Gijon','Celta de Vigo':'Celta Vigo','Bayern München':'Bayern Munich','Borussia Mönchengladbach':"Borussia Monchengladbach"}
 def slug(s):
     s=unicodedata.normalize('NFKD',s).encode('ascii','ignore').decode().lower()
     return re.sub(r'[^a-z0-9]+','-',s).strip('-')
@@ -39,7 +39,7 @@ def main():
         except Exception: teams=[]
         for t in teams:
             if t.get('strSport')!='Soccer' or not t.get('strBadge'):continue
-            s=score(q,t['strTeam'])+(0.15 if t.get('strCountry')==ctry else -0.3)
+            s=score(q,t['strTeam'])+(0.15 if t.get('strCountry') in (ctry,'The Netherlands','Holland') else -0.3)
             if best is None or s>best[0]:best=(s,t)
         if not best or best[0]<0.75:
             rep[sl]={'n':n,'ok':False,'why':'sem match','best':best and best[1]['strTeam']};print('FALHOU',n,rep[sl]['best']);json.dump(rep,open(rp,'w'),indent=0);continue
