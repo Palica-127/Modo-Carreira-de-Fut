@@ -345,8 +345,8 @@ function pick(i){
 /* ---------- artilharia ---------- */
 function scorers(l,d){
   const out=[];
-  Object.values(S.sc).forEach(e=>{const c=S.cs[e.c];if(c.l==l&&c.d==d&&e.g>0)out.push({n:e.n,c:e.c,g:e.g})});
-  S.rv.forEach(r=>{const c=S.cs[r.club];if(c.l==l&&c.d==d&&r.cur.lg>0)out.push({n:r.n,c:r.club,g:r.cur.lg,rv:1})});
+  Object.entries(S.sc).forEach(([k,e])=>{const c=S.cs[e.c];if(c.l==l&&c.d==d&&e.g>0)out.push({n:e.n,c:e.c,g:e.g,q:k.replace('_','.')})});
+  S.rv.forEach(r=>{const c=S.cs[r.club];if(c.l==l&&c.d==d&&r.cur.lg>0)out.push({n:r.n,c:r.club,g:r.cur.lg,rv:1,id:r.id})});
   const mc=cl(S.club);if(mc.l==l&&mc.d==d&&S.cur&&S.cur.lg>0)out.push({n:S.p.name,c:S.club,g:S.cur.lg,me:1});
   return out.sort((a,b)=>b.g-a.g);
 }

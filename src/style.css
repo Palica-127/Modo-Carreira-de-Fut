@@ -478,3 +478,4 @@ th{background:var(--panel)}
 .sheet .pills{margin:8px 0 10px}
 .pts{font:700 20px/1 var(--d);color:var(--gold)}
 @media(max-width:420px){.nb{font-size:9px}.acts2{flex-direction:column}.btn-s{min-height:32px}}
+.tn.lnk,.logo.lnk,.fut[onclick]{border-bottom:0;cursor:pointer}.tn.lnk:hover span{color:var(--acc)}

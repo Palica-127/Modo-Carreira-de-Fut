@@ -487,6 +487,7 @@ th{background:var(--panel)}
 .sheet .pills{margin:8px 0 10px}
 .pts{font:700 20px/1 var(--d);color:var(--gold)}
 @media(max-width:420px){.nb{font-size:9px}.acts2{flex-direction:column}.btn-s{min-height:32px}}
+.tn.lnk,.logo.lnk,.fut[onclick]{border-bottom:0;cursor:pointer}.tn.lnk:hover span{color:var(--acc)}
 
 </style></head>
 <body><div id="app" class="wrap"></div>
@@ -1289,8 +1290,8 @@ function pick(i){
 /* ---------- artilharia ---------- */
 function scorers(l,d){
   const out=[];
-  Object.values(S.sc).forEach(e=>{const c=S.cs[e.c];if(c.l==l&&c.d==d&&e.g>0)out.push({n:e.n,c:e.c,g:e.g})});
-  S.rv.forEach(r=>{const c=S.cs[r.club];if(c.l==l&&c.d==d&&r.cur.lg>0)out.push({n:r.n,c:r.club,g:r.cur.lg,rv:1})});
+  Object.entries(S.sc).forEach(([k,e])=>{const c=S.cs[e.c];if(c.l==l&&c.d==d&&e.g>0)out.push({n:e.n,c:e.c,g:e.g,q:k.replace('_','.')})});
+  S.rv.forEach(r=>{const c=S.cs[r.club];if(c.l==l&&c.d==d&&r.cur.lg>0)out.push({n:r.n,c:r.club,g:r.cur.lg,rv:1,id:r.id})});
   const mc=cl(S.club);if(mc.l==l&&mc.d==d&&S.cur&&S.cur.lg>0)out.push({n:S.p.name,c:S.club,g:S.cur.lg,me:1});
   return out.sort((a,b)=>b.g-a.g);
 }
@@ -1689,10 +1690,11 @@ function card(o){
   const cls=o.kind||('t'+tierOf(o.ovr));
   return `<div class="fut ${cls} ${o.sz||''} ${o.me?'me':''} ${o.inj?'inj':''}" ${o.on?`onclick="${o.on}"`:''}><b class="fo">${o.ovr}</b><i class="fr">${o.pos}</i><i class="fn">${o.nat}</i><span class="fs">${shield(o.club,'xs')}</span><span class="fa">${bust(o.club.hue,o.club)}</span><span class="fnm">${esc(o.name)}</span><span class="fst">${o.st.map(([l,v])=>`<span><b>${v}</b><small>${l}</small></span>`).join('')}</span>${o.tag?`<i class="ft">${esc(o.tag)}</i>`:''}</div>`;
 }
-const myCard=(sz='',extra={})=>card({ovr:O(),pos:S.p.pos,nat:natCode(S.p.nat),name:short(S.p.name),club:cl(S.club),st:myStats(),sz,me:1,inj:S.inj>0,tag:S.y+' · '+PN[S.p.pos],...extra});
-const entryCard=(x,sz,extra={})=>card({ovr:x.ovr,pos:x.pos,nat:natCode(x.nat),name:short(x.n),club:cl(x.club),st:x.me?myStats():pst(x.ovr,x.pos,x.id),sz,me:x.me,...extra});
+const myCard=(sz='',extra={})=>card({on:"sheet('me','me')",ovr:O(),pos:S.p.pos,nat:natCode(S.p.nat),name:short(S.p.name),club:cl(S.club),st:myStats(),sz,me:1,inj:S.inj>0,tag:S.y+' · '+PN[S.p.pos],...extra});
+const cardOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${encodeURIComponent(x.n)}')`:'';
+const entryCard=(x,sz,extra={})=>card({on:cardOn(x),ovr:x.ovr,pos:x.pos,nat:natCode(x.nat),name:short(x.n),club:cl(x.club),st:x.me?myStats():pst(x.ovr,x.pos,x.id),sz,me:x.me,...extra});
 const hx=(v,sz='')=>`<span class="hx t${tierOf(v)} ${sz}">${v}</span>`;
-const tn=(c,cls='')=>`<span class="tn ${cls}">${shield(c,'sm')}<span>${esc(c.n)}</span></span>`;
+const tn=(c,cls='')=>`<span class="tn lnk ${cls}" onclick="event.stopPropagation();sheet('c','${c.id}')">${shield(c,'sm')}<span>${esc(c.n)}</span></span>`;
 const tbl=(heads,rows)=>`<div class="tw"><table class="tb"><tr>${heads.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr class="${r.cls||''}">${r.c.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`;
 const pills=(items,cur,fn,cls='')=>`<div class="pills ${cls}">${items.map(([k,l])=>`<button class="pill" aria-pressed="${cur==k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
 const TRO={wc:['#2EC4B6','Copa'],lig:['#3AC6D3','Liga'],dom:['#B9C4D0','Copa'],ucl:['#7AA2FF','UCL'],lib:['#F2D58C','LIB'],mc:['#C58BFF','Mundial'],bo:['#FFD84D','Bola']};
@@ -1715,7 +1717,7 @@ const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar">
 function hud(){
   const idx=S.ph!='season'?4:S.week==1?0:S.week<=15?1:S.week<=17?2:3;
   const c=cl(S.club);
-  return `<header class="hud"><div class="logo">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
+  return `<header class="hud"><div class="logo lnk" onclick="sheet('c','${c.id}')">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
     <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
 }
 const NAVS=[['jogar','Jogar'],['bdo','Bola de Ouro'],['lend','Lendas'],['elen','Elenco'],['jog','Jogador']];
@@ -1737,11 +1739,11 @@ function nextMatches(){
 }
 function mini(r){
   const h=cl(r.h),a=cl(r.a),w=r.win;
-  return `<div class="m ${r.h==S.club||r.a==S.club?'mine':''}"><div class="mt"><div class="tn ${w==r.h?'win':w==r.a?'lose':''}">${shield(h,'sm')}<span>${esc(h.n)}</span></div><div class="sc">${r.g[0]}<i>x</i>${r.g[1]}</div><div class="tn b ${w==r.a?'win':w==r.h?'lose':''}">${shield(a,'sm')}<span>${esc(a.n)}</span></div></div><div class="mi"><span>${esc(r.comp)}${r.pen?' · pênaltis':''}</span>${r.pl?`<span>Nota <b>${r.rt}</b> · ${r.mn}' · ${r.gl} gol(s) · ${r.as} assist.</span>`:'<span>Você não atuou</span>'}</div></div>`;
+  return `<div class="m ${r.h==S.club||r.a==S.club?'mine':''}"><div class="mt"><div class="tn ${w==r.h?'win':w==r.a?'lose':''} lnk" onclick="sheet('c','${h.id}')">${shield(h,'sm')}<span>${esc(h.n)}</span></div><div class="sc">${r.g[0]}<i>x</i>${r.g[1]}</div><div class="tn b ${w==r.a?'win':w==r.h?'lose':''} lnk" onclick="sheet('c','${a.id}')">${shield(a,'sm')}<span>${esc(a.n)}</span></div></div><div class="mi"><span>${esc(r.comp)}${r.pen?' · pênaltis':''}</span>${r.pl?`<span>Nota <b>${r.rt}</b> · ${r.mn}' · ${r.gl} gol(s) · ${r.as} assist.</span>`:'<span>Você não atuou</span>'}</div></div>`;
 }
 function mcard(r){
   const h=cl(r.h),a=cl(r.a),w=r.win;
-  return `<div class="m ${r.h==S.club||r.a==S.club?'mine':''}">${r.pen?'<span class="zb ok">Pênaltis</span>':''}<div class="mt"><div class="tn ${w==r.h?'win':w==r.a?'lose':''}">${shield(h,'sm')}<span>${esc(h.n)}</span></div><div class="sc">${r.g[0]}<i>x</i>${r.g[1]}</div><div class="tn b ${w==r.a?'win':w==r.h?'lose':''}">${shield(a,'sm')}<span>${esc(a.n)}</span></div></div>
+  return `<div class="m ${r.h==S.club||r.a==S.club?'mine':''}">${r.pen?'<span class="zb ok">Pênaltis</span>':''}<div class="mt"><div class="tn ${w==r.h?'win':w==r.a?'lose':''} lnk" onclick="sheet('c','${h.id}')">${shield(h,'sm')}<span>${esc(h.n)}</span></div><div class="sc">${r.g[0]}<i>x</i>${r.g[1]}</div><div class="tn b ${w==r.a?'win':w==r.h?'lose':''} lnk" onclick="sheet('c','${a.id}')">${shield(a,'sm')}<span>${esc(a.n)}</span></div></div>
   <div class="mi"><span>${esc(r.comp)}</span><span>Posse ${r.po}% x ${100-r.po}% · Chutes ${r.sh[0]} x ${r.sh[1]}</span></div>
   <div class="mi">${r.pl?`<span>Sua atuação: <b>${r.mn}'</b> · nota <b>${r.rt}</b> · ${r.gl} gol(s) · ${r.as} assist. ${r.yc?'🟨':''}${r.rc?'🟥':''}</span>`:'<span>Você não atuou.</span>'}</div>
   <details class="det"><summary>Lance a lance</summary><div class="log">${r.ev.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></details></div>`;
@@ -1762,7 +1764,7 @@ function viewProx(){
   else{
     const nm=nextMatches();
     h+=`<div class="pn"><div class="banner"><small>Semana ${S.week} de ${SEASON}</small><b>Próximos jogos</b></div>
-    ${nm.map(x=>x.h!=null?`<div class="m ${x.h==S.club||x.a==S.club?'mine':''}"><div class="mt"><div class="tn">${shield(cl(x.h),'sm')}<span>${esc(cl(x.h).n)}</span></div><div class="sc"><i>x</i></div><div class="tn b">${shield(cl(x.a),'sm')}<span>${esc(cl(x.a).n)}</span></div></div><div class="mi"><span>${esc(x.n)}</span></div></div>`:`<div class="m mine"><div class="mi"><span>🏆 ${esc(x.n)}</span><span>adversário sorteado</span></div></div>`).join('')||'<p class="empty">Sem jogos nesta semana.</p>'}
+    ${nm.map(x=>x.h!=null?`<div class="m ${x.h==S.club||x.a==S.club?'mine':''}"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(x.h).id}')">${shield(cl(x.h),'sm')}<span>${esc(cl(x.h).n)}</span></div><div class="sc"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(x.a).id}')">${shield(cl(x.a),'sm')}<span>${esc(cl(x.a).n)}</span></div></div><div class="mi"><span>${esc(x.n)}</span></div></div>`:`<div class="m mine"><div class="mi"><span>🏆 ${esc(x.n)}</span><span>adversário sorteado</span></div></div>`).join('')||'<p class="empty">Sem jogos nesta semana.</p>'}
     <p class="note" style="margin:0 0 10px">Papel: <b>${role()}</b>${S.inj?' · fora por '+S.inj+' sem.':''} · Treino: ${TN[S.tr.a]} (${['leve','normal','intenso'][S.tr.i]})</p>
     <button class="play" onclick="adv()" ${S.ev?'disabled':''}>▶ Jogar semana</button>
     <div class="row" style="margin:0"><button class="ghost" onclick="simN(5)" ${S.ev?'disabled':''}>⏩ +5 semanas</button><button class="ghost" onclick="simN(30)" ${S.ev?'disabled':''}>⏭ Até um evento ou o fim</button></div></div>`;
@@ -1791,7 +1793,7 @@ function compView(k){
   const st=k.ch!=null?`Campeão: <b style="color:var(--gold)">${esc(cl(k.ch).n)}</b>${k.ru!=null?' · vice: '+esc(cl(k.ru).n):''}`:k.rd<k.rn.length?`Próxima fase: <b>${k.rn[k.rd]}</b> (semana ${k.wk[k.rd]}) · ${k.al.length} clube(s) vivo(s)`:'';
   const rds=[...new Set(k.log.map(x=>x[0]))].reverse();
   return `<div class="pn"><h2>${esc(k.n)}</h2><p class="note" style="margin-top:0">${st}${k.pl?'<span class="tag">seu clube</span>':''}</p>
-  ${rds.length?rds.map(rd=>`<div class="sub">${k.rn[rd]}</div>${k.log.filter(x=>x[0]==rd).map(x=>`<div class="m ${x[1]==S.club||x[2]==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${x[5]==x[1]?'win':'lose'}">${shield(cl(x[1]),'xs')}<span>${esc(cl(x[1]).n)}</span></div><div class="sc" style="font-size:20px">${x[3]}<i>x</i>${x[4]}</div><div class="tn b ${x[5]==x[2]?'win':'lose'}">${shield(cl(x[2]),'xs')}<span>${esc(cl(x[2]).n)}</span></div></div>${x[6]?'<div class="mi"><span>decidido nos pênaltis</span></div>':''}</div>`).join('')}`).join(''):'<p class="empty">A competição ainda não começou.</p>'}</div>`;
+  ${rds.length?rds.map(rd=>`<div class="sub">${k.rn[rd]}</div>${k.log.filter(x=>x[0]==rd).map(x=>`<div class="m ${x[1]==S.club||x[2]==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${x[5]==x[1]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[1]).id}')">${shield(cl(x[1]),'xs')}<span>${esc(cl(x[1]).n)}</span></div><div class="sc" style="font-size:20px">${x[3]}<i>x</i>${x[4]}</div><div class="tn b ${x[5]==x[2]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[2]).id}')">${shield(cl(x[2]),'xs')}<span>${esc(cl(x[2]).n)}</span></div></div>${x[6]?'<div class="mi"><span>decidido nos pênaltis</span></div>':''}</div>`).join('')}`).join(''):'<p class="empty">A competição ainda não começou.</p>'}</div>`;
 }
 function champHist(l){
   const L=LEAGUES[l];
@@ -1990,7 +1992,7 @@ function pgFin(){
   const hist=S.hist.slice(-8);
   return `<div class="pn"><h2>Finanças</h2>${kv([['Patrimônio',F(S.money)],['Salário/semana',F(c.sal)],['Salário/ano',F(anual)],['Bônus por gol',F(c.bon)],['Contrato',c.yrs+' ano(s)'],['Multa',F(c.cl)],['Valor de mercado',F(val())],['Bônus (carreira)',F(bonus)]])}</div>
   <div class="pn"><h2>Projeção da próxima temporada</h2>${kv([['Salário',F(anual)],['Bônus estimado',F(Math.round((tt.ap?tt.g/Math.max(1,S.hist.length||1):8)*c.bon))],['Total estimado',F(anual+Math.round((tt.ap?tt.g/Math.max(1,S.hist.length||1):8)*c.bon))]])}<p class="note">Estimativa baseada no seu contrato atual e na média de gols por temporada.</p></div>
-  <div class="pn full"><h2>Clube atual</h2><div class="tn">${shield(cl(S.club),'sm')}<span>${esc(cl(S.club).n)}</span></div><p class="note">${S.loan?'Você está emprestado.':'Contrato com multa de '+F(c.cl)+'.'}</p></div>`;
+  <div class="pn full"><h2>Clube atual</h2><div class="tn lnk" onclick="sheet('c','${cl(S.club).id}')">${shield(cl(S.club),'sm')}<span>${esc(cl(S.club).n)}</span></div><p class="note">${S.loan?'Você está emprestado.':'Contrato com multa de '+F(c.cl)+'.'}</p></div>`;
 }
 
 /* ---------- Fichas (portado do BrasLOL): jogador, clube e lenda ---------- */
@@ -2007,6 +2009,7 @@ function closeSheet(){ui.sheet=null;render(true)}
 const ek=s=>encodeURIComponent(s).replace(/'/g,'%27');
 const lnk=(on,t)=>`<span class="lnk" onclick="${on}">${t}</span>`;
 const clubLnk=(n,id)=>{const i=id!=null?id:cn2id(n);return i!=null?lnk(`sheet('c','${i}')`,esc(n)):esc(n)};
+const pLn=x=>x.me?lnk("sheet('me','me')",esc(x.n)):x.id?lnk(`sheet('p','${x.id}')`,esc(x.n)):x.q?lnk(`sheet('q','${x.q}')`,esc(x.n)):esc(x.n);
 const selLnk=n=>lnk(`sheet('s','${ek(n)}')`,esc(n));
 const ST_UCL=['Fase de 32','Oitavas','Quartas','Semifinal','Final'],ST_LIB=['Oitavas','Quartas','Semifinal','Final'];
 const TL={l:'Liga',d:'Copa',u:'Champions',b:'Libertadores',m:'Mundial',w:'Copa do Mundo',o:'Bola de Ouro'};
@@ -2031,7 +2034,7 @@ function upcoming(){
   }
   return rows.length?`<div class="pn"><h2>Calendário próximo</h2>${tbl(['Sem','Torneio','Jogo','Força'],rows)}</div>`:'';
 }
-const mrow=(h,a,gh,ga)=>`<div class="m ${h==S.club||a==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${gh>ga?'win':gh<ga?'lose':''}">${shield(cl(h),'xs')}<span>${esc(cl(h).n)}</span></div><div class="sc" style="font-size:18px">${gh}<i>x</i>${ga}</div><div class="tn b ${ga>gh?'win':ga<gh?'lose':''}">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div></div></div>`;
+const mrow=(h,a,gh,ga)=>`<div class="m ${h==S.club||a==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${gh>ga?'win':gh<ga?'lose':''} lnk" onclick="sheet('c','${cl(h).id}')">${shield(cl(h),'xs')}<span>${esc(cl(h).n)}</span></div><div class="sc" style="font-size:18px">${gh}<i>x</i>${ga}</div><div class="tn b ${ga>gh?'win':ga<gh?'lose':''} lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div></div></div>`;
 function lastRound(l,d){
   const r=(S.lr||{})[l+'-'+d];if(!r||!r.length)return '';
   return `<div class="pn full"><h2>Rodada ${S.lrw} · ${LEAGUES[l].dn[d]}</h2>${r.map(([h,a,gh,ga])=>mrow(h,a,gh,ga)).join('')}</div>`;
@@ -2039,7 +2042,7 @@ function lastRound(l,d){
 function nextRound(l,d){
   if(S.ph!='season'||S.week>SEASON)return '';
   const rd=rounds(l,d)[S.week-1];
-  return `<div class="pn full"><h2>Próxima rodada (${S.week}) · ${LEAGUES[l].dn[d]}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`;
+  return `<div class="pn full"><h2>Próxima rodada (${S.week}) · ${LEAGUES[l].dn[d]}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(b).id}')">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`;
 }
 function viewRes(){
   const c=cl(S.club),cu=S.cur||Z;let h='';
@@ -2055,7 +2058,7 @@ function viewTab(){
   const d=ui.dv,sc=scorers(ui.lg,d).slice(0,10);
   let h=lgPills()+`<div class="pills">${L.dn.map((n,i)=>`<button class="pill" aria-pressed="${ui.dv==i}" onclick="setDv(${i})">${n}</button>`).join('')}</div>`;
   h+=`<div class="pn"><h2>${L.dn[d]} · ${L.n}</h2>${stTable(ui.lg,d)}</div>
-  <div class="pn"><h2>Artilharia</h2>${sc.length?tbl(['#','Jogador','Clube','Gols'],sc.map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
+  <div class="pn"><h2>Artilharia</h2>${sc.length?tbl(['#','Jogador','Clube','Gols'],sc.map((x,i)=>({c:[i+1,pLn(x)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
   return h+lastRound(ui.lg,d)+nextRound(ui.lg,d);
 }
 function viewCal(){
@@ -2117,11 +2120,11 @@ function viewOvr(){
 }
 function viewArt(){
   const all=[];
-  Object.values(S.sc).forEach(e=>{if(S.cs[e.c].d==0&&e.g>0)all.push({n:e.n,c:e.c,g:e.g})});
-  S.rv.forEach(r=>{if(S.cs[r.club].d==0&&r.cur.lg>0)all.push({n:r.n,c:r.club,g:r.cur.lg})});
+  Object.entries(S.sc).forEach(([k,e])=>{if(S.cs[e.c].d==0&&e.g>0)all.push({n:e.n,c:e.c,g:e.g,q:k.replace('_','.')})});
+  S.rv.forEach(r=>{if(S.cs[r.club].d==0&&r.cur.lg>0)all.push({n:r.n,c:r.club,g:r.cur.lg,id:r.id})});
   const mc=cl(S.club);if(mc.d==0&&S.cur&&S.cur.lg>0)all.push({n:S.p.name,c:S.club,g:S.cur.lg,me:1});
   all.sort((a,b)=>b.g-a.g);
-  return `<div class="pn full"><h2>Chuteira de Ouro — 1ªs divisões</h2>${all.length?tbl(['#','Jogador','Clube','Liga','Gols'],all.slice(0,10).map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),LEAGUES[cl(x.c).l].k,`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
+  return `<div class="pn full"><h2>Chuteira de Ouro — 1ªs divisões</h2>${all.length?tbl(['#','Jogador','Clube','Liga','Gols'],all.slice(0,10).map((x,i)=>({c:[i+1,pLn(x)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),LEAGUES[cl(x.c).l].k,`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
 }
 
 /* ============================================================
@@ -2230,7 +2233,7 @@ function shP(s){
     if(!x){const e=S.bdo.flatMap(b=>b.top).find(z=>z.id==s.id);if(!e)return null;x={...e,pot:e.ovr,cur:Z,ad:[0,0,0,0,0,0],car:newCar(),h:[],ghost:1}}
   }
   const tabs=[['res','Resumo'],['tit','Títulos'],['tmp','Temporadas']],tb=shTab(s,tabs),c=cl(x.club);
-  let b=`<div class="shc">${entryCard({...x,club:x.club},'',{tag:me?'Você':x.ret?'Aposentado em '+x.ret:''})}</div>${shTabs(s,tabs)}`;
+  let b=`<div class="shc">${entryCard({...x,club:x.club},'',{on:'',tag:me?'Você':x.ret?'Aposentado em '+x.ret:''})}</div>${shTabs(s,tabs)}`;
   const titles=me?myTitles():rvTitles(x),nt=titles.filter(z=>z.k!='bo').length;
   if(tb=='res'){
     const cu=x.cur||Z,nota=cu.ap?(cu.rs/cu.ap).toFixed(2):'—',car=x.car||newCar(),L=me?myLeg():null;
@@ -2306,7 +2309,7 @@ function shL(s){
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||SQP[+slot]==null)return null;
   const x=sqPlayer(c,+slot);
-  return {title:x.n,body:`<div class="shc">${entryCard({...x,club:x.club},'',{})}</div>${kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot]])}<h3>Atributos</h3>${statBars(pst(x.ovr,x.pos,x.id))}<p class="note">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button>`};
+  return {title:x.n,body:`<div class="shc">${entryCard({...x,club:x.club},'',{on:''})}</div>${kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot]])}<h3>Atributos</h3>${statBars(pst(x.ovr,x.pos,x.id))}<p class="note">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button>`};
 }
 /* seleção */
 function shS(s){

@@ -7,6 +7,7 @@
 const ek=s=>encodeURIComponent(s).replace(/'/g,'%27');
 const lnk=(on,t)=>`<span class="lnk" onclick="${on}">${t}</span>`;
 const clubLnk=(n,id)=>{const i=id!=null?id:cn2id(n);return i!=null?lnk(`sheet('c','${i}')`,esc(n)):esc(n)};
+const pLn=x=>x.me?lnk("sheet('me','me')",esc(x.n)):x.id?lnk(`sheet('p','${x.id}')`,esc(x.n)):x.q?lnk(`sheet('q','${x.q}')`,esc(x.n)):esc(x.n);
 const selLnk=n=>lnk(`sheet('s','${ek(n)}')`,esc(n));
 const ST_UCL=['Fase de 32','Oitavas','Quartas','Semifinal','Final'],ST_LIB=['Oitavas','Quartas','Semifinal','Final'];
 const TL={l:'Liga',d:'Copa',u:'Champions',b:'Libertadores',m:'Mundial',w:'Copa do Mundo',o:'Bola de Ouro'};
@@ -31,7 +32,7 @@ function upcoming(){
   }
   return rows.length?`<div class="pn"><h2>Calendário próximo</h2>${tbl(['Sem','Torneio','Jogo','Força'],rows)}</div>`:'';
 }
-const mrow=(h,a,gh,ga)=>`<div class="m ${h==S.club||a==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${gh>ga?'win':gh<ga?'lose':''}">${shield(cl(h),'xs')}<span>${esc(cl(h).n)}</span></div><div class="sc" style="font-size:18px">${gh}<i>x</i>${ga}</div><div class="tn b ${ga>gh?'win':ga<gh?'lose':''}">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div></div></div>`;
+const mrow=(h,a,gh,ga)=>`<div class="m ${h==S.club||a==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${gh>ga?'win':gh<ga?'lose':''} lnk" onclick="sheet('c','${cl(h).id}')">${shield(cl(h),'xs')}<span>${esc(cl(h).n)}</span></div><div class="sc" style="font-size:18px">${gh}<i>x</i>${ga}</div><div class="tn b ${ga>gh?'win':ga<gh?'lose':''} lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div></div></div>`;
 function lastRound(l,d){
   const r=(S.lr||{})[l+'-'+d];if(!r||!r.length)return '';
   return `<div class="pn full"><h2>Rodada ${S.lrw} · ${LEAGUES[l].dn[d]}</h2>${r.map(([h,a,gh,ga])=>mrow(h,a,gh,ga)).join('')}</div>`;
@@ -39,7 +40,7 @@ function lastRound(l,d){
 function nextRound(l,d){
   if(S.ph!='season'||S.week>SEASON)return '';
   const rd=rounds(l,d)[S.week-1];
-  return `<div class="pn full"><h2>Próxima rodada (${S.week}) · ${LEAGUES[l].dn[d]}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`;
+  return `<div class="pn full"><h2>Próxima rodada (${S.week}) · ${LEAGUES[l].dn[d]}</h2>${rd.map(([a,b])=>`<div class="m ${a==S.club||b==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(a).id}')">${shield(cl(a),'xs')}<span>${esc(cl(a).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(b).id}')">${shield(cl(b),'xs')}<span>${esc(cl(b).n)}</span></div></div></div>`).join('')}</div>`;
 }
 function viewRes(){
   const c=cl(S.club),cu=S.cur||Z;let h='';
@@ -55,7 +56,7 @@ function viewTab(){
   const d=ui.dv,sc=scorers(ui.lg,d).slice(0,10);
   let h=lgPills()+`<div class="pills">${L.dn.map((n,i)=>`<button class="pill" aria-pressed="${ui.dv==i}" onclick="setDv(${i})">${n}</button>`).join('')}</div>`;
   h+=`<div class="pn"><h2>${L.dn[d]} · ${L.n}</h2>${stTable(ui.lg,d)}</div>
-  <div class="pn"><h2>Artilharia</h2>${sc.length?tbl(['#','Jogador','Clube','Gols'],sc.map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
+  <div class="pn"><h2>Artilharia</h2>${sc.length?tbl(['#','Jogador','Clube','Gols'],sc.map((x,i)=>({c:[i+1,pLn(x)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
   return h+lastRound(ui.lg,d)+nextRound(ui.lg,d);
 }
 function viewCal(){
@@ -117,11 +118,11 @@ function viewOvr(){
 }
 function viewArt(){
   const all=[];
-  Object.values(S.sc).forEach(e=>{if(S.cs[e.c].d==0&&e.g>0)all.push({n:e.n,c:e.c,g:e.g})});
-  S.rv.forEach(r=>{if(S.cs[r.club].d==0&&r.cur.lg>0)all.push({n:r.n,c:r.club,g:r.cur.lg})});
+  Object.entries(S.sc).forEach(([k,e])=>{if(S.cs[e.c].d==0&&e.g>0)all.push({n:e.n,c:e.c,g:e.g,q:k.replace('_','.')})});
+  S.rv.forEach(r=>{if(S.cs[r.club].d==0&&r.cur.lg>0)all.push({n:r.n,c:r.club,g:r.cur.lg,id:r.id})});
   const mc=cl(S.club);if(mc.d==0&&S.cur&&S.cur.lg>0)all.push({n:S.p.name,c:S.club,g:S.cur.lg,me:1});
   all.sort((a,b)=>b.g-a.g);
-  return `<div class="pn full"><h2>Chuteira de Ouro — 1ªs divisões</h2>${all.length?tbl(['#','Jogador','Clube','Liga','Gols'],all.slice(0,10).map((x,i)=>({c:[i+1,esc(x.n)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),LEAGUES[cl(x.c).l].k,`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
+  return `<div class="pn full"><h2>Chuteira de Ouro — 1ªs divisões</h2>${all.length?tbl(['#','Jogador','Clube','Liga','Gols'],all.slice(0,10).map((x,i)=>({c:[i+1,pLn(x)+(x.me?' <span class="tag">você</span>':''),tn(cl(x.c)),LEAGUES[cl(x.c).l].k,`<b>${x.g}</b>`],cls:x.me?'mine':''}))):'<p class="empty">Ninguém marcou ainda.</p>'}</div>`;
 }
 
 /* ============================================================
@@ -230,7 +231,7 @@ function shP(s){
     if(!x){const e=S.bdo.flatMap(b=>b.top).find(z=>z.id==s.id);if(!e)return null;x={...e,pot:e.ovr,cur:Z,ad:[0,0,0,0,0,0],car:newCar(),h:[],ghost:1}}
   }
   const tabs=[['res','Resumo'],['tit','Títulos'],['tmp','Temporadas']],tb=shTab(s,tabs),c=cl(x.club);
-  let b=`<div class="shc">${entryCard({...x,club:x.club},'',{tag:me?'Você':x.ret?'Aposentado em '+x.ret:''})}</div>${shTabs(s,tabs)}`;
+  let b=`<div class="shc">${entryCard({...x,club:x.club},'',{on:'',tag:me?'Você':x.ret?'Aposentado em '+x.ret:''})}</div>${shTabs(s,tabs)}`;
   const titles=me?myTitles():rvTitles(x),nt=titles.filter(z=>z.k!='bo').length;
   if(tb=='res'){
     const cu=x.cur||Z,nota=cu.ap?(cu.rs/cu.ap).toFixed(2):'—',car=x.car||newCar(),L=me?myLeg():null;
@@ -306,7 +307,7 @@ function shL(s){
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||SQP[+slot]==null)return null;
   const x=sqPlayer(c,+slot);
-  return {title:x.n,body:`<div class="shc">${entryCard({...x,club:x.club},'',{})}</div>${kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot]])}<h3>Atributos</h3>${statBars(pst(x.ovr,x.pos,x.id))}<p class="note">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button>`};
+  return {title:x.n,body:`<div class="shc">${entryCard({...x,club:x.club},'',{on:''})}</div>${kv([['Clube',esc(c.n)],['Posição',PNQ[x.pos]],['Idade',x.age+' anos'],['Nação',esc(x.nat)],['OVR',x.ovr],['Potencial',x.pot]])}<h3>Atributos</h3>${statBars(pst(x.ovr,x.pos,x.id))}<p class="note">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button>`};
 }
 /* seleção */
 function shS(s){
