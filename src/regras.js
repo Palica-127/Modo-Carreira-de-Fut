@@ -16,9 +16,9 @@
   const PW=105,PH=68;
   const RG={
     imp:{perdeu:.05,falso:.01},                   // erro do assistente: não marca impedimento / marca sem existir
-    falta:{tackle:.6,drib:.7,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
-    amarelo:{base:.06,agr:.1,tatica:.2,area:.05,contra:.06},
-    vermelho:{violento:.0015,dogsoFora:.2,dogsoArea:.06,agr:.006},
+    falta:{tackle:.68,drib:.78,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
+    amarelo:{base:.09,agr:.1,tatica:.2,area:.05,contra:.06},
+    vermelho:{violento:.0012,dogsoFora:.17,dogsoArea:.06,agr:.006},
     pen:{base:.76,pen:250,cmp:500,gk:400,erra:.08,rebote:.1},
     tempo:{falta:6,cartao:30,gol:45,var:90,lesao:60,sub:30,pen:40}, // segundos perdidos por ocorrência (viram acréscimo)
     acr:{min:1,max:8}
@@ -53,7 +53,7 @@
     }
     if(rs.chance(clamp((RG.vermelho.violento+RG.vermelho.agr*ag)*rig,0,.2)))return{c:'vermelho',segundo:false,motivo:'jogada violenta'};
     let p=RG.amarelo.base+RG.amarelo.agr*ag+(f.tatica?RG.amarelo.tatica:0)+(f.dogso?RG.amarelo.contra*4:0)+(f.area?RG.amarelo.area:0);
-    p=clamp(p*rig*(f.amarelos>=1?.3:1),0,.95);
+    p=clamp(p*rig*(f.amarelos>=1?.22:1),0,.95);
     if(!rs.chance(p))return{c:null};
     if(f.amarelos>=1)return{c:'vermelho',segundo:true,motivo:'segundo amarelo'};
     return{c:'amarelo',segundo:false,motivo:f.tatica?'falta tática':'falta imprudente'};

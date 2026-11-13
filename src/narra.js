@@ -45,7 +45,7 @@
       /* posse: o tempo até o próximo lance conta para o time do lance anterior que tem a bola */
       if(prev!=null&&i>0){const dt=e.t-ev[i-1].t;if(dt>0&&ev[i-1].k!='fim_tempo'&&ev[i-1].k!='acrescimo'&&ev[i-1].k!='var')X[prev].posse+=dt}
       if(POS.includes(e.k)&&s!=null)prev=s;
-      if(e.k=='gol'&&e.d&&e.d.anulado){continue}
+      if(e.k=='gol'&&e.d&&e.d.anulado){x.alvo++;continue}
       switch(e.k){
         case 'passe':case 'lancamento':x.pas++;if(e.o=='ok')x.pasOk++;else x.perdas++;if(e.k=='lancamento')x.lanc++;break;
         case 'cruzamento':if(!(e.d&&e.d.origem)){x.pas++;x.cruz++;if(e.o=='ok'){x.pasOk++;x.cruzOk++}else x.perdas++}break;
@@ -82,7 +82,7 @@
     for(const s of [0,1])J.slots[s].forEach((l,i)=>l.forEach(u=>{const o=get(s,i,u.de);o.min+=((Math.min(u.ate,fim)-u.de)/60)}));
     for(const e of ev){
       if(e.p==null||e.s==null)continue;
-      if(e.k=='gol'&&e.d&&e.d.anulado)continue;
+      if(e.k=='gol'&&e.d&&e.d.anulado){get(e.s,e.p,e.t).alvo++;continue}
       const o=get(e.s,e.p,e.t);
       switch(e.k){
         case 'passe':case 'lancamento':o.pas++;if(e.o=='ok'){o.pasOk++;o.pts+=.012}else{o.perdas++;o.pts-=.03}break;
@@ -155,7 +155,6 @@
           w(e,base+' '+nome(0)+' '+pl()+' '+nome(1)+'.','gol',true);break}
         case 'var':{const p=e.p!=null?q(e.s,e.p,e.t):null;
           const m={'gol:anulado':'VAR: gol anulado por '+e.d.motivo+'.','penalti:anulado':'VAR: pênalti cancelado — '+e.d.motivo+(p?' de '+p:'')+'.','penalti:concedido':'VAR: pênalti concedido ('+e.d.motivo+').','vermelho:revertido':'VAR: cartão vermelho revertido para amarelo'+(p?' ('+p+')':'')+'.','vermelho:concedido':'VAR: expulsão confirmada'+(p?' para '+p:'')+' ('+e.d.motivo+').'}[e.d.tipo+':'+e.d.resultado];
-          if(e.d.tipo=='gol'&&e.d.resultado=='anulado')G[e.s]--;
           w(e,m||'VAR revisa o lance.','var',true);break}
         case 'chute':{
           if(nx&&(nx.k=='gol'||nx.k=='penalti'))break;

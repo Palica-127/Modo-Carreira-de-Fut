@@ -23,8 +23,8 @@
     /* lesões */
     lesao:{semContato:1.2e-6,idade:.05,idadeMin:30,fadiga:40,contato:.006,contatoAgr:1,
            grav:{leve:.55,media:.3,grave:.15},mult:{leve:.88,media:.6,grave:.35}},
-    moral:{efeito:.04,gol:.22,sofre:.2,vermelho:.25,decai:.985,casa:.2},
-    casa:{atr:.02,falta:.9,cartao:.88,gasto:1.03}   // mando: atributos, faltas marcadas contra, cartões, e gasto do visitante
+    moral:{efeito:.04,gol:.22,sofre:.2,vermelho:.25,decai:.985,casa:.3},
+    casa:{atr:.03,falta:.88,cartao:.85,gasto:1.03}   // mando: atributos, faltas marcadas contra, cartões, e gasto do visitante
   };
 
   /* gasto por segundo */

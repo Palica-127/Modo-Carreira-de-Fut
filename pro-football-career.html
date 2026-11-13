@@ -2828,7 +2828,7 @@ const MT=(()=>{
     esc:20,            // sensibilidade do finalizador (maior = atributos pesam menos)
     escGk:16,          // idem para o goleiro
     gkMin:.86,gkMax:1.28,   // multiplicador do xG conforme o goleiro (bom=min, ruim=max)
-    cabeca:.55,primeira:.93,global:1.5,   // ajuste geral da calibração
+    cabeca:.55,primeira:.93,global:2.0,   // ajuste geral da calibração
 
     origem:{filtrado:1.18,cruz:.9,rebote:1.05,passe:1,conducao:1,nenhuma:1},
     marca:.14,pressao:.22,caixa:.98,   // perda de xG por defensor a menos de 2,8 m / pressão geral / chute dentro da área
@@ -2942,9 +2942,9 @@ const MT=(()=>{
   const PW=105,PH=68;
   const RG={
     imp:{perdeu:.05,falso:.01},                   // erro do assistente: não marca impedimento / marca sem existir
-    falta:{tackle:.6,drib:.7,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
-    amarelo:{base:.06,agr:.1,tatica:.2,area:.05,contra:.06},
-    vermelho:{violento:.0015,dogsoFora:.2,dogsoArea:.06,agr:.006},
+    falta:{tackle:.68,drib:.78,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
+    amarelo:{base:.09,agr:.1,tatica:.2,area:.05,contra:.06},
+    vermelho:{violento:.0012,dogsoFora:.17,dogsoArea:.06,agr:.006},
     pen:{base:.76,pen:250,cmp:500,gk:400,erra:.08,rebote:.1},
     tempo:{falta:6,cartao:30,gol:45,var:90,lesao:60,sub:30,pen:40}, // segundos perdidos por ocorrência (viram acréscimo)
     acr:{min:1,max:8}
@@ -2979,7 +2979,7 @@ const MT=(()=>{
     }
     if(rs.chance(clamp((RG.vermelho.violento+RG.vermelho.agr*ag)*rig,0,.2)))return{c:'vermelho',segundo:false,motivo:'jogada violenta'};
     let p=RG.amarelo.base+RG.amarelo.agr*ag+(f.tatica?RG.amarelo.tatica:0)+(f.dogso?RG.amarelo.contra*4:0)+(f.area?RG.amarelo.area:0);
-    p=clamp(p*rig*(f.amarelos>=1?.3:1),0,.95);
+    p=clamp(p*rig*(f.amarelos>=1?.22:1),0,.95);
     if(!rs.chance(p))return{c:null};
     if(f.amarelos>=1)return{c:'vermelho',segundo:true,motivo:'segundo amarelo'};
     return{c:'amarelo',segundo:false,motivo:f.tatica?'falta tática':'falta imprudente'};
@@ -3129,8 +3129,8 @@ const MT=(()=>{
     /* lesões */
     lesao:{semContato:1.2e-6,idade:.05,idadeMin:30,fadiga:40,contato:.006,contatoAgr:1,
            grav:{leve:.55,media:.3,grave:.15},mult:{leve:.88,media:.6,grave:.35}},
-    moral:{efeito:.04,gol:.22,sofre:.2,vermelho:.25,decai:.985,casa:.2},
-    casa:{atr:.02,falta:.9,cartao:.88,gasto:1.03}   // mando: atributos, faltas marcadas contra, cartões, e gasto do visitante
+    moral:{efeito:.04,gol:.22,sofre:.2,vermelho:.25,decai:.985,casa:.3},
+    casa:{atr:.03,falta:.88,cartao:.85,gasto:1.03}   // mando: atributos, faltas marcadas contra, cartões, e gasto do visitante
   };
 
   /* gasto por segundo */
@@ -3251,7 +3251,7 @@ const MT=(()=>{
       /* posse: o tempo até o próximo lance conta para o time do lance anterior que tem a bola */
       if(prev!=null&&i>0){const dt=e.t-ev[i-1].t;if(dt>0&&ev[i-1].k!='fim_tempo'&&ev[i-1].k!='acrescimo'&&ev[i-1].k!='var')X[prev].posse+=dt}
       if(POS.includes(e.k)&&s!=null)prev=s;
-      if(e.k=='gol'&&e.d&&e.d.anulado){continue}
+      if(e.k=='gol'&&e.d&&e.d.anulado){x.alvo++;continue}
       switch(e.k){
         case 'passe':case 'lancamento':x.pas++;if(e.o=='ok')x.pasOk++;else x.perdas++;if(e.k=='lancamento')x.lanc++;break;
         case 'cruzamento':if(!(e.d&&e.d.origem)){x.pas++;x.cruz++;if(e.o=='ok'){x.pasOk++;x.cruzOk++}else x.perdas++}break;
@@ -3288,7 +3288,7 @@ const MT=(()=>{
     for(const s of [0,1])J.slots[s].forEach((l,i)=>l.forEach(u=>{const o=get(s,i,u.de);o.min+=((Math.min(u.ate,fim)-u.de)/60)}));
     for(const e of ev){
       if(e.p==null||e.s==null)continue;
-      if(e.k=='gol'&&e.d&&e.d.anulado)continue;
+      if(e.k=='gol'&&e.d&&e.d.anulado){get(e.s,e.p,e.t).alvo++;continue}
       const o=get(e.s,e.p,e.t);
       switch(e.k){
         case 'passe':case 'lancamento':o.pas++;if(e.o=='ok'){o.pasOk++;o.pts+=.012}else{o.perdas++;o.pts-=.03}break;
@@ -3361,7 +3361,6 @@ const MT=(()=>{
           w(e,base+' '+nome(0)+' '+pl()+' '+nome(1)+'.','gol',true);break}
         case 'var':{const p=e.p!=null?q(e.s,e.p,e.t):null;
           const m={'gol:anulado':'VAR: gol anulado por '+e.d.motivo+'.','penalti:anulado':'VAR: pênalti cancelado — '+e.d.motivo+(p?' de '+p:'')+'.','penalti:concedido':'VAR: pênalti concedido ('+e.d.motivo+').','vermelho:revertido':'VAR: cartão vermelho revertido para amarelo'+(p?' ('+p+')':'')+'.','vermelho:concedido':'VAR: expulsão confirmada'+(p?' para '+p:'')+' ('+e.d.motivo+').'}[e.d.tipo+':'+e.d.resultado];
-          if(e.d.tipo=='gol'&&e.d.resultado=='anulado')G[e.s]--;
           w(e,m||'VAR revisa o lance.','var',true);break}
         case 'chute':{
           if(nx&&(nx.k=='gol'||nx.k=='penalti'))break;
@@ -3429,7 +3428,7 @@ const MT=(()=>{
     cond:{zonaArea:.4,zonaTerco:.75,hab:36,esc:20,pres:1.7,passo:[6,13]},
     drib:{zonaArea:.55,zonaTerco:.85,esc:18,ganho:.08},
     desarme:{prob:.28,esc:20,raio:3.2},
-    chute:{esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
+    chute:{minXg:.025,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
     decisao:{tau0:.05,tauDec:.14,ruido:.12},
     pos:{compacto:.82,largura:.85,maxU:.84},
     valor:{keep:.15,gol:3}      // valor de ter a bola e de um gol, na mesma unidade da ameaça (th)
@@ -3638,7 +3637,7 @@ const MT=(()=>{
       if(!ops.length)return null;
       /* impulso: quem é agressivo ou atrevido bate de longe mesmo sem ser a melhor opção */
       const sh=ops.find(o=>o.t=='chute');
-      if(sh&&sh.c.xg>.015&&RD.chance(PAR.chute.impulso*(1+.35*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
+      if(sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.35*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
       const mx=Math.max(...ops.map(o=>o.u));
       let tot=0;const w=ops.map(o=>{const v=Math.exp((o.u-mx)/tau);tot+=v;return v});
       let r=RD.f()*tot;for(let i=0;i<ops.length;i++){r-=w[i];if(r<=0)return ops[i]}

@@ -168,7 +168,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(x({tipo:'cabeca'})<x({tipo:'pe'})*.7,'cabeçada vale menos que chute de pé');
   ok(x({origem:'filtrado'})>x({origem:'passe'})&&x({origem:'cruz'})<x({origem:'passe'}),'passe em profundidade aumenta, cruzamento diminui');
   ok(x({nDef:2})<x({nDef:0})&&x({pres:1})<x({pres:0}),'marcação e pressão reduzem o xG');
-  const p=x({u:pen,v:.5,nDef:0}),p6=x({u:1-5.5/105,v:.5});ok(p>.06&&p<.4&&p6>.25&&p6<.6&&p6>2*p,'xG: pequena área alto, 11 m central moderado ('+p6.toFixed(2)+' / '+p.toFixed(2)+')');
+  const p=x({u:pen,v:.5,nDef:0}),p6=x({u:1-5.5/105,v:.5});ok(p>.06&&p<.4&&p6>.25&&p6<.78&&p6>2*p,'xG: pequena área alto, 11 m central moderado ('+p6.toFixed(2)+' / '+p.toFixed(2)+')');
   ok(x({u:.6,v:.5})<.06,'chute de longe vale pouco ('+x({u:.6,v:.5}).toFixed(3)+')');
   ok(x({u:.99,v:.5,origem:'filtrado'})<=.8,'xG nunca passa de 0,80');}
  /* habilidade do finalizador e pé fraco */
@@ -408,7 +408,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const z={},b={};C.aplica(a0,z,{en:100,moral:1,casa:false});C.aplica(a0,b,{en:100,moral:-1,casa:false});
   ok(z.dec>b.dec&&z.pas>b.pas&&z.vel==b.vel,'moral alta melhora técnica e cabeça, não o físico');
   const h={},v={};C.aplica(a0,h,{en:100,moral:0,casa:true});C.aplica(a0,v,{en:100,moral:0,casa:false});
-  ok(h.pas>v.pas&&h.pas/v.pas<1.03,'mando de campo dá um empurrão pequeno');
+  ok(h.pas>v.pas&&h.pas/v.pas<1.05,'mando de campo dá um empurrão pequeno');
   const l={};C.aplica(a0,l,{en:100,moral:0,casa:false,lesao:'media'});ok(l.vel<a0.vel*.65&&l.pas<a0.pas,'machucado rende menos');}
  /* lesão */
  {ok(C.risco({age:35,en:100})>C.risco({age:25,en:100})*1.2,'veterano se machuca mais');ok(C.risco({age:25,en:20})>C.risco({age:25,en:100})*1.5,'cansado se machuca mais');

@@ -28,7 +28,7 @@
     cond:{zonaArea:.4,zonaTerco:.75,hab:36,esc:20,pres:1.7,passo:[6,13]},
     drib:{zonaArea:.55,zonaTerco:.85,esc:18,ganho:.08},
     desarme:{prob:.28,esc:20,raio:3.2},
-    chute:{esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
+    chute:{minXg:.025,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
     decisao:{tau0:.05,tauDec:.14,ruido:.12},
     pos:{compacto:.82,largura:.85,maxU:.84},
     valor:{keep:.15,gol:3}      // valor de ter a bola e de um gol, na mesma unidade da ameaça (th)
@@ -237,7 +237,7 @@
       if(!ops.length)return null;
       /* impulso: quem é agressivo ou atrevido bate de longe mesmo sem ser a melhor opção */
       const sh=ops.find(o=>o.t=='chute');
-      if(sh&&sh.c.xg>.015&&RD.chance(PAR.chute.impulso*(1+.35*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
+      if(sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.35*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
       const mx=Math.max(...ops.map(o=>o.u));
       let tot=0;const w=ops.map(o=>{const v=Math.exp((o.u-mx)/tau);tot+=v;return v});
       let r=RD.f()*tot;for(let i=0;i<ops.length;i++){r-=w[i];if(r<=0)return ops[i]}

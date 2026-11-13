@@ -7,6 +7,7 @@ for(const m of mods)vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js'
 const MT=ctx.MT;
 /* PAR='{"desarme":{"prob":.1}}' sobrescreve constantes sem editar o código */
 if(process.env.PAR){const m=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]=='object'&&!Array.isArray(b[k]))m(a[k],b[k]);else a[k]=b[k]}};m(MT.PAR,JSON.parse(process.env.PAR))}
+if(process.env.CHU)Object.assign(MT.CHUTE,JSON.parse(process.env.CHU));
 const N=+process.argv[2]||300,fa=+process.argv[3]||70,fb=+process.argv[4]||70,ff=process.argv[5]||'4-3-3',fg=process.argv[6]||'4-3-3';
 const t0=Date.now();
 const st=MT.lote((seed)=>{
