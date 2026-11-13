@@ -95,7 +95,7 @@ function pgBdo(){
   const h=pills([['bdo','Bola de Ouro'],['ovr','Melhores OVR'],['art','Artilheiros']],ui.bk,'bkSet');
   if(ui.bk=='ovr')return h+viewOvr();
   if(ui.bk=='art')return h+viewArt();
-  return h+bdoTop()+bdoWinners();
+  return h+bdoHero()+bdoTop()+bdoWinners();
 }
 function bdoTop(){
   const live=S.ph=='season',ys=S.bdo.map(b=>String(b.y)).reverse();
@@ -114,18 +114,27 @@ function bdoTop(){
   }
   return h;
 }
+function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:''}
+const bdoAv=(x,c='lgav')=>legImg(x.n,c)||`<span class="${c} ph">${esc(String(x.n)[0])}</span>`;
+function bdoHero(){
+  const all=bdoAll().filter(x=>x.n!='—').sort((a,b)=>b.y-a.y),w=all[0];if(!w)return '';
+  const k=all.filter(x=>x.n==w.n).length,on=bdoWho(w);
+  return `<div class="bdh pn"><div class="bdhp" ${on?`onclick="${on}"`:''}>${bdoAv(w,'bdhav')}</div><div class="bdht"><small>Bola de Ouro · ${w.y}</small><h1>${esc(w.n)}${w.nat?' '+flg(w.nat):''}${w.me?'<span class="tag">você</span>':''}</h1><p>${esc(w.c||'')}</p><div class="chips"><span>${k}× Bola de Ouro</span>${w.pos?`<span>${esc(w.pos)}</span>`:''}${w.g&&w.pts?`<span>${Math.round(w.pts)} pontos</span>`:''}</div></div><div class="bdt" aria-hidden="true">⚽</div></div>`;
+}
 function bdoWinners(){
-  const all=bdoAll().sort((a,b)=>b.y-a.y),cnt={};
-  all.forEach(x=>{if(x.n!='—')cnt[x.n]=(cnt[x.n]||0)+1});
+  const all=bdoAll().sort((a,b)=>b.y-a.y),cnt={},nat={};
+  all.forEach(x=>{if(x.n!='—'){cnt[x.n]=(cnt[x.n]||0)+1;nat[x.n]=x.nat}});
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const live=S.ph=='season'?bdoList(false):[];
-  const who=x=>x.me?lnk("sheet('me','me')",esc(x.n))+' <span class="tag">você</span>':x.id?lnk(`sheet('p','${x.id}')`,esc(x.n)):LEG.some(z=>z.n==x.n)?lnk(`sheet('l','${ek(x.n)}')`,esc(x.n)):esc(x.n);
-  const rows=[];
-  for(let i=3;i>=1;i--)rows.push({c:[S.y+i,'<span class="muted">A definir</span>','','','']});
-  if(live.length)rows.push({c:[S.y+' ⏱','Em disputa: '+who(live[0]),natb(natCode(live[0].nat)),clubLnk(cl(live[0].club).n,live[0].club),''],cls:'mine'});
-  all.forEach(x=>rows.push({c:[x.y+(x.g?' ⚽':''),x.n=='—'?'<span class="muted">Não houve premiação</span>':who(x),x.nat?natb(x.nat):'',x.c?clubLnk(x.c):'',x.g?Math.round(x.pts):''],cls:x.me?'mine':''}));
-  return `<div class="pn full"><h2>Todos os vencedores da Bola de Ouro</h2><p class="note" style="margin-top:0">1956–2025: histórico real. De 2026 em diante (⚽): os vencedores do jogo, ano a ano. As próximas edições aparecem aqui conforme as temporadas passam.</p>${tbl(['Ano','Vencedor','País','Clube','Pts'],rows)}</div>
-  <div class="pn"><h2>Maiores vencedores</h2>${tbl(['#','Jogador','Bolas de Ouro'],top.map(([n,k],i)=>({c:[i+1,esc(n),`<b>${k}</b>`]})))}</div>`;
+  const card=x=>{
+    if(x.n=='—')return `<div class="bdc"><span class="yr">${x.y}</span><span class="muted">Não houve premiação</span></div>`;
+    const on=bdoWho(x);
+    return `<div class="bdc ${x.me?'me':''}" ${on?`onclick="${on}"`:''}><span class="yr">${x.y}${x.g?' ⚽':''}</span>${bdoAv(x)}<span class="nm2"><b>${esc(x.n)}</b>${x.nat?' '+flg(x.nat):''}${x.me?'<span class="tag">você</span>':''}<small>${esc(x.c||'')}${x.g&&x.pts?' · '+Math.round(x.pts)+' pts':''}</small></span></div>`;
+  };
+  const cur=live.length?`<div class="bdc live" onclick="${bdoWho(live[0])}"><span class="yr">${S.y} ⏱</span>${bdoAv(live[0])}<span class="nm2"><b>${esc(live[0].n)}</b> ${flg(natCode(live[0].nat))}<small>Em disputa · ${esc(cl(live[0].club).n)}</small></span></div>`:'';
+  const mp=top.map(([n,k],i)=>ldRow({pos:i+1,lead:'',name:esc(n)+' '+flg(nat[n]||''),sub:'',pts:k,unit:k>1?'PRÊMIOS':'PRÊMIO',cls:'',on:null})).join('');
+  return `<div class="ldg"><div class="pn"><h2>Arquivo de vencedores · ${all[all.length-1].y}–${all[0].y}</h2><div class="bdg">${cur}${all.map(card).join('')}</div><p class="note">1956–2025: histórico real. De 2026 em diante (⚽): os vencedores do jogo, ano a ano.</p></div>
+  <div class="ldc"><div class="pn"><h2>Mais premiados</h2><ul class="lrk">${mp}</ul></div></div></div>`;
 }
 const natb=c=>`<span class="natb" style="display:inline-grid;padding:0 6px">${esc(c)}</span>`;
 function viewOvr(){
@@ -154,16 +163,37 @@ function pgLend(){
 }
 const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:`sheet('l','${ek(x.n)}')`;
 const lgTag=x=>x.me?'<span class="tag">você</span>':x.st=='ativo'?'<span class="tag">ativo</span>':x.st=='ret'?'<span class="tag">aposentado</span>':'';
+/* ---------- Lendas: layout em painéis (pódio, recordes, histórico por ano) ---------- */
+const flg=(k,c='')=>{
+  if(typeof FLAGIMG!='undefined'&&FLAGIMG[k])return `<img class="flg ${c}" src="${FLAGIMG[k]}" alt="" title="${esc(k)}">`;
+  const nt=NATS.find(x=>x[0]==k);return `<span class="natb">${esc(nt?nt[1]:String(k).slice(0,3).toUpperCase())}</span>`;
+};
+const clubBadge=(n,id,sz='sm')=>{const i=id!=null?id:cn2id(n);return i!=null?shield(cl(i),sz):`<span class="fbk ${sz}">${esc(String(n).slice(0,3).toUpperCase())}</span>`};
+const hexb=v=>`<span class="hexb" style="--hc:${v>=88?'#9a6bff':v>=84?'#2fd0c8':v>=78?'#5aa6e8':'#7f8fa6'}">${Math.round(v)}</span>`;
+const ldRow=o=>`<li class="ldr ${o.pos<=3?'t'+o.pos:''} ${o.cls||''}" ${o.on?`onclick="${o.on}"`:''}><span class="pos">${o.pos}</span><span class="ldl">${o.lead||''}</span><span class="nm2">${o.name}<small>${o.sub||''}</small></span><span class="ldm">${o.mid||''}</span><span class="pt">${o.pts}<small>${o.unit||''}</small></span></li>`;
+const ldTit=x=>[x.bo&&x.bo+'× Bola de Ouro',x.wc&&x.wc+'× Copa',x.ucl&&x.ucl+'× Champions',x.lib&&x.lib+'× Libertadores'].filter(Boolean).join(' · ');
 function lendJog(){
   const l=legList(),mi=l.findIndex(x=>x.me);
-  const row=(x,i)=>`<li class="${x.me?'me':''}" onclick="${lgOn(x)}"><span class="pos">${i+1}</span>${legImg(x.n,'lgav')}<span class="natb">${esc(x.nat)}</span><span class="nm2">${esc(x.n)}${lgTag(x)}<small>${x.pos} · ${x.bo} Bola(s) de Ouro${x.wc?' · '+x.wc+' Copa(s)':''}${x.ucl?' · '+x.ucl+' Champions':''}${x.lib?' · '+x.lib+' Libertadores':''} · ${x.g} gols</small></span><b class="pts">${Math.round(x.pts)}</b></li>`;
-  return `<div class="pn full"><h2>Top 10 da história</h2><ul class="rank">${l.slice(0,10).map(row).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}
-  <p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, Mundiais, ligas e gols. As lendas reais têm números aproximados até 2025. Os craques do jogo entram no ranking conforme acumulam prêmios e títulos, e continuam nele depois de se aposentar.</p></div>
-  <div class="pn full"><details class="det"><summary>11º ao 30º</summary><ul class="rank">${l.slice(10,30).map((x,i)=>row(x,i+10)).join('')}</ul></details></div>`;
+  const ph=x=>legImg(x.n,'pdp')||`<span class="pdp ph">${esc(x.n[0])}</span>`;
+  const pod=(x,i)=>`<div class="pdm p${i+1}${x.me?' me':''}" onclick="${lgOn(x)}"><span class="pdn">${i+1}</span>${ph(x)}<b>${esc(x.n)}</b><small>${x.pos} · ${flg(x.nat)}</small><em>${ldTit(x)||x.g+' gols'}</em><strong>${Math.round(x.pts)}</strong><i>PTS</i></div>`;
+  const row=(x,i)=>ldRow({pos:i+1,lead:legImg(x.n,'lgav')||`<span class="lgav ph">${esc(x.n[0])}</span>`,name:esc(x.n)+lgTag(x),sub:`${x.pos} · ${flg(x.nat)} · ${x.g} gols`,mid:ldTit(x),pts:Math.round(x.pts),unit:'PTS',on:lgOn(x),cls:x.me?'me':''});
+  const best=k=>l.reduce((a,b)=>(b[k]||0)>(a[k]||0)?b:a,l[0]);
+  const rec=[['Bolas de Ouro','bo'],['Copas do Mundo','wc'],['Champions','ucl'],['Gols na carreira','g']].map(([t,k])=>{const x=best(k);return `<div class="rec" onclick="${lgOn(x)}"><small>${t}</small><b>${x[k]}</b><span>${esc(x.n)} ${flg(x.nat)}</span></div>`}).join('');
+  const yrs=bdoAll().sort((a,b)=>b.y-a.y).filter(x=>x.n!='—').slice(0,12).map(x=>`<li class="byr ${x.me?'me':''}"><span class="yr">${x.y}</span>${legImg(x.n,'lgav')||`<span class="lgav ph">${esc(x.n[0])}</span>`}<span class="nm2">${esc(x.n)}${x.nat?' '+flg(x.nat):''}</span><small>${esc(x.c||'')}</small></li>`).join('');
+  return `<div class="ldg"><div class="pn"><h2>Top 10 de todos os tempos</h2><div class="pods">${l.slice(0,3).map(pod).join('')}</div><ul class="lrk">${l.slice(3,10).map((x,i)=>row(x,i+3)).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}
+  <p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, Mundiais, ligas e gols. As lendas reais têm números aproximados até 2025. Os craques do jogo entram no ranking conforme acumulam prêmios e títulos.</p></div>
+  <div class="ldc"><div class="pn"><h2>Recordes</h2><div class="recs">${rec}</div></div><div class="pn"><h2>Bola de Ouro por ano</h2><ul class="lrk">${yrs}</ul></div></div></div>
+  <div class="pn full"><details class="det"><summary>11º ao 30º</summary><ul class="lrk">${l.slice(10,30).map((x,i)=>row(x,i+10)).join('')}</ul></details></div>`;
 }
 function lendWc(){
   const rows=[...WC_H.map(x=>({y:x.y,c:x.c,r:x.r})),...S.wc.map(w=>({y:w.y,c:w.champ,r:w.ru,sf:w.sf,g:1,w}))].sort((a,b)=>b.y-a.y);
-  return `<div class="pn full"><h2>Copas do Mundo</h2>${tbl(['Ano','Campeã','Vice','Semifinalistas'],rows.map(x=>({c:[x.y+(x.g?' ⚽':''),selLnk(x.c),selLnk(x.r),x.sf?x.sf.map(esc).join(', '):'—'],cls:x.g&&x.w.nat==x.c&&x.w.me.called?'mine':''})))}<p class="note">1930–2022: histórico real. A partir de 2026 (⚽) valem as Copas simuladas pelo jogo, a cada 4 anos.</p></div>`;
+  const cnt={};rows.forEach(x=>{cnt[x.c]=(cnt[x.c]||0)+1});
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,10);
+  const c3=top.slice(0,3).map(([n,k])=>`<div class="c3" onclick="sheet('s','${ek(n)}')">${flg(n,'lg')}<b>${k}</b><small>${esc(n)}</small></div>`).join('');
+  const yl=rows.map(x=>`<li class="yrr ${x.g&&x.w.nat==x.c&&x.w.me.called?'me':''}"><span class="yr">${x.y}${x.g?' ⚽':''}</span><div><div class="yw">${flg(x.c)}${selLnk(x.c)}</div><div class="yv">Vice: ${flg(x.r)}${selLnk(x.r)}${x.sf?' · Semifinais: '+x.sf.map(esc).join(', '):''}</div></div></li>`).join('');
+  const tl=top.map(([n,k],i)=>ldRow({pos:i+1,lead:flg(n),name:selLnk(n),sub:'',pts:k,unit:'TÍTULOS'})).join('');
+  return `<div class="ldg"><div class="pn"><h2>Copa do Mundo · campeãs e vices</h2><div class="c3s">${c3}</div><ul class="yrl">${yl}</ul><p class="note">1930–2022: histórico real. A partir de 2026 (⚽) valem as Copas simuladas pelo jogo, a cada 4 anos.</p></div>
+  <div class="ldc"><div class="pn"><h2>Maiores campeãs</h2><ul class="lrk">${tl}</ul></div></div></div>`;
 }
 function lendCont(key){
   const H=key=='ucl'?UCL_H:LIB_H,title=key=='ucl'?'Liga dos Campeões':'Libertadores';
@@ -172,17 +202,23 @@ function lendCont(key){
   rows.sort((a,b)=>b.y-a.y);
   const cnt={};rows.forEach(x=>{cnt[x.c]=(cnt[x.c]||0)+1});
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,10);
-  return `<div class="pn"><h2>Maiores campeões · ${title}</h2>${tbl(['#','Clube','Títulos'],top.map(([n,k],i)=>({c:[i+1,clubLnk(n),`<b>${k}</b>`],cls:cn2id(n)==S.club?'mine':''})))}</div>
-  <div class="pn full"><h2>${title} · resultados por ano</h2>${tbl(['Ano','Campeão','Vice'],rows.map(x=>({c:[x.y+(x.g?' ⚽':''),clubLnk(x.c,x.ci),x.r=='—'?'—':clubLnk(x.r,x.ri)],cls:x.ci==S.club?'mine':''})))}<p class="note">${key=='ucl'?'1956–2025':'1960–2025'}: histórico real. Depois, as edições simuladas pelo jogo (⚽).</p></div>`;
+  const c3=top.slice(0,3).map(([n,k])=>`<div class="c3" ${cn2id(n)!=null?`onclick="sheet('c','${cn2id(n)}')"`:''}>${clubBadge(n,null,'lg')}<b>${k}</b><small>${esc(n)}</small></div>`).join('');
+  const yl=rows.map(x=>`<li class="yrr ${x.ci==S.club?'me':''}"><span class="yr">${x.y}${x.g?' ⚽':''}</span><div><div class="yw">${clubBadge(x.c,x.ci,'xs')}${clubLnk(x.c,x.ci)}</div><div class="yv">Vice: ${x.r=='—'?'—':clubBadge(x.r,x.ri,'xs')+clubLnk(x.r,x.ri)}</div></div></li>`).join('');
+  const tl=top.map(([n,k],i)=>ldRow({pos:i+1,lead:clubBadge(n,null,'sm'),name:clubLnk(n),sub:'',pts:k,unit:'TÍTULOS',cls:cn2id(n)==S.club?'me':''})).join('');
+  return `<div class="ldg"><div class="pn"><h2>${title} · campeões e vices</h2><div class="c3s">${c3}</div><ul class="yrl">${yl}</ul><p class="note">${key=='ucl'?'1956–2025':'1960–2025'}: histórico real. Depois, as edições simuladas pelo jogo (⚽).</p></div>
+  <div class="ldc"><div class="pn"><h2>Maiores campeões</h2><ul class="lrk">${tl}</ul></div></div></div>`;
 }
 function lendClb(){
   const l=clubPower().filter(x=>x.pts>0).slice(0,25),f=S.cs.filter(c=>c.l>=0).sort((a,b)=>b.s-a.s).slice(0,10);
-  return `<div class="pn full"><h2>Power ranking de clubes</h2><p class="note" style="margin-top:0">Pontos de títulos: Champions 10, Libertadores 8, Mundial 5, liga 2, copa nacional 1, vice continental 3 (UCL) ou 2 (LIB). Histórico real até 2025 mais os títulos do jogo.</p>${tbl(['#','Clube','UCL','LIB','MUN','Ligas*','Pts','Força'],l.map((x,i)=>({c:[i+1,lnk(`sheet('c','${x.c.id}')`,tn(x.c)),x.t.ucl.length,x.t.lib.length,x.t.mc,x.t.lg.length,`<b>${x.pts}</b>`,Math.round(x.c.s)],cls:x.c.id==S.club?'mine':''})))}<p class="note">*Ligas e copas nacionais contam só a partir de 2026, nas temporadas do jogo.</p></div>
-  <div class="pn full"><h2>Mais fortes agora</h2><ul class="rank">${f.map((c,i)=>`<li class="${c.id==S.club?'me':''}" onclick="sheet('c','${c.id}')"><span class="pos">${i+1}</span>${shield(c,'sm')}<span class="nm2">${esc(c.n)}<small>${LEAGUES[c.l].n} · ${dvName(c)}</small></span><span class="pt">${Math.round(c.s)}<small>força</small></span></li>`).join('')}</ul></div>`;
+  const row=(x,i)=>ldRow({pos:i+1,lead:`<span class="hxw">${hexb(x.c.s)}</span>${shield(x.c,'sm')}`,name:esc(x.c.n)+(x.c.l>=0?` <span class="lgchip">${LEAGUES[x.c.l].k}</span>`:''),sub:`${x.t.ucl.length} UCL · ${x.t.lib.length} LIB · ${x.t.mc} Mundial · ${x.t.lg.length} ligas`,pts:x.pts,unit:'POWER',on:`sheet('c','${x.c.id}')`,cls:x.c.id==S.club?'me':''});
+  const fr=f.map((c,i)=>ldRow({pos:i+1,lead:`<span class="hxw">${hexb(c.s)}</span>${shield(c,'sm')}`,name:esc(c.n),sub:`${LEAGUES[c.l].n} · ${dvName(c)}`,pts:Math.round(c.s),unit:'FORÇA',on:`sheet('c','${c.id}')`,cls:c.id==S.club?'me':''})).join('');
+  return `<div class="ldg"><div class="pn"><h2>Power ranking</h2><p class="note" style="margin-top:0">Champions 10, Libertadores 8, Mundial 5, liga 2, copa nacional 1, vice continental 3 (UCL) ou 2 (LIB). Histórico real até 2025 mais os títulos do jogo. Ligas e copas nacionais contam a partir de 2026.</p><ul class="lrk">${l.map(row).join('')}</ul></div>
+  <div class="ldc"><div class="pn"><h2>Mais fortes agora</h2><ul class="lrk">${fr}</ul></div></div></div>`;
 }
 function lendSel(){
   const l=selRank().slice(0,16);
-  return `<div class="pn full"><h2>Ranking de seleções</h2><p class="note" style="margin-top:0">Mesma lógica das lendas: Copa do Mundo 20 pontos, vice 8, semifinal 3 (semifinais só nas Copas do jogo). Histórico real até 2022 mais as Copas simuladas.</p><ul class="rank">${l.map((x,i)=>`<li class="${x.n==S.p.nat?'me':''}" onclick="sheet('s','${ek(x.n)}')"><span class="pos">${i+1}</span><span class="natb">${esc(x.c)}</span><span class="nm2">${esc(x.n)}${x.n==S.p.nat?'<span class="tag">sua seleção</span>':''}<small>${x.t.length} título(s) · ${x.v.length} vice(s)${x.sf.length?' · '+x.sf.length+' semifinal(is) no jogo':''}${x.s?' · força '+x.s:''}</small></span><b class="pts">${x.pts}</b></li>`).join('')}</ul></div>`;
+  const row=(x,i)=>ldRow({pos:i+1,lead:flg(x.n,'lg'),name:esc(x.n)+(x.n==S.p.nat?'<span class="tag">sua seleção</span>':''),sub:`${x.t.length} título(s) · ${x.v.length} vice(s)${x.sf.length?' · '+x.sf.length+' semifinal(is) no jogo':''}${x.s?' · força '+x.s:''}`,pts:x.pts,unit:'PTS',on:`sheet('s','${ek(x.n)}')`,cls:x.n==S.p.nat?'me':''});
+  return `<div class="pn ldone"><h2>Seleções de todos os tempos</h2><p class="note" style="margin-top:0">Copa do Mundo 20 pontos, vice 8, semifinal 3 (semifinais só nas Copas do jogo). Histórico real até 2022 mais as Copas simuladas. Toque numa seleção para abrir a ficha.</p><ul class="lrk">${l.map(row).join('')}</ul></div>`;
 }
 
 /* ============================================================

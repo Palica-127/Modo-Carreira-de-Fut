@@ -49,7 +49,7 @@ function allPages(tag){
   sheetOk(tag,`sheet('l',encodeURIComponent(LEG[20].n))`);
   sheetOk(tag,"sheet('q',S.club+'.7')");
   if(ev('S.mail.length'))sheetOk(tag,`sheet('m',String(S.mail[0].id))`);
-  if(ev('lvIdx()')>=0){for(const code of ['liveOpen(lvIdx(),1)','liveOpen(lvIdx());ui.lv.t=45;lvDraw()']){ev(code);if(!w.document.querySelector('#lvo .lvh')||/undefined|NaN/.test(w.document.querySelector('#lvo').textContent))errors.push(tag+' ao vivo '+code);if(code.includes('t=45')&&(w.document.querySelectorAll('#lvpitch .pd').length!=22||!w.document.querySelector('#lvpitch .pb')))errors.push(tag+' campo ao vivo');ev('clearInterval(LVT);ui.lv=null;S.lvp=0;lvDraw()')}}
+  if(ev('lvIdx()')>=0){for(const code of ['liveOpen(lvIdx(),1)','liveOpen(lvIdx());ui.lv.t=45;lvDraw()']){ev(code);if(!w.document.querySelector('#lvo .lvh')||/undefined|NaN/.test(w.document.querySelector('#lvo').textContent))errors.push(tag+' ao vivo '+code);if(code.includes('t=45')&&(w.document.querySelectorAll('#lvpitch .pj').length!=22||!w.document.querySelector('#lvpitch .pb')))errors.push(tag+' campo ao vivo');ev('clearInterval(LVT);ui.lv=null;S.lvp=0;lvDraw()')}}
   counts.sheets+=1;
   ev(`ui.pg='jogar';ui.jg='prox';render()`);
 }
