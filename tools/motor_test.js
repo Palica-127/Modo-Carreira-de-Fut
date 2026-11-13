@@ -270,10 +270,10 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(bad.length==0,'encadeamento das regras: '+bad.slice(0,3).join('; '));}
  /* expulso não joga mais; nenhum jogador leva 3 amarelos; faltas em área só pelo defensor da área */
  {let bad=[],vermelhos=0;const AGE=['passe','lancamento','cruzamento','conducao','drible','chute','desarme','intercepta','falta'];
-  for(const r of jogos){const exp=new Set(),am={};
+  for(const r of jogos){const exp=new Set(),am={},J=MT.jogadores(r),K=e=>e.s+'|'+J.quem(e.s,e.p,e.t);   /* por jogador (a vaga é reaproveitada por quem entra) */
    r.log.ev.forEach(e=>{
-    if(e.k=='cartao'){if(e.o=='amarelo'){am[e.s+'|'+e.p]=(am[e.s+'|'+e.p]||0)+1;if(am[e.s+'|'+e.p]>2)bad.push('3 amarelos');}else{exp.add(e.s+'|'+e.p);vermelhos++}}
-    else if(AGE.includes(e.k)&&e.p!=null&&exp.has(e.s+'|'+e.p)&&e.p>0)bad.push('expulso em campo: '+e.k);
+    if(e.k=='cartao'){if(e.o=='amarelo'){am[K(e)]=(am[K(e)]||0)+1;if(am[K(e)]>2)bad.push('3 amarelos');}else{exp.add(K(e));vermelhos++}}
+    else if(AGE.includes(e.k)&&e.p!=null&&exp.has(K(e))&&e.p>0)bad.push('expulso em campo: '+e.k);
    });}
   ok(bad.length==0,'cartões coerentes: '+bad.slice(0,3).join('; '));}
  /* acréscimos e tempo */

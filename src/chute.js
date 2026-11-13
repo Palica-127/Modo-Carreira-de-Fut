@@ -26,7 +26,7 @@
     esc:20,            // sensibilidade do finalizador (maior = atributos pesam menos)
     escGk:16,          // idem para o goleiro
     gkMin:.86,gkMax:1.28,   // multiplicador do xG conforme o goleiro (bom=min, ruim=max)
-    cabeca:.55,primeira:.93,global:4.0,   // ajuste geral da calibração
+    cabeca:.55,primeira:.93,global:3.4,   // ajuste geral da calibração
 
     origem:{filtrado:1.18,cruz:.9,rebote:1.05,passe:1,conducao:1,nenhuma:1},
     marca:.14,pressao:.22,caixa:.98,   // perda de xG por defensor a menos de 2,8 m / pressão geral / chute dentro da área

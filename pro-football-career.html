@@ -2923,7 +2923,7 @@ const MT=(()=>{
     esc:20,            // sensibilidade do finalizador (maior = atributos pesam menos)
     escGk:16,          // idem para o goleiro
     gkMin:.86,gkMax:1.28,   // multiplicador do xG conforme o goleiro (bom=min, ruim=max)
-    cabeca:.55,primeira:.93,global:4.0,   // ajuste geral da calibração
+    cabeca:.55,primeira:.93,global:3.4,   // ajuste geral da calibração
 
     origem:{filtrado:1.18,cruz:.9,rebote:1.05,passe:1,conducao:1,nenhuma:1},
     marca:.14,pressao:.22,caixa:.98,   // perda de xG por defensor a menos de 2,8 m / pressão geral / chute dentro da área
@@ -3524,9 +3524,9 @@ const MT=(()=>{
     cond:{zonaArea:.4,zonaTerco:.75,hab:36,esc:20,pres:1.7,passo:[6,13]},
     drib:{zonaArea:.55,zonaTerco:.85,esc:18,ganho:.08},
     desarme:{prob:.28,esc:20,raio:3.2},
-    chute:{janelaAss:20,minXg:.055,zonaAtras:.78,penAtras:.12,instinto:.15,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
+    chute:{meia:.1,janelaAss:20,minXg:.06,zonaAtras:.78,penAtras:.12,instinto:.15,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
     decisao:{tau0:.05,tauDec:.14,ruido:.12},
-    pos:{compacto:.82,largura:.85,maxU:.84,ponta:.45,chegada:.09},
+    pos:{compacto:.82,largura:.85,maxU:.84,ponta:.8,chegada:.4},
     valor:{keep:.15,gol:3}      // valor de ter a bola e de um gol, na mesma unidade da ameaça (th)
   };
 
@@ -3690,7 +3690,7 @@ const MT=(()=>{
       let n=0;maisPerto(opp(s),[bx,by],3,true).forEach(o=>{if(o.d<2.8)n++});
       if(ub>.8&&n<1)n=1;
       const rec=ult&&ult.s==s&&ult.j==h?ult:null;
-      return{u:ub,v:vb,d:g.d,tipo:cab?'cabeca':rec?'primeira':'pe',origem:rec?rec.o:'nenhuma',nDef:n,pres:P,ass:rec};
+      return{u:ub,v:vb,d:g.d,tipo:cab?'cabeca':rec&&!rec.c?'primeira':'pe',origem:rec?rec.o:'nenhuma',nDef:n,pres:P,ass:rec};
     }
     /* o que o jogador vê antes de chutar: xG do lance corrigido pela habilidade esperada dele (sem saber o goleiro) */
     function avalChute(s,h,P,cab){
@@ -3734,7 +3734,7 @@ const MT=(()=>{
         ops.push({t:'drib',m:m.i,pd,nu,nv,u:pd*(vOwn(nu,nv)+PAR.drib.ganho)+(1-pd)*vOpp(ub,vb)+(a.dri-60)/450+RD.gauss(0,ruido)})}}
       /* chute */
       {const c=avalChute(s,h,P,false);
-       if(c){const ev=c.xg*V.gol+(1-c.xg)*(-(V.keep+.02))+(c.xg>.1?PAR.chute.instinto*Math.min(1,c.xg/.3):0)+(a.agr>70?.01:0)+(100-a.dec)/100*.03*(c.d<26?1:.5);ops.push({t:'chute',c,u:ev+RD.gauss(0,ruido*.4)})}}
+       if(c){const ev=c.xg*V.gol+(1-c.xg)*(-(V.keep+.02))+(c.xg>.1?PAR.chute.instinto*Math.min(1,c.xg/.3):0)+((cls=='CM'||cls=='AM'||cls=='DM')&&c.d<27?PAR.chute.meia:0)+(a.agr>70?.01:0)+(100-a.dec)/100*.03*(c.d<26?1:.5);ops.push({t:'chute',c,u:ev+RD.gauss(0,ruido*.4)})}}
       if(!ops.length)return null;
       /* impulso: quem é agressivo ou atrevido bate de longe mesmo sem ser a melhor opção */
       const sh=ops.find(o=>o.t=='chute');
@@ -4105,16 +4105,16 @@ const MT=(()=>{
         }
       }else if(op.t=='cond'){
         gasta(s,PAR.dur.cond+op.dist*PAR.dur.condM);gastaEn(s,h,op.dist*.03);
-        if(RU.chance(op.pc)){st[s].conducoes++;if(op.dist>=9)evento('conducao',{s,p:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tx:+op.np[0].toFixed(3),ty:+op.np[1].toFixed(3)}});bx=op.np[0];by=op.np[1];ult=null}
+        if(RU.chance(op.pc)){st[s].conducoes++;if(op.dist>=9)evento('conducao',{s,p:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tx:+op.np[0].toFixed(3),ty:+op.np[1].toFixed(3)}});bx=op.np[0];by=op.np[1];if(ult)ult.c=1}
         else{
           const k=maisPerto(opp(s),op.np,1,true)[0];
-          if(RF.chance(MT.regras.pFalta('cond',I(opp(s),k.i).a,me,rigZ(s,[bx,by])*Math.sqrt(T[opp(s)].est.pres)))){if(!faltaEm(opp(s),k.i,s,h,'cond',[bx,by],RF.chance(.35))){bx=op.np[0];by=op.np[1];ult=null}continue}
+          if(RF.chance(MT.regras.pFalta('cond',I(opp(s),k.i).a,me,rigZ(s,[bx,by])*Math.sqrt(T[opp(s)].est.pres)))){if(!faltaEm(opp(s),k.i,s,h,'cond',[bx,by],RF.chance(.35))){bx=op.np[0];by=op.np[1];if(ult)ult.c=1}continue}
           st[s].perdas++;st[opp(s)].desarmes++;st[opp(s)].desOk++;
           evento('desarme',{s:opp(s),p:k.i,q:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tipo:'conducao'}});recupera(opp(s),k.i,[bx,by],'desarme');
         }
       }else if(op.t=='drib'){
         st[s].dribles++;gasta(s,PAR.dur.drib);gastaEn(s,h,.5);
-        if(RU.chance(op.pd)){st[s].dribOk++;evento('drible',{s,p:h,q:op.m,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok'});bx=toX(s,op.nu);by=toY(s,op.nv);ult=null}
+        if(RU.chance(op.pd)){st[s].dribOk++;evento('drible',{s,p:h,q:op.m,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok'});bx=toX(s,op.nu);by=toY(s,op.nv);if(ult)ult.c=1}
         else if(RF.chance(MT.regras.pFalta('drib',I(opp(s),op.m).a,me,rigZ(s,[bx,by])*Math.sqrt(T[opp(s)].est.pres)))){if(!faltaEm(opp(s),op.m,s,h,'drib',[bx,by],RF.chance(.35))){bx=toX(s,op.nu);by=toY(s,op.nv);ult=null}continue}
         else{st[s].perdas++;evento('drible',{s,p:h,q:op.m,x:+bx.toFixed(3),y:+by.toFixed(3),o:'falha'});st[opp(s)].desarmes++;st[opp(s)].desOk++;evento('desarme',{s:opp(s),p:op.m,q:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tipo:'drible'}});recupera(opp(s),op.m,[bx,by],'desarme')}
       }else if(op.t=='chute'){
