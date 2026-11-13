@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','chute','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','regras','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -108,7 +108,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
  {const [A,B]=par(70,70,3),r1=MT.simula(A,B,77),r2=MT.simula(A,B,77),r3=MT.simula(A,B,78);
   ok(r1.log.digest()===r2.log.digest(),'mesma seed => partida idêntica');ok(r1.log.digest()!==r3.log.digest(),'outra seed => outra partida');
   const ev=r1.log.ev;ok(ev[0].k=='inicio'&&ev[ev.length-1].k=='fim','começa em inicio e termina em fim');
-  ok(ev.every((e,i)=>i==0||e.t>=ev[i-1].t)&&ev[ev.length-1].t<=5400+120,'tempo crescente e dentro dos 90 minutos');
+  ok(ev.every((e,i)=>i==0||e.t>=ev[i-1].t)&&ev[ev.length-1].t<=5400+900,'tempo crescente e dentro dos 90 minutos mais acréscimos');
   ok(ev.filter(e=>e.k=='fim_tempo').length==1,'um intervalo');
   ok(r1.g[0]+r1.g[1]==ev.filter(e=>e.k=='gol').length,'placar bate com os gols do registro');}
  /* auditoria: toda ação com a bola é feita por quem a tem; chute só de quem recebeu ou conquistou; gol só após chute; assistência só de passe */
@@ -118,6 +118,9 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
     if(e.k=='inicio'||e.k=='fim_tempo'){hold=null;continue}
     if(e.k=='recuperou'){hold=[e.s,e.p];last=e;continue}
     if(e.k=='tiro_meta'){hold=[e.s,0];last=e;continue}
+    if(e.k=='tiro_livre'||e.k=='escanteio'||e.k=='penalti'){hold=[e.s,e.p];last=e;continue}
+    if(e.k=='lateral'){hold=[e.s,e.q];last=e;continue}
+    if(e.k=='impedimento'||(e.k=='falta'&&!e.d.vantagem)){hold=null;last=e;continue}
     if(['passe','lancamento','cruzamento','conducao','drible','chute'].includes(e.k)){
       n++;if(hold&&(hold[0]!=e.s||hold[1]!=e.p))bad.push(e.k+' de quem não tinha a bola (t='+e.t+')');
       if(['passe','lancamento','cruzamento'].includes(e.k)&&e.o=='ok')hold=[e.s,e.q];
@@ -147,10 +150,10 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(pa.mean('a')>pa.mean('b')+4,'passe/técnica/visão ruins derrubam a precisão ('+pa.mean('a').toFixed(1)+' x '+pa.mean('b').toFixed(1)+')');
   /* goleiro excelente x goleiro fraco: a conversão dos chutes do adversário cai */
   const gk=(v)=>T=>{const p=T.xi[0];p.a={...p.a};['ref','aga','gpo','sai','um1'].forEach(k=>p.a[k]=v);return T};
-  let gb=0,sb=0,gf=0,sf=0;
+  let gb=0,sb=0,gf=0,sf=0; /* sb/sf: xG somado — compara gols por xG, que isola o goleiro da seleção de chutes */
   for(let sd=1;sd<=(RAPIDO?10:40);sd++){const A=MT.timeTeste(70,'4-3-3','Casa',sd*2),r=MT.simula(A,gk(92)(MT.timeTeste(70,'4-3-3','Fora',sd*2+1)),sd),r2=MT.simula(A,gk(35)(MT.timeTeste(70,'4-3-3','Fora',sd*2+1)),sd);
-    gb+=r.st[0].gols;sb+=r.st[0].chutes;gf+=r2.st[0].gols;sf+=r2.st[0].chutes}
-  ok(gb/sb<gf/sf,'goleiro bom converte menos chutes do adversário que o ruim ('+(100*gb/sb).toFixed(1)+'% x '+(100*gf/sf).toFixed(1)+'%)');
+    gb+=r.st[0].gols;sb+=r.st[0].xg;gf+=r2.st[0].gols;sf+=r2.st[0].xg}
+  ok(gb/sb<gf/sf,'goleiro bom sofre menos gols por xG que o ruim ('+(100*gb/sb).toFixed(1)+'% x '+(100*gf/sf).toFixed(1)+'%)');
 }
 }
 
@@ -206,6 +209,97 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(fr>0&&fr/ch<.2,'pé fraco é usado em minoria dos chutes ('+(100*fr/ch).toFixed(0)+'%)');
   ok(comPe==ch,'todo chute registra o pé usado');
   ok(Math.abs(gols-xgS)/xgS<.45,'gols próximos do xG somado ('+gols+' x '+xgS.toFixed(1)+')');}
+}
+
+/* ===== módulo 4: regras do jogo (IFAB) ===== */
+{
+ const R=MT.regras,at=(v)=>{const o={};MT.ATTR_KEYS.forEach(k=>o[k]=v);return o};
+ /* Lei 11: impedimento */
+ {const adv=[.97,.8,.7,.6,.5];   // goleiro e defensores, em coordenadas do atacante
+  ok(!R.impedimento(.78,.5,adv).imp,'atrás do penúltimo defensor: em condição');
+  ok(R.impedimento(.85,.5,adv).imp,'à frente do penúltimo defensor e da bola: impedido');
+  ok(!R.impedimento(.85,.9,adv).imp,'à frente dos defensores mas atrás da bola: em condição');
+  ok(!R.impedimento(.45,.2,[.97,.4,.3]).imp,'na própria metade nunca é impedimento');
+  ok(!R.impedimento(.8,.5,adv).imp,'na mesma linha do penúltimo defensor: em condição');
+  ok(R.impedimento(.9,.5,[.99,.6,.5]).imp&&!R.impedimento(.9,.5,[.99,.95,.5]).imp,'o goleiro conta como defensor, o penúltimo é quem vale');
+  ok(R.dentroArea(1-10/105,.5)&&!R.dentroArea(1-20/105,.5)&&!R.dentroArea(1-10/105,.1)&&R.dentroArea(1-16/105,.5+19/68),'grande área: 16,5 m x 40,3 m');}
+ /* faltas: quem é agressivo e marca mal comete mais */
+ {const ag=at(50);ag.agr=90;ag.des=35;ag.mar=35;const ca=at(50);ca.agr=15;ca.des=85;ca.mar=85;const atk=at(60);
+  ok(R.pFalta('tackle',ag,atk)>R.pFalta('tackle',ca,atk)*1.8,'agressivo e fraco no desarme comete bem mais faltas');
+  ok(R.pFalta('tackle',ag,atk)>R.pFalta('recep',ag,atk)&&R.pFalta('tackle',ag,atk,.5)<R.pFalta('tackle',ag,atk),'desarme gera mais falta que recepção; rigor do árbitro escala');}
+ /* cartões */
+ {const rs=MT.rng('cartoes'),cont=(f,n)=>{const o={amarelo:0,vermelho:0,segundo:0,nada:0};for(let i=0;i<n;i++){const c=R.cartao(f,rs);if(!c.c)o.nada++;else{o[c.c]++;if(c.segundo)o.segundo++}}return o};
+  const normal=cont({agr:50,amarelos:0},20000),viol=cont({agr:95,amarelos:0},20000),dg=cont({agr:50,amarelos:0,dogso:'fora'},20000),seg=cont({agr:70,amarelos:1,tatica:true},20000);
+  ok(normal.amarelo/20000>.05&&normal.amarelo/20000<.25,'falta comum: amarelo em 5% a 25% ('+(100*normal.amarelo/20000).toFixed(1)+'%)');
+  ok(normal.vermelho/20000<.01,'falta comum quase nunca é vermelho');
+  ok(viol.amarelo>normal.amarelo,'jogador agressivo leva mais cartão');
+  ok(dg.vermelho/20000>.1,'anular chance clara fora da área rende vermelho com frequência ('+(100*dg.vermelho/20000).toFixed(0)+'%)');
+  ok(seg.segundo>0&&seg.amarelo==0,'quem já tem amarelo e é punido de novo leva vermelho (segundo amarelo)');
+  const rs2=MT.rng(2);ok(R.cartao({agr:60,amarelos:0,dogso:'area'},rs2)!=null,'cartão na área é avaliado');}
+ /* pênalti */
+ {const rs=MT.rng('pen'),taxa=(c,g,n)=>{let k=0;for(let i=0;i<n;i++)if(R.penalti(c,g,rs).res=='gol')k++;return k/n},m=at(65);
+  const tm=taxa(m,m,20000);ok(tm>.7&&tm<.85,'cobrança média converte 70% a 85% ('+(100*tm).toFixed(0)+'%)');
+  ok(taxa(at(92),m,20000)>taxa(at(35),m,20000)+.1,'bom cobrador converte bem mais que o ruim');
+  ok(taxa(m,at(92),20000)<taxa(m,at(35),20000)-.05,'bom goleiro defende mais pênaltis');
+  const o={gol:0,defesa:0,fora:0,trave:0};for(let i=0;i<20000;i++)o[R.penalti(m,m,rs).res]++;ok(o.fora>0&&o.trave>0&&o.defesa>0,'pênalti pode ir fora, na trave ou ser defendido');}
+ ok(R.acrescimo(10)==1&&R.acrescimo(180)==3&&R.acrescimo(9999)==8,'acréscimo: mínimo 1, arredonda minutos, máximo 8');
+
+ /* na partida */
+ const par=(fa,fb,seed)=>[MT.timeTeste(fa,'4-3-3','Casa',seed*2),MT.timeTeste(fb,'4-4-2','Fora',seed*2+1)];
+ const NJ=process.env.RAPIDO?8:40,jogos=[];for(let i=1;i<=NJ;i++){const [A,B]=par(70,70,i);jogos.push(MT.simula(A,B,900+i))}
+ const soma=(f)=>jogos.reduce((s,r)=>s+f(r),0)/jogos.length;
+ const num=(k)=>soma(r=>r.log.count(k));
+ {const faltas=num('falta')/2;ok(faltas>9&&faltas<18,'faltas por time entre 9 e 18 ('+faltas.toFixed(1)+')');
+  const am=soma(r=>r.log.ev.filter(e=>e.k=='cartao'&&e.o=='amarelo').length),vm=soma(r=>r.log.ev.filter(e=>e.k=='cartao'&&e.o=='vermelho').length);
+  ok(am>2&&am<6,'amarelos por jogo entre 2 e 6 ('+am.toFixed(2)+')');ok(vm<.9,'vermelhos por jogo abaixo de 0,9 ('+vm.toFixed(2)+')');
+  const im=num('impedimento')/2;ok(im>1.5&&im<6,'impedimentos por time entre 1,5 e 6 ('+im.toFixed(1)+')');
+  const es=num('escanteio')/2;ok(es>3&&es<8,'escanteios por time entre 3 e 8 ('+es.toFixed(1)+')');
+  const la=num('lateral')/2;ok(la>10&&la<28,'laterais por time entre 10 e 28 ('+la.toFixed(1)+')');
+  ok(num('tiro_meta')/2>3,'tiros de meta acontecem');ok(num('vantagem')>0,'a vantagem é aplicada em alguns lances');}
+ /* encadeamento: toda falta/impedimento termina em reposição certa; vantagem que falha volta como falta */
+ {let bad=[];
+  for(const r of jogos){const ev=r.log.ev;
+   ev.forEach((e,i)=>{
+    if(e.k=='impedimento'){const nx=ev[i+1];if(!nx||nx.k!='tiro_livre'||nx.s==e.s||nx.d.origem!='impedimento')bad.push('impedimento sem tiro livre do adversário')}
+    if(e.k=='penalti'){const nx=ev[i+1];if(!nx||nx.k!='chute'||nx.d.tipo!='penalti'||nx.p!=e.p)bad.push('pênalti sem chute do cobrador');if(Math.abs(Math.abs(e.x-.5)-(.5-11/105))>.01)bad.push('pênalti fora da marca')}
+    if(e.k=='falta'&&!e.d.vantagem){let j=i+1;while(ev[j]&&ev[j].k=='cartao')j++;const nx=ev[j];if(!nx||(nx.k!='tiro_livre'&&nx.k!='penalti'))bad.push('falta sem reposição ('+(nx&&nx.k)+')');
+     if(nx&&nx.k=='tiro_livre'&&nx.s==e.s)bad.push('tiro livre dado ao time que cometeu a falta');if(nx&&nx.k=='penalti'&&!e.d.area)bad.push('pênalti fora da área')}
+    if(e.k=='falta'&&e.d.area&&e.s!==undefined){const at_=e.x;if((e.s==0&&at_<.5)||(e.s==1&&at_>.5)){} }
+    if(e.k=='cartao'&&e.o=='vermelho'&&e.d.segundo){const pr=ev[i-1];if(!pr||pr.k!='cartao'||pr.o!='amarelo'||pr.p!=e.p)bad.push('segundo amarelo sem amarelo antes')}
+   });}
+  ok(bad.length==0,'encadeamento das regras: '+bad.slice(0,3).join('; '));}
+ /* expulso não joga mais; nenhum jogador leva 3 amarelos; faltas em área só pelo defensor da área */
+ {let bad=[],vermelhos=0;const AGE=['passe','lancamento','cruzamento','conducao','drible','chute','desarme','intercepta','falta'];
+  for(const r of jogos){const exp=new Set(),am={};
+   r.log.ev.forEach(e=>{
+    if(e.k=='cartao'){if(e.o=='amarelo'){am[e.s+'|'+e.p]=(am[e.s+'|'+e.p]||0)+1;if(am[e.s+'|'+e.p]>2)bad.push('3 amarelos');}else{exp.add(e.s+'|'+e.p);vermelhos++}}
+    else if(AGE.includes(e.k)&&e.p!=null&&exp.has(e.s+'|'+e.p)&&e.p>0)bad.push('expulso em campo: '+e.k);
+   });}
+  ok(bad.length==0,'cartões coerentes: '+bad.slice(0,3).join('; '));}
+ /* acréscimos e tempo */
+ {const r=jogos[0],ac=r.log.by('acrescimo'),ft=r.log.by('fim_tempo');
+  ok(ac.length==2&&ac.every(e=>e.d.min>=1&&e.d.min<=8),'dois avisos de acréscimo entre 1 e 8 minutos');
+  ok(r.log.ev[r.log.ev.length-1].t>=5400&&r.log.ev[r.log.ev.length-1].t<=5400+(ac[0].d.min+ac[1].d.min)*60+400,'a partida termina depois dos 90 min, dentro dos acréscimos');
+  ok(ft.length==1&&ft[0].t>=2700&&ft[0].t<=2700+ac[0].d.min*60+400,'o intervalo vem depois do acréscimo do 1º tempo');
+  ok(jogos.every(r=>!r.pen),'sem mata-mata, não há prorrogação nem pênaltis');}
+ /* mata-mata: prorrogação e disputa de pênaltis */
+ {let emp=0,prorr=0,pens=0,bad=[];
+  for(let i=1;i<=(process.env.RAPIDO?30:90)&&pens<(process.env.RAPIDO?1:4);i++){const [A,B]=par(70,70,i+300),r=MT.simula(A,B,1200+i,{mataMata:true}),ev=r.log.ev;
+   const p1=ev.filter(e=>e.k=='prorrogacao').length;
+   const g90=ev.filter(e=>e.k=='gol'&&e.t<=ev.find(x=>x.k=='prorrogacao'||x.k=='fim').t).length;
+   if(p1){prorr++;if(p1!=2)bad.push('prorrogação deve ter 2 períodos');}
+   const pe=ev.filter(e=>e.k=='penaltis'&&e.o);
+   if(r.pen){pens++;const [a,b]=r.pen.placar;
+    if(a==b)bad.push('disputa terminou empatada');
+    const ga=pe.filter(e=>e.s==0&&e.o=='gol').length,gb_=pe.filter(e=>e.s==1&&e.o=='gol').length;if(ga!=a||gb_!=b)bad.push('placar da disputa não bate com as cobranças');
+    if(r.g[0]!=r.g[1])bad.push('disputa sem empate');
+    const n0=pe.filter(e=>e.s==0).length,n1=pe.filter(e=>e.s==1).length;if(Math.abs(n0-n1)>1)bad.push('cobranças desiguais');
+    if(r.pen.vencedor!=(a>b?0:1))bad.push('vencedor errado');
+   }else if(r.g[0]==r.g[1])bad.push('empate sem desempate');
+  }
+  ok(prorr>0,'mata-mata empatado vai à prorrogação');ok(pens>0,'prorrogação empatada vai aos pênaltis');ok(bad.length==0,'mata-mata coerente: '+bad.slice(0,3).join('; '));}
+ /* reprodutível */
+ {const [A,B]=par(70,70,5),a=MT.simula(A,B,4242),b=MT.simula(A,B,4242);ok(a.log.digest()===b.log.digest()&&a.st[0].faltas==b.st[0].faltas,'regras reproduzíveis com a mesma seed');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);

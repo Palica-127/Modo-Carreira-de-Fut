@@ -26,7 +26,8 @@
     esc:20,            // sensibilidade do finalizador (maior = atributos pesam menos)
     escGk:16,          // idem para o goleiro
     gkMin:.86,gkMax:1.28,   // multiplicador do xG conforme o goleiro (bom=min, ruim=max)
-    cabeca:.55,primeira:.93,
+    cabeca:.55,primeira:.93,global:1.3,   // ajuste geral da calibração
+
     origem:{filtrado:1.18,cruz:.9,rebote:1.05,passe:1,conducao:1,nenhuma:1},
     marca:.14,pressao:.22,caixa:.98,   // perda de xG por defensor a menos de 2,8 m / pressão geral / chute dentro da área
     bloq:{base:.2,porDef:.1,pressao:.04,cab:.35},   // chance de o chute ser bloqueado
@@ -51,21 +52,27 @@
   };
 
   /* c: {u,v,tipo:'pe'|'cabeca'|'primeira', origem, nDef, pres}  ->  xG do lance */
+  /* falta direta: chance cai com a distância; barreira já está no bloqueio, sem desconto de marcação */
+  function xgFalta(u,v){
+    const g=geo(u,v);if(g.x<0)return .002;
+    return clamp(.13*Math.exp(-(Math.max(g.d,15)-15)/9)*clamp(g.ang/.4,.4,1.1),.004,.2);
+  }
   function xgModel(c){
+    if(c.tipo=='falta')return xgFalta(c.u,c.v);
     let p=xgGeo(c.u,c.v);
     if(c.tipo=='cabeca')p*=CH.cabeca;else if(c.tipo=='primeira')p*=CH.primeira;
     p*=CH.origem[c.origem||'nenhuma']||1;
     p*=(1-CH.marca*(c.nDef||0))*(1-CH.pressao*(c.pres||0));
     if(c.u>.83)p*=CH.caixa;
-    return clamp(p,.003,.8);
+    return clamp(p*CH.global,.003,.8);
   }
 
   /* qualidade bruta do finalizador */
-  const qFin=(a,cab)=>cab?a.cab*.7+a.imp*.15+a.for*.15:a.fin*.5+a.cmp*.2+a.tec*.15+a.pt*.15;
+  const qFin=(a,cab,tipo)=>tipo=='falta'?a.fal*.6+a.tec*.2+a.fin*.2:cab?a.cab*.7+a.imp*.15+a.for*.15:a.fin*.5+a.cmp*.2+a.tec*.15+a.pt*.15;
   /* multiplicador do xG pelo finalizador; pé fraco desconta pela nota do pé fraco (30..80) */
   function habil(a,tipo,fraco,pf){
-    let q=qFin(a,tipo=='cabeca');
-    if(fraco&&tipo!='cabeca')q-=(100-(pf||55))*.45;
+    let q=qFin(a,tipo=='cabeca',tipo);
+    if(fraco&&tipo!='cabeca'&&tipo!='falta')q-=(100-(pf||55))*.45;
     return .55+.9*sig((q-CH.q0)/CH.esc);
   }
   /* habilidade esperada antes de saber o pé: dos lances com a bola do lado fraco, uma parte é com o pé fraco */
@@ -91,7 +98,7 @@
     const cab=c.tipo=='cabeca';
     const pB=clamp((CH.bloq.base+CH.bloq.porDef*(c.nDef||0)+CH.bloq.pressao*(c.pres||0))*(cab?CH.bloq.cab:1),.01,.45);
     const dm=c.d||geo(c.u,c.v).d;
-    const prec=.75+.5*sig((qFin(a,cab)-CH.q0)/CH.esc);   // 0,75..1,25
+    const prec=.75+.5*sig((qFin(a,cab,c.tipo)-CH.q0)/CH.esc);   // 0,75..1,25
     const pO0=clamp((CH.alvo.base-CH.alvo.dist*(dm-10))*prec*(cab?.85:1),CH.alvo.min,CH.alvo.max);
     const pGU=Math.min(.97,pG/(1-pB));
     const pO=Math.max(pO0,pGU/CH.alvo.gol);          // quem vai ter chance de gol alta tem de acertar o gol
@@ -113,5 +120,5 @@
   }
 
   MT.CHUTE=CH;
-  MT.chute={geo,xgGeo,xgModel,habil,habilEsp,qFin,qGoleiro,gkMult,probs,resolve};
+  MT.chute={geo,xgGeo,xgFalta,xgModel,habil,habilEsp,qFin,qGoleiro,gkMult,probs,resolve};
 })();
