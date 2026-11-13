@@ -184,6 +184,19 @@ function pm(h,a,label,knock,kind,ag){
   const PA=({ATA:1,PNT:.6,MEI:.4,VOL:.12,ZAG:.08})[pos]*Math.pow(S.at[1]/68,2)*(.7+S.cond/200)*(1+pfx('gl'));
   const AA=({ATA:.4,PNT:.7,MEI:1,VOL:.4,ZAG:.1})[pos]*(S.at[2]/70)*(S.at[6]/70)*(1+pfx('ast'));
   const isLg=kind=='lg';
+  /* motor de partidas novo (src/ponte.js); se falhar, segue o motor antigo logo abaixo */
+  if(typeof pmMotor=='function'&&pmMotor(r,{h,a,my,lu,knock,kind,ag,isLg,inn})){
+    const gf=r.g[my],ga=r.g[1-my];
+    if(lu&&r.pl){
+      const c=S.cur;c.ap++;c.g+=r.gl;c.a+=r.as;c.rs+=r.rt;c.mn+=r.mn;c.y1+=r.yc;c.r1+=r.rc;
+      if(isLg)c.lg+=r.gl;
+      S.form=S.form*.7+r.rt*.3;S.mor=C(S.mor+(gf>ga?4:gf<ga?-4:0)+(r.rt-6.5)*3,0,100);S.money+=r.gl*S.ct.bon*(1+pfx('bon'));pcXp(Math.max(4,(r.rt-4)*9+r.gl*6+r.as*3)*(1+pfx('xpm'))*(.4+.6*Math.min(1,r.mn/90)));pcTrust((r.rt-6.5)*1.3);
+      const k=kind=='ucl'||kind=='lib'?2:1;
+      {const dr=(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k;S.rep=C(S.rep+dr*(dr>0?1+pfx('fame'):1),0,100)}S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
+      if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).');mail('Departamento médico','Lesão confirmada','Você ficará fora por '+w+' semana(s). Descanso e fisioterapia ajudam na recuperação.')}
+    }else{S.mor=C(S.mor-1.5,0,100);if(!S.inj)pcTrust(-.35)}
+    S.wm+=r.mn;return r;
+  }
   e(0,`Começa o jogo! ${cl(h).n} x ${cl(a).n} — ${label}.`);
   e(0,lu?lu.s?'Você foi escalado como titular.':'Você começa no banco de reservas.':S.inj>0?'Você está lesionado e acompanha de fora.':'O técnico não utilizou você nesta partida.');
   let ok=0,bad=0;

@@ -1867,6 +1867,19 @@ function pm(h,a,label,knock,kind,ag){
   const PA=({ATA:1,PNT:.6,MEI:.4,VOL:.12,ZAG:.08})[pos]*Math.pow(S.at[1]/68,2)*(.7+S.cond/200)*(1+pfx('gl'));
   const AA=({ATA:.4,PNT:.7,MEI:1,VOL:.4,ZAG:.1})[pos]*(S.at[2]/70)*(S.at[6]/70)*(1+pfx('ast'));
   const isLg=kind=='lg';
+  /* motor de partidas novo (src/ponte.js); se falhar, segue o motor antigo logo abaixo */
+  if(typeof pmMotor=='function'&&pmMotor(r,{h,a,my,lu,knock,kind,ag,isLg,inn})){
+    const gf=r.g[my],ga=r.g[1-my];
+    if(lu&&r.pl){
+      const c=S.cur;c.ap++;c.g+=r.gl;c.a+=r.as;c.rs+=r.rt;c.mn+=r.mn;c.y1+=r.yc;c.r1+=r.rc;
+      if(isLg)c.lg+=r.gl;
+      S.form=S.form*.7+r.rt*.3;S.mor=C(S.mor+(gf>ga?4:gf<ga?-4:0)+(r.rt-6.5)*3,0,100);S.money+=r.gl*S.ct.bon*(1+pfx('bon'));pcXp(Math.max(4,(r.rt-4)*9+r.gl*6+r.as*3)*(1+pfx('xpm'))*(.4+.6*Math.min(1,r.mn/90)));pcTrust((r.rt-6.5)*1.3);
+      const k=kind=='ucl'||kind=='lib'?2:1;
+      {const dr=(r.gl*.25+r.as*.12+(r.rt-7)*.15)*k;S.rep=C(S.rep+dr*(dr>0?1+pfx('fame'):1),0,100)}S.pop=C(S.pop+r.gl*.3+(r.rt-7)*.12,0,100);
+      if(r.inj){const w=Math.random()<.2?RI(6,16):RI(1,4);S.inj=w;r.inj=w;news('🚑 Lesão: fora por '+w+' semana(s).');mail('Departamento médico','Lesão confirmada','Você ficará fora por '+w+' semana(s). Descanso e fisioterapia ajudam na recuperação.')}
+    }else{S.mor=C(S.mor-1.5,0,100);if(!S.inj)pcTrust(-.35)}
+    S.wm+=r.mn;return r;
+  }
   e(0,`Começa o jogo! ${cl(h).n} x ${cl(a).n} — ${label}.`);
   e(0,lu?lu.s?'Você foi escalado como titular.':'Você começa no banco de reservas.':S.inj>0?'Você está lesionado e acompanha de fora.':'O técnico não utilizou você nesta partida.');
   let ok=0,bad=0;
@@ -2789,6 +2802,605 @@ const MT=(()=>{
 })();
 
 /* ============================================================
+   MOTOR DE PARTIDAS — módulo 3: CHUTE E GOLEIRO
+   Todas as fórmulas de finalização ficam aqui (nada de número solto no motor da posse).
+
+   Um chute passa por quatro etapas:
+     1. xG do lance  = geometria (distância e ângulo do gol) × tipo (pé, cabeça, de primeira) × origem do passe
+                       × marcação/pressão. É a chance de um jogador e um goleiro médios converterem.
+     2. habilidade do finalizador (finalização, compostura, técnica, primeiro toque; cabeceio/impulsão/força
+        nas cabeçadas; pé fraco pesa quando bate com ele) multiplica o xG.
+     3. goleiro: reflexos, posicionamento, agarrar e — conforme o lance — um contra um, saídas ou jogo aéreo
+        multiplicam o xG de novo (de 0,86 a 1,28).
+     4. desfecho: bloqueado, para fora (às vezes na trave), defendido (segurou ou deu rebote) ou gol.
+        O desfecho é sorteado de modo que a chance total de gol seja exatamente a calculada em 1–3.
+
+   - MT.chute.geo(u,v)                  distância (m) e abertura angular do gol
+   - MT.chute.xgModel(c)                xG do lance (sem jogador nem goleiro)
+   - MT.chute.habil(a,tipo,fraco,pf)    multiplicador do finalizador
+   - MT.chute.qGoleiro(g,c)             0..1, qualidade do goleiro NESTE lance
+   - MT.chute.resolve(c,a,g,rs,fraco,pf) desfecho completo
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),sig=x=>1/(1+Math.exp(-x));
+  const PW=105,PH=68;
+  const CH={
+    esc:20,            // sensibilidade do finalizador (maior = atributos pesam menos)
+    escGk:16,          // idem para o goleiro
+    gkMin:.86,gkMax:1.28,   // multiplicador do xG conforme o goleiro (bom=min, ruim=max)
+    cabeca:.55,primeira:.93,global:1.5,   // ajuste geral da calibração
+
+    origem:{filtrado:1.18,cruz:.9,rebote:1.05,passe:1,conducao:1,nenhuma:1},
+    marca:.14,pressao:.22,caixa:.98,   // perda de xG por defensor a menos de 2,8 m / pressão geral / chute dentro da área
+    bloq:{base:.2,porDef:.1,pressao:.04,cab:.35},   // chance de o chute ser bloqueado
+    alvo:{base:.47,dist:.0065,min:.3,max:.7,gol:.92},   // chance de ir no gol, se não bloqueado
+    rebote:{base:.14,aga:300,min:.05,max:.32},         // defesa que não fica com o goleiro
+    trave:.05,         // fração dos chutes para fora que bate na trave
+    big:.3,            // xG a partir do qual é "chance clara"
+    fraco:.45,         // chance de usar o pé fraco quando a bola está do lado dele
+    q0:62,qgk:66
+  };
+
+  /* geometria: distância ao centro do gol e ângulo de visão do gol */
+  function geo(u,v){
+    const x=(1-u)*PW,y=Math.abs(v-.5)*PH,d=Math.hypot(x,y);
+    if(x<0)return{d,ang:0,x};
+    const ang=Math.abs(Math.atan2(7.32*x,x*x+y*y-3.66*3.66));
+    return{d,ang,x};
+  }
+  const xgGeo=(u,v)=>{
+    const g=geo(u,v);if(g.x<0)return .002;
+    return .55*Math.exp(-Math.pow(g.d/8.5,1.15))*clamp(g.ang/.9,.06,1.15);
+  };
+
+  /* c: {u,v,tipo:'pe'|'cabeca'|'primeira', origem, nDef, pres}  ->  xG do lance */
+  /* falta direta: chance cai com a distância; barreira já está no bloqueio, sem desconto de marcação */
+  function xgFalta(u,v){
+    const g=geo(u,v);if(g.x<0)return .002;
+    return clamp(.13*Math.exp(-(Math.max(g.d,15)-15)/9)*clamp(g.ang/.4,.4,1.1),.004,.2);
+  }
+  function xgModel(c){
+    if(c.tipo=='falta')return xgFalta(c.u,c.v);
+    let p=xgGeo(c.u,c.v);
+    if(c.tipo=='cabeca')p*=CH.cabeca;else if(c.tipo=='primeira')p*=CH.primeira;
+    p*=CH.origem[c.origem||'nenhuma']||1;
+    p*=(1-CH.marca*(c.nDef||0))*(1-CH.pressao*(c.pres||0));
+    if(c.u>.83)p*=CH.caixa;
+    return clamp(p*CH.global,.003,.8);
+  }
+
+  /* qualidade bruta do finalizador */
+  const qFin=(a,cab,tipo)=>tipo=='falta'?a.fal*.6+a.tec*.2+a.fin*.2:cab?a.cab*.7+a.imp*.15+a.for*.15:a.fin*.5+a.cmp*.2+a.tec*.15+a.pt*.15;
+  /* multiplicador do xG pelo finalizador; pé fraco desconta pela nota do pé fraco (30..80) */
+  function habil(a,tipo,fraco,pf){
+    let q=qFin(a,tipo=='cabeca',tipo);
+    if(fraco&&tipo!='cabeca'&&tipo!='falta')q-=(100-(pf||55))*.45;
+    return .55+.9*sig((q-CH.q0)/CH.esc);
+  }
+  /* habilidade esperada antes de saber o pé: dos lances com a bola do lado fraco, uma parte é com o pé fraco */
+  function habilEsp(a,tipo,ladoFraco,foot,pf){
+    const h0=habil(a,tipo,false,pf);
+    if(!ladoFraco||foot=='A'||tipo=='cabeca')return h0;
+    return h0*(1-CH.fraco)+habil(a,tipo,true,pf)*CH.fraco;
+  }
+
+  /* goleiro: peso dos atributos muda com o lance — 1x1 e passe em profundidade pedem saída e um contra um,
+     cruzamento/cabeçada pedem jogo aéreo e saída, o resto é reflexo, posicionamento e firmeza */
+  function qGoleiro(g,c){
+    let w={ref:.3,gpo:.3,aga:.15,um1:.1,sai:.1,aer:0},tot=0;
+    if(c.tipo=='cabeca'||c.origem=='cruz')w={ref:.2,gpo:.2,aga:.15,um1:.05,sai:.2,aer:.2};
+    else if(c.origem=='filtrado'||(c.d||99)<11)w={ref:.25,gpo:.15,aga:.1,um1:.3,sai:.2,aer:0};
+    let s=0;for(const k in w){s+=w[k]*g[k];tot+=w[k]}
+    return sig((s/tot-CH.qgk)/CH.escGk);
+  }
+  const gkMult=q=>CH.gkMax-(CH.gkMax-CH.gkMin)*q;
+
+  /* chance de bloqueio, de ir no gol e de converter no gol — a partir da chance total de gol pG */
+  function probs(c,a,pG){
+    const cab=c.tipo=='cabeca';
+    const pB=clamp((CH.bloq.base+CH.bloq.porDef*(c.nDef||0)+CH.bloq.pressao*(c.pres||0))*(cab?CH.bloq.cab:1),.01,.45);
+    const dm=c.d||geo(c.u,c.v).d;
+    const prec=.75+.5*sig((qFin(a,cab,c.tipo)-CH.q0)/CH.esc);   // 0,75..1,25
+    const pO0=clamp((CH.alvo.base-CH.alvo.dist*(dm-10))*prec*(cab?.85:1),CH.alvo.min,CH.alvo.max);
+    const pGU=Math.min(.97,pG/(1-pB));
+    const pO=Math.max(pO0,pGU/CH.alvo.gol);          // quem vai ter chance de gol alta tem de acertar o gol
+    return{pB,pO,conv:pGU/pO,pGU};
+  }
+
+  /* desfecho de um chute. c = {u,v,d,tipo,origem,nDef,pres}; a = atributos do finalizador; g = atributos do goleiro;
+     rs = gerador (usa 3 sorteios sempre); devolve {res, seg?, xg, pG, big, ...} */
+  function resolve(c,a,g,rs,fraco,pf,foot){
+    const xg=xgModel(c),h=habil(a,c.tipo,fraco,pf),gq=qGoleiro(g,c),gm=gkMult(gq);
+    const pG=clamp(xg*h*gm,.002,.85),P=probs(c,a,pG);
+    const r1=rs.f(),r2=rs.f(),r3=rs.f();
+    const out={xg,pG,hab:h,gq,pB:P.pB,pO:P.pO,big:xg>=CH.big};
+    if(r1<P.pB)return{...out,res:'bloqueio'};
+    if(r2>=P.pO)return{...out,res:r3<CH.trave?'trave':'fora'};
+    if(rs.f()<P.conv)return{...out,res:'gol'};
+    const reb=clamp(CH.rebote.base-(g.aga-60)/CH.rebote.aga+(c.tipo=='cabeca'?0:.0),CH.rebote.min,CH.rebote.max);
+    return{...out,res:'defesa',seg:rs.f()<reb?'rebote':'segurou'};
+  }
+
+  MT.CHUTE=CH;
+  MT.chute={geo,xgGeo,xgFalta,xgModel,habil,habilEsp,qFin,qGoleiro,gkMult,probs,resolve};
+})();
+
+/* ============================================================
+   MOTOR DE PARTIDAS — módulo 4: REGRAS (IFAB)
+   Funções puras das leis do jogo: impedimento, faltas, cartões, pênalti, acréscimos.
+   O motor da posse chama estas funções e só aplica o resultado (registra o lance, move a bola).
+
+   - MT.regras.impedimento(recU, bolaU, linhaU[])   Lei 11, posição na hora do passe
+   - MT.regras.pFalta(tipo, def, atk, ctx)          chance de a disputa virar falta
+   - MT.regras.cartao(f, rs)                         'amarelo' | 'vermelho' | null (Lei 12)
+   - MT.regras.penalti(cobr, gk, rs)                 desfecho da cobrança (Lei 14)
+   - MT.regras.dentroArea(u,v)                       grande área (16,5 m x 40,3 m)
+   - MT.regras.acrescimo(seg)                        minutos adicionados a partir do tempo perdido
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),sig=x=>1/(1+Math.exp(-x));
+  const PW=105,PH=68;
+  const RG={
+    imp:{perdeu:.05,falso:.01},                   // erro do assistente: não marca impedimento / marca sem existir
+    falta:{tackle:.6,drib:.7,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
+    amarelo:{base:.06,agr:.1,tatica:.2,area:.05,contra:.06},
+    vermelho:{violento:.0015,dogsoFora:.2,dogsoArea:.06,agr:.006},
+    pen:{base:.76,pen:250,cmp:500,gk:400,erra:.08,rebote:.1},
+    tempo:{falta:6,cartao:30,gol:45,var:90,lesao:60,sub:30,pen:40}, // segundos perdidos por ocorrência (viram acréscimo)
+    acr:{min:1,max:8}
+  };
+
+  /* Lei 11: impedido quem, na hora do passe, está na metade adversária e mais perto da linha de fundo
+     que a bola e que o penúltimo adversário. Tudo em coordenadas do ATACANTE (u cresce rumo ao gol que ele ataca). */
+  function impedimento(recU,bolaU,advUs){
+    const o=advUs.slice().sort((a,b)=>b-a),pen=o.length>1?o[1]:o[0];
+    const linha=Math.max(bolaU,pen);
+    return{imp:recU>.5&&recU>linha+1e-9,linha,margem:recU-linha};
+  }
+
+  /* grande área: 16,5 m de fundo e 40,32 m de largura, em (u,v) do atacante */
+  const dentroArea=(u,v)=>(1-u)*PW<=16.5&&Math.abs(v-.5)*PH<=20.16;
+
+  /* chance de uma disputa terminar em falta: agressividade e desarme ruim do defensor aumentam; atacante
+     habilidoso/ágil é mais difícil de marcar limpo (então leva mais falta); ctx.rig é o rigor do árbitro */
+  function pFalta(tipo,d,a,rig=1){
+    const b=RG.falta[tipo]||.1;
+    const f=(.55+.9*sig((d.agr-50)/22))*(1.35-.6*sig((d.des+d.mar-110)/35))*(.8+.4*sig((a.dri+a.agi-110)/35));
+    return clamp(b*f*rig,0,.9);
+  }
+
+  /* Lei 12. f = {agr, tatica (parou contra-ataque), dogso:'fora'|'area'|null, area, amarelos (do infrator), rig}
+     devolve {c:'amarelo'|'vermelho'|null, segundo:boolean, motivo:'...'} */
+  function cartao(f,rs){
+    const rig=f.rig||1,ag=f.agr/100;
+    if(f.dogso){
+      const pv=f.dogso=='fora'?RG.vermelho.dogsoFora:RG.vermelho.dogsoArea;
+      if(rs.chance(clamp(pv*rig,0,.9)))return{c:'vermelho',segundo:false,motivo:'anular chance clara de gol'};
+    }
+    if(rs.chance(clamp((RG.vermelho.violento+RG.vermelho.agr*ag)*rig,0,.2)))return{c:'vermelho',segundo:false,motivo:'jogada violenta'};
+    let p=RG.amarelo.base+RG.amarelo.agr*ag+(f.tatica?RG.amarelo.tatica:0)+(f.dogso?RG.amarelo.contra*4:0)+(f.area?RG.amarelo.area:0);
+    p=clamp(p*rig*(f.amarelos>=1?.3:1),0,.95);
+    if(!rs.chance(p))return{c:null};
+    if(f.amarelos>=1)return{c:'vermelho',segundo:true,motivo:'segundo amarelo'};
+    return{c:'amarelo',segundo:false,motivo:f.tatica?'falta tática':'falta imprudente'};
+  }
+
+  /* Lei 14: cobrança de pênalti. pen e compostura do cobrador contra reflexos e um contra um do goleiro */
+  function penalti(c,g,rs){
+    const P=RG.pen;
+    const p=clamp(P.base+(c.pen-65)/P.pen+(c.cmp-65)/P.cmp-((g.ref+g.um1)/2-65)/P.gk,.45,.93);
+    const r=rs.f(),r2=rs.f();
+    const erra=clamp(P.erra-(c.pen-65)/700-(c.cmp-65)/900,.015,.2);    // chuta fora/na trave por erro do cobrador
+    if(r<erra)return{res:r2<.35?'trave':'fora',p};
+    if(r2<p)return{res:'gol',p};
+    return{res:'defesa',p,rebote:rs.f()<P.rebote};
+  }
+
+  /* minutos adicionados a partir dos segundos perdidos no período (arredonda e limita) */
+  function acrescimo(seg){return clamp(Math.round(seg/60),RG.acr.min,RG.acr.max)}
+
+  MT.REGRAS=RG;
+  MT.regras={impedimento,dentroArea,pFalta,cartao,penalti,acrescimo};
+})();
+
+/* ============================================================
+   MOTOR DE PARTIDAS — módulo 5: TÁTICA E TREINADOR
+   A IA do treinador decide sozinha (o usuário não manda na tática): escolhe formação e estilo antes do jogo,
+   adapta durante a partida (placar, minuto, expulsões) e faz as substituições (até 5, em 3 janelas + intervalo).
+   Funções puras: o motor da posse só aplica o resultado.
+
+   - MT.tatica.ESTILOS            parâmetros de cada estilo (pressão, altura da linha, largura, risco, ritmo, compactação)
+   - MT.tatica.treinador(nome)    perfil do treinador (ofensividade, adaptação), reproduzível pelo nome
+   - MT.tatica.estiloInicial(...) estilo de partida conforme forças e perfil
+   - MT.tatica.adapta(...)        troca de estilo durante o jogo (ou mantém)
+   - MT.tatica.subs(...)          substituições: quem sai e quem entra
+   - MT.tatica.melhorForm(...)    formação que melhor aproveita o elenco
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),sig=x=>1/(1+Math.exp(-x));
+  /* pres: intensidade da pressão (1 = normal); linha: altura da linha defensiva (-1 baixa .. 1 alta); largura: abertura do time;
+     risco: gosto por passes verticais e chutes; ritmo: velocidade das ações; compacto: distância entre as linhas (menor = mais junto) */
+  const ESTILOS={
+    retranca:   {pres:.8, linha:-.8,largura:.9, risco:.2, ritmo:.95,compacto:.9},
+    equilibrado:{pres:1,  linha:0,  largura:1,  risco:0,  ritmo:1,  compacto:1},
+    posse:      {pres:1.05,linha:.3, largura:1.1,risco:-.4,ritmo:.95,compacto:1.05},
+    pressao:    {pres:1.3,linha:.7, largura:1,  risco:.1, ritmo:1.06,compacto:.95},
+    ofensivo:   {pres:1.1,linha:.5, largura:1.1,risco:.5, ritmo:1.04,compacto:1.02},
+    desespero:  {pres:1.25,linha:.9, largura:1.15,risco:.9, ritmo:1.1,compacto:1.05}
+  };
+  const NOMES=Object.keys(ESTILOS);
+
+  /* perfil do treinador: reproduzível pelo nome */
+  function treinador(nome){
+    const r=MT.rng('tec|'+nome);
+    return{nome,ofensivo:clamp(r.gauss(0,.45),-1,1),adapt:r.range(.3,1),subs:r.range(.4,1)};
+  }
+
+  /* estilo inicial: o mais forte joga por cima, o mais fraco se fecha; o perfil do treinador desloca a escolha */
+  function estiloInicial(forca,adv,tec,casa,rs){
+    const d=(forca-adv)/8+(casa?.35:-.15)+tec.ofensivo*.9+rs.gauss(0,.35);
+    if(d>1.6)return'pressao';if(d>.7)return'ofensivo';if(d>.1)return'posse';if(d>-.9)return'equilibrado';return'retranca';
+  }
+
+  /* adaptação durante o jogo. ctx = {min, saldo (gols a favor - contra), homens, homensAdv, chave}
+     devolve {chave, motivo} ou null se mantém */
+  function adapta(ctx,tec,rs){
+    const{min,saldo,homens,homensAdv,chave}=ctx;
+    if(!rs.chance(.45+.55*tec.adapt))return null;
+    let novo=chave,motivo=null;
+    if(homens<homensAdv){novo=saldo>0?'retranca':chave=='retranca'?'retranca':'equilibrado';motivo='com um a menos'}
+    else if(homens>homensAdv&&saldo<=0){novo=saldo<0?'desespero':'pressao';motivo='com um a mais'}
+    else if(saldo<0&&min>=55){novo=(saldo<=-2||min>=78)?'desespero':'ofensivo';motivo='atrás no placar'}
+    else if(saldo>0&&min>=70){novo=saldo>=2||min>=82?'retranca':'equilibrado';motivo='protegendo a vantagem'}
+    else if(saldo==0&&min>=80&&tec.ofensivo>.25){novo='ofensivo';motivo='buscando o gol no fim'}
+    if(!novo||novo==chave)return null;
+    return{chave:novo,motivo};
+  }
+
+  /* qualidade de um elenco numa formação: soma das notas, com desconto por jogador fora de posição */
+  function melhorForm(avalia,formas){
+    let b=null,bv=-1;
+    for(const f of formas){const v=avalia(f);if(v>bv){bv=v;b=f}}
+    return b;
+  }
+
+  /* substituições. ctx = {min, saldo, xi:[{cls,ovr,rt,am,exp,gk}], banco:[{cls,ovr}], feitas, janelas, ht}
+     devolve [{out, in, motivo}] — respeita 5 trocas e 3 janelas (o intervalo não conta como janela) */
+  function subs(ctx,tec,rs){
+    const{min,saldo,xi,banco,feitas}=ctx,max=5-feitas;
+    if(max<=0||!banco.length)return[];
+    if(!ctx.ht&&ctx.janelas>=3)return[];
+    /* quantas trocas nesta janela: mais perto do fim e mais para quem precisa do resultado */
+    const urg=(min>=78?1:min>=68?.7:min>=58?.45:.25)*(saldo<0?1.35:saldo>0?.8:1)*(.5+.5*tec.subs);
+    let n=0;for(let i=0;i<max;i++)if(rs.chance(clamp(urg*(1-.1*i),0,.95)))n++;
+    if(ctx.ht)n=Math.min(n,rs.chance(.35)?1:0);
+    if(!n)return[];
+    /* quem sai: pior desempenho, cartão e posição que o jogo pede; goleiro e expulsos ficam */
+    const procura=saldo<0?'ataque':saldo>0&&min>=70?'defesa':'neutro';
+    const cand=xi.map((p,i)=>({p,i})).filter(o=>!o.p.gk&&!o.p.exp);
+    const sc=o=>{
+      let s=-(o.p.rt||0)*1.2-(o.p.ovr-65)/40+(o.p.am?.35:0)+rs.gauss(0,.25)+Math.max(0,65-(o.p.en??100))/35;
+      if(procura=='ataque'&&['CB','DM','FB'].includes(o.p.cls))s+=.5;
+      if(procura=='defesa'&&['ST','W','AM'].includes(o.p.cls))s+=.5;
+      return s;
+    };
+    cand.sort((a,b)=>sc(b)-sc(a));
+    const out=[],pool=banco.map((p,k)=>({p,k}));
+    for(const o of cand){
+      if(out.length>=n||!pool.length)break;
+      /* entra: mesma função, ou a que o jogo pede */
+      let alvo=o.p.cls;if(procura=='ataque'&&['CB','DM','FB'].includes(alvo))alvo=rs.chance(.6)?'ST':'W';
+      if(procura=='defesa'&&['ST','W','AM'].includes(alvo))alvo=rs.chance(.5)?'DM':'CB';
+      let cho=pool.filter(x=>x.p.cls==alvo).sort((a,b)=>b.p.ovr-a.p.ovr)[0]||pool.filter(x=>x.p.cls==o.p.cls).sort((a,b)=>b.p.ovr-a.p.ovr)[0]||pool.filter(x=>!x.p.gk).sort((a,b)=>b.p.ovr-a.p.ovr)[0];
+      if(!cho)break;
+      pool.splice(pool.indexOf(cho),1);
+      out.push({out:o.i,in:cho.k,motivo:o.p.am?'cartão amarelo':procura=='ataque'?'buscar o resultado':procura=='defesa'?'segurar o resultado':o.p.rt<-.3?'rendimento':'renovar o time'});
+    }
+    return out;
+  }
+
+  /* posição-padrão de uma função no campo (u,v do próprio time), para quando a troca muda a função */
+  const PADRAO={GK:.04,CB:.2,FB:.22,DM:.38,CM:.5,AM:.66,W:.8,ST:.88};
+
+  MT.tatica={ESTILOS,NOMES,treinador,estiloInicial,adapta,melhorForm,subs,PADRAO};
+})();
+
+/* ============================================================
+   MOTOR DE PARTIDAS — módulo 6: CONDIÇÕES (cansaço, lesões, moral, mando de campo)
+   Funções puras. O motor da posse guarda a energia (0–100) de cada jogador e, de tempos em tempos,
+   reescreve os atributos "em uso" a partir dos atributos-base: base × cansaço × moral × mando × lesão.
+
+   - MT.cond.gasto(a, cls, est)       energia perdida por segundo de jogo
+   - MT.cond.fatores(en)              {fis, tec, men}: multiplicadores por cansaço
+   - MT.cond.risco(p)                 chance por segundo de lesão sem contato
+   - MT.cond.gravidade(rs)            'leve' | 'media' | 'grave'
+   - MT.cond.aplica(a0, a, ctx)       escreve em 'a' os atributos efetivos
+   - MT.cond.moralMult(m)             efeito da moral (-1..1) nos atributos técnicos e mentais
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const CD={
+    /* energia perdida por segundo: perfil médio (resistência 65) perde ~50 pontos em 90 min */
+    base:.011,
+    papel:{GK:.25,CB:.75,FB:1.15,DM:1.0,CM:1.1,AM:1.0,W:1.1,ST:.95},
+    estilo:{pres:.5,ritmo:.3,fixo:.2},          // peso de cada parâmetro do estilo no gasto
+    fadiga:{ini:80,fis:.006,tec:.002,men:.0015},   // abaixo de 'ini' de energia, perde x por ponto
+    descanso:15,                                 // energia recuperada no intervalo
+    /* lesões */
+    lesao:{semContato:1.2e-6,idade:.05,idadeMin:30,fadiga:40,contato:.006,contatoAgr:1,
+           grav:{leve:.55,media:.3,grave:.15},mult:{leve:.88,media:.6,grave:.35}},
+    moral:{efeito:.04,gol:.22,sofre:.2,vermelho:.25,decai:.985,casa:.2},
+    casa:{atr:.02,falta:.9,cartao:.88,gasto:1.03}   // mando: atributos, faltas marcadas contra, cartões, e gasto do visitante
+  };
+
+  /* gasto por segundo */
+  function gasto(a,cls,est){
+    const e=est||{pres:1,ritmo:1};
+    const fe=CD.estilo.pres*e.pres+CD.estilo.ritmo*e.ritmo+CD.estilo.fixo;
+    const g=1.5-((a.res||60)*.6+(a.cnd||60)*.4)/100;
+    return CD.base*(CD.papel[cls]??1)*fe*g;
+  }
+  /* multiplicadores por cansaço (1 = descansado) */
+  function fatores(en){
+    const d=Math.max(0,CD.fadiga.ini-en);
+    return{fis:1-CD.fadiga.fis*d,tec:1-CD.fadiga.tec*d,men:1-CD.fadiga.men*d};
+  }
+  const moralMult=m=>1+CD.moral.efeito*clamp(m,-1,1);
+
+  /* chance por segundo de lesão sem contato: cansado e veterano se machuca mais */
+  function risco(p){
+    const L=CD.lesao,idade=1+Math.max(0,(p.age||26)-L.idadeMin)*L.idade,cans=1+(100-clamp(p.en,0,100))/L.fadiga;
+    return L.semContato*idade*cans;
+  }
+  function gravidade(rs){
+    const g=CD.lesao.grav,r=rs.f();return r<g.leve?'leve':r<g.leve+g.media?'media':'grave';
+  }
+
+  /* chaves de atributo por grupo */
+  const FIS=['vel','ace','agi','imp','for','equ'];
+  const MEN=['dec','vis','con','cmp','ant','pos','cri','lid','tre','det','agr'];
+  const FISS=new Set(FIS),MENS=new Set(MEN);
+  /* atributos efetivos: a0 (base) -> a (em uso). ctx = {en, moral, casa, lesao:'leve'|'media'|'grave'|null} */
+  function aplica(a0,a,ctx){
+    const f=fatores(ctx.en),mo=moralMult(ctx.moral||0),ca=ctx.casa?1+CD.casa.atr:1,les=ctx.lesao?CD.lesao.mult[ctx.lesao]:1;
+    for(const k in a0){
+      let m;
+      if(k=='res'||k=='cnd')m=1;                       // quanto aguenta não cai com o próprio cansaço
+      else if(FISS.has(k))m=f.fis*les;
+      else if(MENS.has(k))m=f.men*mo*(les<1?Math.sqrt(les):1);
+      else m=f.tec*mo*(les<1?Math.sqrt(les):1);
+      a[k]=a0[k]*m*(k=='res'||k=='cnd'?1:ca);
+    }
+  }
+
+  MT.CONDICAO=CD;
+  MT.cond={gasto,fatores,moralMult,risco,gravidade,aplica};
+})();
+
+/* ============================================================
+   MOTOR DE PARTIDAS — módulo 7: ARBITRAGEM E VAR
+   - MT.arbitro(nome)  perfil do árbitro, reproduzível pelo nome:
+       rig    rigor (0,8 brando .. 1,25 rigoroso): multiplica a chance de marcar faltas e dar cartões
+       erro   chance-base de erro de apreciação (0,02 .. 0,07)
+       vant   gosto pela vantagem
+   - MT.VAR   o que o árbitro de vídeo revisa (gols, pênaltis, vermelhos diretos), a chance de ele
+              corrigir um erro CLARO e o tempo que a revisão toma.
+   O motor da posse decide quando um erro aconteceu; aqui ficam só os números e o perfil.
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function arbitro(nome){
+    const r=MT.rng('arb|'+nome);
+    return{nome,rig:clamp(r.gauss(1,.12),.8,1.25),erro:clamp(r.gauss(.04,.012),.02,.07),vant:clamp(r.gauss(1,.15),.7,1.3)};
+  }
+  const VAR={
+    det:.88,                       // chance de o VAR corrigir um erro claro
+    simulacao:.15,                 // fração das "faltas" na área que são simulação
+    tempo:{min:60,max:150},        // segundos que a revisão toma
+    janela:25,                     // até quantos segundos antes do gol uma infração ainda é revisada
+    erroExcessivo:4,erroDogso:6, // multiplicadores de 'erro' para vermelho excessivo e para vermelho não dado
+    erroSimula:5,                  // multiplicador de 'erro' para o árbitro cair na simulação
+    erroApita:2.2                   // multiplicador de 'erro' para não marcar uma falta que existiu
+  };
+  MT.VAR=VAR;MT.arbitro=arbitro;
+})();
+
+/* ============================================================
+   MOTOR DE PARTIDAS — módulo 8: ESTATÍSTICAS E NARRAÇÃO
+   Tudo aqui é LIDO do registro de lances (r.log.ev) — nenhuma estatística é sorteada.
+   - MT.minutos(r)         {fmt(t)->"45+2'", n(t)->minuto numérico} a partir dos acréscimos e períodos
+   - MT.jogadores(r)       quem estava em cada posição em cada instante (considera substituições)
+   - MT.estat(r)           estatísticas por time, lidas do registro
+   - MT.estatJog(r)        estatísticas, minutos e nota (3–10) de cada jogador
+   - MT.calor(r,s,nome)    mapa de calor 12x8 do jogador (time sempre atacando para a direita)
+   - MT.narra(r)           narração em português, uma linha por lance relevante
+   ============================================================ */
+(()=>{
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  /* ---------- tempo ---------- */
+  function minutos(r){
+    const ev=r.log.ev,ft=ev.find(e=>e.k=='fim_tempo'),t1=ft?ft.t:2700,pr=ev.filter(e=>e.k=='prorrogacao'),fim=ev[ev.length-1].t;
+    const base=t=>{
+      if(pr.length&&t>=pr[0].t){const p2=pr[1]&&t>=pr[1].t,b0=p2?pr[1].t:pr[0].t,m=Math.floor((t-b0)/60),lim=15,off=p2?105:90;return m>=lim?{n:off+lim,x:m-lim+1}:{n:off+m+1,x:0}}
+      if(t<t1){const m=Math.floor(t/60);return m>=45?{n:45,x:m-45+1}:{n:m+1,x:0}}
+      const m=Math.floor((t-t1)/60);return m>=45?{n:90,x:m-45+1}:{n:46+m,x:0};
+    };
+    const fmt=t=>{const b=base(t);return b.x?b.n+'+'+b.x+"'":b.n+"'"};
+    return{fmt,n:t=>{const b=base(t);return b.n+b.x},base,t1,fim};
+  }
+
+  /* ---------- quem jogava onde ---------- */
+  function jogadores(r){
+    const ev=r.log.ev,sl=[0,1].map(s=>r.ini[s].map(p=>[{n:p.n,de:0,ate:Infinity}]));
+    ev.filter(e=>e.k=='substituicao').forEach(e=>{const l=sl[e.s][e.p],u=l[l.length-1];u.ate=e.t;l.push({n:e.d.entra,de:e.t,ate:Infinity})});
+    ev.filter(e=>e.k=='cartao'&&e.o=='vermelho').forEach(e=>{const l=sl[e.s][e.p],u=l[l.length-1];if(u.ate==Infinity)u.ate=e.t});
+    ev.filter(e=>e.k=='lesao'&&e.d.semTroca&&e.d.gravidade=='grave').forEach(e=>{const l=sl[e.s][e.p],u=l[l.length-1];if(u.ate==Infinity)u.ate=e.t});
+    const quem=(s,i,t)=>{const l=sl[s][i];if(!l)return '?';let u=l[0];for(const x of l)if(t>=x.de)u=x;return u.n};
+    return{quem,slots:sl};
+  }
+
+  /* ---------- estatísticas por time ---------- */
+  const novoTime=()=>({gols:0,chutes:0,alvo:0,bloq:0,fora:0,xg:0,defesas:0,grandes:0,pas:0,pasOk:0,cruz:0,cruzOk:0,lanc:0,desarmes:0,desOk:0,inter:0,dribles:0,dribOk:0,faltas:0,amarelos:0,vermelhos:0,imped:0,escanteios:0,laterais:0,penaltis:0,subs:0,lesoes:0,tiroMeta:0,posse:0,perdas:0,var:0,trave:0});
+  function estat(r){
+    const ev=r.log.ev,X=[novoTime(),novoTime()];
+    let prev=null;
+    const POS=['passe','lancamento','cruzamento','conducao','drible','chute','recuperou','tiro_livre','escanteio','lateral','penalti','tiro_meta'];
+    for(let i=0;i<ev.length;i++){
+      const e=ev[i],s=e.s,x=s!=null?X[s]:null;
+      /* posse: o tempo até o próximo lance conta para o time do lance anterior que tem a bola */
+      if(prev!=null&&i>0){const dt=e.t-ev[i-1].t;if(dt>0&&ev[i-1].k!='fim_tempo'&&ev[i-1].k!='acrescimo'&&ev[i-1].k!='var')X[prev].posse+=dt}
+      if(POS.includes(e.k)&&s!=null)prev=s;
+      if(e.k=='gol'&&e.d&&e.d.anulado){continue}
+      switch(e.k){
+        case 'passe':case 'lancamento':x.pas++;if(e.o=='ok')x.pasOk++;else x.perdas++;if(e.k=='lancamento')x.lanc++;break;
+        case 'cruzamento':if(!(e.d&&e.d.origem)){x.pas++;x.cruz++;if(e.o=='ok'){x.pasOk++;x.cruzOk++}else x.perdas++}break;
+        case 'chute':x.chutes++;x.xg+=e.d.xg;if(e.d.grande)x.grandes++;break;
+        case 'gol':x.gols++;x.alvo++;break;
+        case 'defesa':X[1-s].alvo++;x.defesas++;break;
+        case 'bloqueio':x.bloq++;break;
+        case 'trave':x.trave++;break;
+        case 'desarme':x.desarmes++;if(e.o=='ok')x.desOk++;break;
+        case 'intercepta':x.inter++;X[1-s].pas++;X[1-s].perdas++;break;
+        case 'drible':x.dribles++;if(e.o=='ok')x.dribOk++;break;
+        case 'falta':x.faltas++;break;
+        case 'cartao':if(e.o=='amarelo')x.amarelos++;else x.vermelhos++;break;
+        case 'impedimento':x.imped++;x.pas++;x.perdas++;break;
+        case 'escanteio':x.escanteios++;break;
+        case 'lateral':x.laterais++;break;
+        case 'penalti':x.penaltis++;break;
+        case 'substituicao':x.subs++;break;
+        case 'lesao':x.lesoes++;break;
+        case 'tiro_meta':x.tiroMeta++;break;
+        case 'var':x.var++;break;
+      }
+    }
+    for(const s of [0,1])X[s].fora=Math.max(0,X[s].chutes-X[s].alvo-X[1-s].bloq);
+    const tot=X[0].posse+X[1].posse||1;X[0].posseP=100*X[0].posse/tot;X[1].posseP=100*X[1].posse/tot;
+    return X;
+  }
+
+  /* ---------- por jogador ---------- */
+  function estatJog(r){
+    const ev=r.log.ev,J=jogadores(r),M=minutos(r),fim=ev[ev.length-1].t,out=[{},{}];
+    const get=(s,i,t)=>{const n=J.quem(s,i,t);return out[s][n]||(out[s][n]={nome:n,slot:i,cls:r.ini[s][i]?r.ini[s][i].cls:'',gols:0,assist:0,chutes:0,alvo:0,xg:0,pas:0,pasOk:0,cruz:0,desarmes:0,inter:0,dribles:0,dribOk:0,faltas:0,amarelos:0,vermelhos:0,defesas:0,sofridos:0,bloq:0,perdas:0,min:0,pts:0})};
+    /* minutos em campo */
+    for(const s of [0,1])J.slots[s].forEach((l,i)=>l.forEach(u=>{const o=get(s,i,u.de);o.min+=((Math.min(u.ate,fim)-u.de)/60)}));
+    for(const e of ev){
+      if(e.p==null||e.s==null)continue;
+      if(e.k=='gol'&&e.d&&e.d.anulado)continue;
+      const o=get(e.s,e.p,e.t);
+      switch(e.k){
+        case 'passe':case 'lancamento':o.pas++;if(e.o=='ok'){o.pasOk++;o.pts+=.012}else{o.perdas++;o.pts-=.03}break;
+        case 'cruzamento':if(!(e.d&&e.d.origem)){o.pas++;o.cruz++;if(e.o=='ok'){o.pasOk++;o.pts+=.02}else{o.perdas++;o.pts-=.02}}break;
+        case 'chute':o.chutes++;o.xg+=e.d.xg;if(e.d.grande)o.pts-=.2*0;break;
+        case 'gol':{o.gols++;o.alvo++;o.pts+=1.0;const g=get(1-e.s,0,e.t);g.sofridos++;g.pts-=.3;break}
+        case 'assistencia':o.assist++;o.pts+=.7;break;
+        case 'defesa':o.defesas++;o.pts+=.25;break;
+        case 'bloqueio':o.bloq++;o.pts+=.1;break;
+        case 'desarme':if(e.o=='ok'){o.desarmes++;o.pts+=.12}break;
+        case 'intercepta':o.inter++;o.pts+=.12;break;
+        case 'drible':o.dribles++;if(e.o=='ok'){o.dribOk++;o.pts+=.1}else o.pts-=.1;break;
+        case 'falta':o.faltas++;o.pts-=.1;break;
+        case 'cartao':if(e.o=='amarelo'){o.amarelos++;o.pts-=.3}else{o.vermelhos++;o.pts-=1.5}break;
+      }
+      if(e.k=='chute'&&e.d.grande)o.pts+=.05;
+    }
+    /* alvo: chutes defendidos/gols; o resultado do time e a baliza invicta entram na nota */
+    for(const e of ev){if(e.k=='defesa'&&e.q!=null){const sh=get(1-e.s,e.q,e.t);sh.alvo++}}
+    const res=[0,1].map(s=>Math.sign(r.g[s]-r.g[1-s]));
+    const lista=[];
+    for(const s of [0,1])for(const n in out[s]){
+      const o=out[s][n];o.s=s;
+      const bonus=res[s]*.3+(o.cls=='GK'||o.cls=='CB'||o.cls=='FB'||o.cls=='DM'?(r.g[1-s]==0?.3:0):0);
+      const peso=clamp(o.min/60,.2,1);
+      o.nota=+clamp(6+(o.pts+bonus)*peso,3,10).toFixed(1);
+      lista.push(o);
+    }
+    lista.sort((a,b)=>b.nota-a.nota||b.gols-a.gols);
+    return{lista,melhor:lista[0],por:out};
+  }
+
+  /* ---------- mapa de calor ---------- */
+  function calor(r,s,nome){
+    const J=jogadores(r),g=Array.from({length:8},()=>Array(12).fill(0));let n=0;
+    for(const e of r.log.ev){
+      if(e.p==null||e.s!==s||e.x==null||e.y==null)continue;
+      if(!['passe','lancamento','cruzamento','conducao','drible','chute','desarme','recuperou','falta','intercepta','bloqueio'].includes(e.k))continue;
+      if(J.quem(s,e.p,e.t)!==nome)continue;
+      const u=s?1-e.x:e.x,v=s?1-e.y:e.y;g[Math.min(7,Math.floor(clamp(v,0,.9999)*8))][Math.min(11,Math.floor(clamp(u,0,.9999)*12))]++;n++;
+    }
+    return{grade:g,n};
+  }
+
+  /* ---------- narração ---------- */
+  const PICK=(rs,a)=>a[Math.floor(rs.f()*a.length)];
+  function narra(r){
+    const ev=r.log.ev,M=minutos(r),J=jogadores(r),rs=MT.rng('narra|'+r.log.digest()),T=r.T,nome=s=>T[s].nome;
+    const L=[],G=[0,0];
+    const w=(e,txt,k,dest)=>L.push({t:e.t,min:M.fmt(e.t),n:M.n(e.t),txt:txt,k:k||e.k,destaque:!!dest,s:e.s});
+    const q=(s,i,t)=>J.quem(s,i,t);
+    const pl=()=>G[0]+' a '+G[1];
+    for(let i=0;i<ev.length;i++){
+      const e=ev[i],nx=ev[i+1];
+      switch(e.k){
+        case 'inicio':w(e,PICK(rs,['Rola a bola! '+nome(0)+' x '+nome(1)+'.','Começa o jogo: '+nome(0)+' recebe o '+nome(1)+'.','Apita o árbitro e a bola rola para '+nome(0)+' e '+nome(1)+'.']));break;
+        case 'tatica':if(e.d.minuto===0)w(e,nome(e.s)+' vai a campo no '+e.d.form+', com estilo '+e.d.estilo+' (treinador '+e.d.treinador+').','tatica');else w(e,nome(e.s)+' muda o jogo: '+e.d.estilo+' ('+e.d.motivo+').','tatica');break;
+        case 'acrescimo':w(e,'O árbitro indica '+e.d.min+' minuto'+(e.d.min>1?'s':'')+' de acréscimo no '+(e.d.periodo==1?'primeiro':'segundo')+' tempo.');break;
+        case 'fim_tempo':w(e,'Fim do primeiro tempo: '+nome(0)+' '+pl()+' '+nome(1)+'.');break;
+        case 'prorrogacao':w(e,e.d.periodo==1?'Empate no tempo normal: vamos à prorrogação!':'Começa o segundo tempo da prorrogação.');break;
+        case 'penaltis':if(e.d&&e.d.inicio)w(e,'Decisão por pênaltis!');else{const p=q(e.s,e.p,e.t);w(e,p+(e.o=='gol'?' converte ':e.o=='defesa'?' tem a cobrança defendida ':' manda para fora ')+'— '+e.d.placar[0]+' a '+e.d.placar[1]+'.','penaltis',true)}break;
+        case 'gol':{
+          const p=q(e.s,e.p,e.t),anul=e.d&&e.d.anulado,pen=e.d&&e.d.penalti,ass=nx&&nx.k=='assistencia'?q(nx.s,nx.p,nx.t):null,ch=ev[i-1],xg=ch&&ch.k=='chute'?ch.d.xg:null;
+          if(anul){w(e,'GOL de '+p+' para o '+nome(e.s)+'... mas o lance será revisado.','gol');break}
+          G[e.s]++;
+          const base=pen?PICK(rs,['GOL! '+p+' bate o pênalti com categoria.','GOL de pênalti! '+p+' não perdoa.','Na cobrança, '+p+' converte.']):
+            xg!=null&&xg<.04?PICK(rs,['GOLAÇO! '+p+' arrisca de longe e acerta o ângulo.','Que pancada de '+p+'! Gol improvável.']):
+            ass?PICK(rs,['GOL! '+p+' finaliza após assistência de '+ass+'.',ass+' serve e '+p+' não desperdiça: GOL!','É GOL! '+p+' completa o passe de '+ass+'.']):
+            PICK(rs,['GOL! '+p+' finaliza e balança a rede.','Bola na rede! '+p+' marca.','Gol de '+p+'!']);
+          w(e,base+' '+nome(0)+' '+pl()+' '+nome(1)+'.','gol',true);break}
+        case 'var':{const p=e.p!=null?q(e.s,e.p,e.t):null;
+          const m={'gol:anulado':'VAR: gol anulado por '+e.d.motivo+'.','penalti:anulado':'VAR: pênalti cancelado — '+e.d.motivo+(p?' de '+p:'')+'.','penalti:concedido':'VAR: pênalti concedido ('+e.d.motivo+').','vermelho:revertido':'VAR: cartão vermelho revertido para amarelo'+(p?' ('+p+')':'')+'.','vermelho:concedido':'VAR: expulsão confirmada'+(p?' para '+p:'')+' ('+e.d.motivo+').'}[e.d.tipo+':'+e.d.resultado];
+          if(e.d.tipo=='gol'&&e.d.resultado=='anulado')G[e.s]--;
+          w(e,m||'VAR revisa o lance.','var',true);break}
+        case 'chute':{
+          if(nx&&(nx.k=='gol'||nx.k=='penalti'))break;
+          const p=q(e.s,e.p,e.t);if(e.d.tipo=='penalti')break;
+          const f=nx&&nx.k=='defesa'?'defesa':nx&&nx.k=='trave'?'trave':nx&&nx.k=='bloqueio'?'bloq':'fora';
+          if(f=='defesa'&&nx.d&&nx.d.penalti){w(e,q(nx.s,nx.p,nx.t)+' defende o pênalti de '+p+'!','defesa',true);break}
+          if(e.d.xg<.12&&f!='defesa'&&f!='trave')break;
+          const tp=e.d.tipo=='cabeca'?' de cabeça':e.d.tipo=='falta'?' de falta':'';
+          if(f=='defesa')w(e,PICK(rs,[q(nx.s,nx.p,nx.t)+' defende o chute'+tp+' de '+p+'.','Boa defesa de '+q(nx.s,nx.p,nx.t)+' no chute'+tp+' de '+p+'.']),'chute');
+          else if(f=='trave')w(e,p+' acerta a trave! Quase.','chute',true);
+          else if(f=='bloq')w(e,'Chute'+tp+' de '+p+' é bloqueado.','chute');
+          else w(e,p+' finaliza'+tp+' e a bola passa perto.','chute');
+          break}
+        case 'falta':{const f=q(e.s,e.p,e.t),v=q(1-e.s,e.q,e.t);
+          if(e.d.simulacao){w(e,v+' cai na área e o árbitro marca pênalti...','falta');break}
+          if(e.d.area){w(e,'Pênalti! '+f+' derruba '+v+' na área.','falta',true);break}
+          const c=nx&&nx.k=='cartao'?nx:null;
+          if(c)break;
+          if(e.d.vantagem)break;
+          if(i%3==0||e.d.dogso)w(e,'Falta de '+f+' em '+v+'.','falta');
+          break}
+        case 'cartao':{const p=q(e.s,e.p,e.t);w(e,(e.o=='amarelo'?'Cartão amarelo para '+p:'EXPULSO! Cartão vermelho para '+p)+' ('+e.d.motivo+').','cartao',e.o=='vermelho');break}
+        case 'vantagem':w(e,'O árbitro manda seguir: vantagem para o '+nome(e.s)+'.','vantagem');break;
+        case 'impedimento':{const p=q(e.s,e.p,e.t);w(e,p+' estava impedido.','impedimento');break}
+        case 'escanteio':w(e,'Escanteio para o '+nome(e.s)+', cobrança de '+q(e.s,e.p,e.t)+'.','escanteio');break;
+        case 'penalti':w(e,q(e.s,e.p,e.t)+' se prepara para a cobrança.','penalti');break;
+        case 'lesao':w(e,'Atendimento médico: '+q(e.s,e.p,e.t)+' sente '+(e.d.tipo=='contato'?'o choque':'uma lesão')+' ('+e.d.gravidade+').','lesao');break;
+        case 'substituicao':w(e,nome(e.s)+': sai '+e.d.sai+', entra '+e.d.entra+' ('+e.d.motivo+').','substituicao');break;
+        case 'defesa':if(e.d&&e.d.penalti)break;break;
+        case 'fim':{const ps=r.pen;w(e,'Fim de jogo! '+nome(0)+' '+G[0]+' a '+G[1]+' '+nome(1)+(ps?' (pênaltis: '+ps.placar[0]+' a '+ps.placar[1]+')':'')+'.','fim',true);break}
+      }
+    }
+    return L;
+  }
+
+  MT.minutos=minutos;MT.jogadores=jogadores;MT.estat=estat;MT.estatJog=estatJog;MT.calor=calor;MT.narra=narra;
+})();
+
+/* ============================================================
    MOTOR DE PARTIDAS — módulo 2: NÚCLEO DA POSSE
    A partida é uma sequência de ações do portador da bola: ele enxerga as opções (passe, enfiada,
    cruzamento, condução, drible, chute), escolhe conforme seus atributos e a pressão, e o resultado
@@ -2834,7 +3446,7 @@ const MT=(()=>{
 
   /* escolhe os 11 de um elenco para uma formação: cada casa recebe o melhor da função (ou de função vizinha) */
   function timeDe(js,form,nome){
-    const f=FORM[form]||FORM['4-3-3'],pool=js.map(j=>({...j,cls:j.cls||MT.cls(j.pos,j.fp)})).sort((a,b)=>b.ovr-a.ovr),used=new Set(),xi=[];
+    const f=FORM[form]||FORM['4-3-3'],pool=js.map(j=>({...j,cls:j.cls||MT.cls(j.pos,j.fp)})).sort((a,b)=>((b.forcado?1000:0)+b.ovr)-((a.forcado?1000:0)+a.ovr)),used=new Set(pool.filter(x=>x.soBanco)),xi=[];
     f.forEach(([c,u,v])=>{
       let p=pool.find(x=>!used.has(x)&&x.cls==c);
       if(!p)for(const c2 of PERTO[c]){p=pool.find(x=>!used.has(x)&&x.cls==c2);if(p)break}
@@ -2843,9 +3455,10 @@ const MT=(()=>{
       used.add(p);const at=p.a?null:MT.atrib(p);xi.push({...p,a:p.a||at.a,foot:p.foot||(at&&at.foot)||'D',pf:p.pf||(at&&at.pf)||55,u0:u,v0:v,slotCls:c,fora:p.cls!=c});
     });
     /* banco: os melhores que sobraram, com um goleiro reserva garantido */
-    const rest=pool.filter(x=>!used.has(x)),banco=[],gk=rest.find(x=>x.cls=='GK');
+    const sb=pool.filter(x=>x.soBanco),rest=pool.filter(x=>!used.has(x)),banco=[],gk=rest.find(x=>x.cls=='GK');
     if(gk)banco.push(gk);
-    rest.filter(x=>x!==gk).slice(0,gk?8:9).forEach(x=>banco.push(x));
+    sb.forEach(x=>banco.push(x));
+    rest.filter(x=>x!==gk).slice(0,(gk?8:9)-sb.length).forEach(x=>banco.push(x));
     banco.forEach((p,k)=>{const at=p.a?null:MT.atrib(p);banco[k]={...p,a:p.a||at.a,foot:p.foot||(at&&at.foot)||'D',pf:p.pf||(at&&at.pf)||55}});
     return{nome:nome||'Time',form:FORM[form]?form:'4-3-3',xi,banco};
   }
@@ -3326,12 +3939,21 @@ const MT=(()=>{
         l.sort((a,b)=>b.in-a.in).forEach(x=>aplicaSub(s,x.out,x.in,x.motivo));
       }
     }
+    const ent=((opt&&opt.entradas)||[]).slice().sort((p,q)=>p.min-q.min);
+    /* entrada combinada de antemão (o jogador do usuário que começa no banco): troca o titular da função com menos energia */
+    function forcaEntrada(e0){
+      const s=e0.s,k=T[s].banco.findIndex(p=>p.n==e0.nome);if(k<0||subsN[s]>=5)return;
+      const cls=T[s].banco[k].cls||MT.cls(T[s].banco[k].pos,T[s].banco[k].fp);let b=-1,bv=1e9;
+      T[s].xi.forEach((p,i)=>{if(i==0||!vivo(s,i)||(ps==s&&h==i))return;const v=en[s][i]+(p.slotCls==cls?-40:0);if(v<bv){bv=v;b=i}});
+      if(b>=0)aplicaSub(s,b,k,'decisão do técnico');
+    }
     function joga(lim){
     while(t<lim&&guarda++<60000){
       if(vant&&t-vant.t>=6)vant=null;
       {const dt=t-tDr;if(dt>0){tDr=t;drena(dt);if(t-tRef>=60){tRef=t;mo[0]*=CD.moral.decai;mo[1]*=CD.moral.decai;refresh()}}}
       if(chk||t>=proxChk){proxChk=t+300;chk=false;adaptaTodos()}
       while(jans.length&&t>=jans[0]){jans.shift();janela(false)}
+      while(ent.length&&minuto()>=ent[0].min){forcaEntrada(ent.shift())}
       posicoes();
       const s=ps,me=pl(s,h),m=maisPerto(opp(s),[bx,by],1,true)[0],P=clamp(sig((4.6-(m?m.d:12))/1.7)*(.3+.7*Math.sqrt(T[opp(s)].est.pres)),0,1);
       const reiniciou=rei;rei=false;
@@ -3428,6 +4050,126 @@ const MT=(()=>{
   MT.timeIA=timeIA;
   MT.PAR=PAR;MT.FORM=FORM;MT.timeDe=timeDe;MT.timeTeste=timeTeste;MT.simula=simula;MT.xgPos=xgPos;MT.thPos=th;
 })();
+
+/* ============================================================
+   PONTE: liga o motor de partidas novo (src/motor.js ... narra.js) ao jogo.
+   Usado só nas partidas do clube do usuário. O motor leve antigo segue nas demais.
+   pmMotor() devolve o resultado no MESMO formato do pm() antigo (g, sc, ev, st, pr, xi, po, sh...),
+   para o jogo ao vivo, as abas e a carreira continuarem funcionando sem mudança.
+   ============================================================ */
+const MOTOR_ON=true;
+const POS_ANTIGA={GK:'GOL',CB:'ZAG',FB:'ZAG',DM:'VOL',CM:'MEI',AM:'MEI',W:'PNT',ST:'ATA'};
+
+/* elenco do clube no formato do motor: força escalada para bater com a força do clube no jogo */
+function motorElenco(cid,lu){
+  const c=S.cs[cid],sq=squadOf(cid).filter(x=>!x.me),top=sq.slice().sort((a,b)=>b.ovr-a.ovr).slice(0,14),med=top.reduce((s,x)=>s+x.ovr,0)/Math.max(1,top.length),d=cid==S.club||true?(c.s-med)*.9:0;
+  const js=sq.map(x=>({n:x.n,pos:x.pos,fp:x.fp,ovr:Math.round(C(x.ovr+d,30,97)),age:x.age||26,nat:x.nat||'',rv:x.rv?1:0}));
+  if(cid==S.club&&lu){
+    const f=MT.atribUser(S.at,{n:S.p.name,pos:S.p.pos,ovr:O(),age:S.p.age,nat:S.p.nat});
+    js.push({n:S.p.name,pos:S.p.pos,ovr:O(),age:S.p.age,nat:S.p.nat,a:f.a,foot:f.foot,pf:f.pf,cls:f.cls,me:1,forcado:!!lu.s,soBanco:!lu.s});
+  }
+  return js;
+}
+
+/* partida do clube do usuário pelo motor novo; null se não puder (o jogo cai no motor antigo) */
+function pmMotor(r,x){
+  if(!MOTOR_ON||typeof MT==='undefined'||!MT.simula)return null;
+  try{
+    const{h,a,my,lu,knock,kind,ag,isLg}=x,me=S.club,ids=[h,a];
+    const js=ids.map(id=>motorElenco(id,id==me?lu:null));
+    const T=ids.map((id,i)=>MT.timeIA(js[i],cl(id).n));
+    const opt={entradas:[],moral:[0,0]};
+    opt.moral[my]=C((S.mor-50)/100+(S.form-6.5)/6,-.6,.6);
+    if(lu&&!lu.s)opt.entradas.push({s:my,nome:S.p.name,min:x.inn});
+    if(knock&&!ag)opt.mataMata=true;
+    const m=MT.simula(T[0],T[1],Math.floor(Math.random()*2147483000),opt);
+    adaptaResultado(r,m,x,js);
+    return r;
+  }catch(e){console.error('motor novo falhou, usando o antigo:',e);return null}
+}
+
+function adaptaResultado(r,m,x,js){
+  const{h,a,my,lu,isLg}=x,me=S.club,ids=[h,a],ev=m.log.ev,M=MT.minutos(m),NA=MT.narra(m),X=MT.estat(m),E=MT.estatJog(m),mn=t=>Math.max(1,Math.min(90,M.n(t)));
+  const nome=S.p.name,ovrDe={};js.forEach((l,i)=>l.forEach(p=>{ovrDe[i+'|'+p.n]=p.ovr}));
+  r.g=m.g.slice();
+  /* gols e assistências */
+  r.sc=[];r.gl=0;r.as=0;
+  ev.forEach((e,i)=>{
+    if(e.k!='gol'||(e.d&&e.d.anulado))return;
+    const J=MT.jogadores(m),aut=J.quem(e.s,e.p,e.t),nx=ev[i+1],as=nx&&nx.k=='assistencia'?J.quem(nx.s,nx.p,nx.t):'';
+    const mine=as==nome&&e.s==my;
+    if(aut==nome&&e.s==my)r.gl++;else if(mine)r.as++;
+    r.sc.push([mn(e.t),e.s,aut,mine?1:0,as]);
+  });
+  /* creditar rivais (gols, assistências, notas) e artilheiros do campeonato */
+  r.sc.forEach(z=>{
+    const cid=ids[z[1]],rv=(RC[cid]||[]).find(q=>q.n==z[2]);
+    if(rv&&z[2]!=nome){rv.cur.g++;if(isLg)rv.cur.lg++}
+    else if(z[2]!=nome&&isLg){const k=cid+'#'+z[2],e2=S.sc[k]||(S.sc[k]={n:z[2],c:cid,g:0});e2.g++}
+    const ra=z[4]&&z[4]!=nome?(RC[cid]||[]).find(q=>q.n==z[4]):null;if(ra)ra.cur.a++;
+  });
+  E.lista.forEach(j=>{if(j.min<1)return;const rv=(RC[ids[j.s]]||[]).find(q=>q.n==j.nome);if(rv&&j.nome!=nome){rv.cur.ap++;rv.cur.rs+=j.nota}});
+  /* texto: narração do motor; o seu jogador aparece como "você" */
+  const re=new RegExp(nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
+  r.ev=[];
+  r.ev.push({m:0,t:`Começa o jogo! ${cl(h).n} x ${cl(a).n} — ${r.comp}.`,c:''});
+  r.ev.push({m:0,t:lu?lu.s?'Você foi escalado como titular.':'Você começa no banco de reservas.':S.inj>0?'Você está lesionado e acompanha de fora.':'O técnico não utilizou você nesta partida.',c:''});
+  NA.forEach(l=>{
+    if(l.k=='tatica'&&l.n>0&&false)return;
+    const mine=l.s==my,txt=l.txt.replace(re,'você');
+    let c='';
+    if(l.k=='gol')c=/será revisado/.test(l.txt)?'':mine?'g':'b';
+    else if(l.k=='cartao')c=/amarelo/.test(l.txt)?'y':'b';
+    else if(l.k=='substituicao'&&txt.includes('entra você'))c='ok';
+    else if(l.k=='lesao'&&txt.includes('você'))c='b';
+    if(l.k=='gol'&&c){const g=r.sc.find(z=>!z.u&&z[0]==mn(l.t));if(g)g.u=1}
+    r.ev.push({m:Math.min(90,l.n),t:(l.k=='gol'&&c?'⚽ ':l.k=='cartao'?(c=='y'?'🟨 ':'🟥 '):'')+txt,c});
+  });
+  r.sc.forEach(z=>{delete z.u});
+  /* cartões e lesão do usuário */
+  r.yc=0;r.rc=0;r.inj=0;
+  ev.forEach(e=>{
+    if(e.s!==my||e.p==null)return;
+    const J=MT.jogadores(m);if(J.quem(e.s,e.p,e.t)!=nome)return;
+    if(e.k=='cartao'){if(e.o=='amarelo')r.yc=1;else r.rc=1}
+    if(e.k=='lesao'&&e.d.gravidade!='leve')r.inj=1;
+  });
+  const meu=E.por[my][nome];
+  r.mn=lu&&meu?Math.max(0,Math.round(meu.min)):0;
+  if(!lu||!meu||r.mn<1){r.pl=false;r.mn=0}else r.pl=true;
+  r.sh=[X[0].chutes,X[1].chutes];r.po=Math.round(C(X[0].posseP,25,75));
+  /* decisão do mata-mata */
+  const ag=x.ag;
+  if(x.knock){
+    if(m.pen){r.win=m.pen.vencedor==0?h:a;r.pen=1}
+    else if(ag&&r.g[0]+ag[0]==r.g[1]+ag[1]){r.win=pen(h,a);r.pen=1;r.ev.push({m:90,t:`${ag?'Empate no agregado!':'Empate!'} Nos pênaltis, vitória do ${cl(r.win).n}.`,c:''})}
+    else r.win=r.g[0]>r.g[1]?h:r.g[1]>r.g[0]?a:null;
+    if(!m.pen&&!ag&&r.g[0]==r.g[1])r.win=pen(h,a);
+  }else r.win=r.g[0]>r.g[1]?h:r.g[1]>r.g[0]?a:null;
+  /* estatísticas para as abas e o jogo ao vivo */
+  const blocos=18,mom=Array(blocos).fill(0),fe=[],xgR=[0,1].map(s=>Math.round(X[s].xg*10)/10);
+  ev.forEach(e=>{
+    const t=mn(e.t),b=Math.min(blocos-1,Math.floor((t-1)/5));
+    if(e.k=='chute'){mom[b]+=(e.s==0?1:-1)*Math.min(.5,e.d.xg*1.5+.04);fe.push([t,e.s,'sh'])}
+    if(e.k=='gol'&&!(e.d&&e.d.anulado)){fe.push([t,e.s,'st']);mom[b]+=(e.s==0?1:-1)*.5}
+    if(e.k=='defesa')fe.push([t,1-e.s,'st']);
+    if(e.k=='escanteio')fe.push([t,e.s,'co']);
+    if(e.k=='falta'&&!(e.d&&e.d.simulacao))fe.push([t,e.s,'fl']);
+    if(e.k=='impedimento')fe.push([t,e.s,'of']);
+    if(e.k=='cartao')fe.push([t,e.s,e.o=='amarelo'?'yc':'rc']);
+  });
+  fe.sort((p,q)=>p[0]-q[0]);
+  r.st={sh:[X[0].chutes,X[1].chutes],sot:[X[0].alvo,X[1].alvo],co:[X[0].escanteios,X[1].escanteios],fl:[X[0].faltas,X[1].faltas],yc:[X[0].amarelos,X[1].amarelos],rc:[X[0].vermelhos,X[1].vermelhos],of:[X[0].imped,X[1].imped],xg:xgR,
+    pa:[0,1].map(s=>X[s].pas?Math.round(100*X[s].pasOk/X[s].pas):0),sv:[X[0].defesas,X[1].defesas],mom:mom.map(v=>Math.round(C(v,-1,1)*100)/100),fe};
+  r.vr=[X[0].var+X[1].var];
+  /* quem jogou e as melhores notas */
+  r.xi=[0,1].map(s=>m.ini[s].map(p=>{const j=E.por[s][p.n];return[p.n,POS_ANTIGA[p.cls]||'MEI',p.n==nome&&s==my?1:0]}));
+  r.pr=[0,1].map(s=>E.lista.filter(j=>j.s==s&&j.min>=1).sort((p,q)=>q.nota-p.nota).slice(0,6).map(j=>{
+    const me_=j.nome==nome&&s==my;return[j.nome,POS_ANTIGA[j.cls]||'MEI',ovrDe[s+'|'+j.nome]||Math.round(cl(ids[s]).s),j.gols,j.assist,j.nota,me_?1:0]}));
+  r.rt=meu&&r.pl?meu.nota:0;
+  r.mv=E.melhor?E.melhor.nome:'';
+  r.motor=1;
+}
 
 /* ============================================================
    HABITE-SE 10 — INTERFACE

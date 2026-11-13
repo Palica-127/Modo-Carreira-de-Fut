@@ -45,7 +45,7 @@
 
   /* escolhe os 11 de um elenco para uma formação: cada casa recebe o melhor da função (ou de função vizinha) */
   function timeDe(js,form,nome){
-    const f=FORM[form]||FORM['4-3-3'],pool=js.map(j=>({...j,cls:j.cls||MT.cls(j.pos,j.fp)})).sort((a,b)=>b.ovr-a.ovr),used=new Set(),xi=[];
+    const f=FORM[form]||FORM['4-3-3'],pool=js.map(j=>({...j,cls:j.cls||MT.cls(j.pos,j.fp)})).sort((a,b)=>((b.forcado?1000:0)+b.ovr)-((a.forcado?1000:0)+a.ovr)),used=new Set(pool.filter(x=>x.soBanco)),xi=[];
     f.forEach(([c,u,v])=>{
       let p=pool.find(x=>!used.has(x)&&x.cls==c);
       if(!p)for(const c2 of PERTO[c]){p=pool.find(x=>!used.has(x)&&x.cls==c2);if(p)break}
@@ -54,9 +54,10 @@
       used.add(p);const at=p.a?null:MT.atrib(p);xi.push({...p,a:p.a||at.a,foot:p.foot||(at&&at.foot)||'D',pf:p.pf||(at&&at.pf)||55,u0:u,v0:v,slotCls:c,fora:p.cls!=c});
     });
     /* banco: os melhores que sobraram, com um goleiro reserva garantido */
-    const rest=pool.filter(x=>!used.has(x)),banco=[],gk=rest.find(x=>x.cls=='GK');
+    const sb=pool.filter(x=>x.soBanco),rest=pool.filter(x=>!used.has(x)),banco=[],gk=rest.find(x=>x.cls=='GK');
     if(gk)banco.push(gk);
-    rest.filter(x=>x!==gk).slice(0,gk?8:9).forEach(x=>banco.push(x));
+    sb.forEach(x=>banco.push(x));
+    rest.filter(x=>x!==gk).slice(0,(gk?8:9)-sb.length).forEach(x=>banco.push(x));
     banco.forEach((p,k)=>{const at=p.a?null:MT.atrib(p);banco[k]={...p,a:p.a||at.a,foot:p.foot||(at&&at.foot)||'D',pf:p.pf||(at&&at.pf)||55}});
     return{nome:nome||'Time',form:FORM[form]?form:'4-3-3',xi,banco};
   }
@@ -537,12 +538,21 @@
         l.sort((a,b)=>b.in-a.in).forEach(x=>aplicaSub(s,x.out,x.in,x.motivo));
       }
     }
+    const ent=((opt&&opt.entradas)||[]).slice().sort((p,q)=>p.min-q.min);
+    /* entrada combinada de antemão (o jogador do usuário que começa no banco): troca o titular da função com menos energia */
+    function forcaEntrada(e0){
+      const s=e0.s,k=T[s].banco.findIndex(p=>p.n==e0.nome);if(k<0||subsN[s]>=5)return;
+      const cls=T[s].banco[k].cls||MT.cls(T[s].banco[k].pos,T[s].banco[k].fp);let b=-1,bv=1e9;
+      T[s].xi.forEach((p,i)=>{if(i==0||!vivo(s,i)||(ps==s&&h==i))return;const v=en[s][i]+(p.slotCls==cls?-40:0);if(v<bv){bv=v;b=i}});
+      if(b>=0)aplicaSub(s,b,k,'decisão do técnico');
+    }
     function joga(lim){
     while(t<lim&&guarda++<60000){
       if(vant&&t-vant.t>=6)vant=null;
       {const dt=t-tDr;if(dt>0){tDr=t;drena(dt);if(t-tRef>=60){tRef=t;mo[0]*=CD.moral.decai;mo[1]*=CD.moral.decai;refresh()}}}
       if(chk||t>=proxChk){proxChk=t+300;chk=false;adaptaTodos()}
       while(jans.length&&t>=jans[0]){jans.shift();janela(false)}
+      while(ent.length&&minuto()>=ent[0].min){forcaEntrada(ent.shift())}
       posicoes();
       const s=ps,me=pl(s,h),m=maisPerto(opp(s),[bx,by],1,true)[0],P=clamp(sig((4.6-(m?m.d:12))/1.7)*(.3+.7*Math.sqrt(T[opp(s)].est.pres)),0,1);
       const reiniciou=rei;rei=false;
