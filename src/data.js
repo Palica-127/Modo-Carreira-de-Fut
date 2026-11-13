@@ -146,7 +146,7 @@ const LEG=[
 const legPts=l=>l.bo*18+(l.wcb||0)*7+(l.ex||0)+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
 
 /* ---------- Árvore de habilidades (portado do BrasLOL, adaptado ao futebol) ----------
-   br = ramo, c = custo em pontos, lv = nível mínimo, pa = pré-requisitos (basta um; `need` no nó final), r = linha (0 topo ... 4 base),
+   br = ramo, c = custo em pontos, lv = nível mínimo, pa = pré-requisitos (basta um; `need` no nó final), r = linha (0 topo ... 9 base; 5+ = Lendas),
    x = posição horizontal em %, at = [atributo, pontos], fx = efeitos: gl gols, ast assistências, rtw nota nas vitórias, bon bônus por gol,
    inj lesões, en desgaste de energia, xpw XP no treino, xpm XP em jogos, tra evolução no treino, fame reputação, trp confiança ganha. */
 const PBR={f:['Decisivo','Decide jogos'],e:['Estudioso','Evolui mais rápido'],p:['Profissional','Vida de atleta']};
@@ -185,9 +185,43 @@ const PERKS=[
  {id:'p9',br:'p',n:'Corpo de aço',d:'+2 de Físico.',c:2,lv:10,pa:['p6','p3'],r:3,x:26,at:[5,2]},
  {id:'p8',br:'p',n:'Negociador',d:'+25% no bônus por gol.',c:2,lv:10,pa:['p3','p2'],r:3,x:50,fx:{bon:.25}},
  {id:'p10',br:'p',n:'Blindado',d:'Mais 20% menos risco de lesão.',c:2,lv:10,pa:['p2','p7'],r:3,x:74,fx:{inj:.20}},
- {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}}
+ {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}},
+ /* ---- Lendas (nível 20+) ---- */
+ {id:'f12',br:'f',n:'Instinto matador',d:'+10% de chance de gol.',c:3,lv:20,pa:['f11'],r:5,x:30,fx:{gl:0.1}},
+ {id:'f13',br:'f',n:'Nervos de aço',d:'+0,3 de nota nas vitórias.',c:3,lv:20,pa:['f11'],r:5,x:70,fx:{rtw:0.3}},
+ {id:'f14',br:'f',n:'Finalização de elite',d:'+3 de Finalização.',c:3,lv:25,pa:['f12'],r:6,x:14,at:[1,3]},
+ {id:'f15',br:'f',n:'Craque de decisão',d:'+5% de gol e +0,3 de nota nas vitórias.',c:3,lv:25,pa:['f12','f13'],r:6,x:38,fx:{gl:0.05,rtw:0.3}},
+ {id:'f16',br:'f',n:'Passe açucarado',d:'+15% de chance de assistência.',c:3,lv:25,pa:['f13'],r:6,x:62,fx:{ast:0.15}},
+ {id:'f17',br:'f',n:'Explosão',d:'+3 de Velocidade.',c:3,lv:25,pa:['f13'],r:6,x:86,at:[0,3]},
+ {id:'f18',br:'f',n:'Artilheiro nato',d:'+12% de chance de gol.',c:4,lv:30,pa:['f14','f15'],r:7,x:26,fx:{gl:0.12}},
+ {id:'f19',br:'f',n:'Gene decisivo',d:'+0,4 de nota nas vitórias e +20% no bônus por gol.',c:4,lv:30,pa:['f15','f16'],r:7,x:50,fx:{rtw:0.4,bon:0.2}},
+ {id:'f20',br:'f',n:'Maestro',d:'+15% de assistência.',c:4,lv:30,pa:['f16','f17'],r:7,x:74,fx:{ast:0.15}},
+ {id:'f21',br:'f',n:'Rei da área',d:'+12% de gol, +10% de assistência e +0,3 de nota. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['f18','f19','f20'],r:8,x:50,need:2,fx:{gl:0.12,ast:0.1,rtw:0.3}},
+ {id:'f22',br:'f',n:'Eterno artilheiro',d:'+15% de gol, +12% de assistência, +0,4 de nota e +30% de reputação.',c:5,lv:50,pa:['f21'],r:9,x:50,fx:{gl:0.15,ast:0.12,rtw:0.4,fame:0.3}},
+ {id:'e12',br:'e',n:'Mente analítica',d:'+20% de XP nas partidas.',c:3,lv:20,pa:['e11'],r:5,x:30,fx:{xpm:0.2}},
+ {id:'e13',br:'e',n:'Rotina de estudo',d:'+20% de XP no treino semanal.',c:3,lv:20,pa:['e11'],r:5,x:70,fx:{xpw:0.2}},
+ {id:'e14',br:'e',n:'Passe de elite',d:'+3 de Passe.',c:3,lv:25,pa:['e12'],r:6,x:14,at:[2,3]},
+ {id:'e15',br:'e',n:'Visão de raio-X',d:'+3 de Visão de jogo.',c:3,lv:25,pa:['e12','e13'],r:6,x:38,at:[6,3]},
+ {id:'e16',br:'e',n:'Laboratório tático',d:'+15% de evolução e +10% de XP no treino.',c:3,lv:25,pa:['e13'],r:6,x:62,fx:{tra:0.15,xpw:0.1}},
+ {id:'e17',br:'e',n:'Drible refinado',d:'+3 de Drible.',c:3,lv:25,pa:['e13'],r:6,x:86,at:[3,3]},
+ {id:'e18',br:'e',n:'Mentor',d:'+25% de XP nas partidas.',c:4,lv:30,pa:['e14','e15'],r:7,x:26,fx:{xpm:0.25}},
+ {id:'e19',br:'e',n:'Metodologia própria',d:'+20% de evolução e +15% de XP no treino.',c:4,lv:30,pa:['e15','e16'],r:7,x:50,fx:{tra:0.2,xpw:0.15}},
+ {id:'e20',br:'e',n:'Escola de craques',d:'+25% de XP no treino semanal.',c:4,lv:30,pa:['e16','e17'],r:7,x:74,fx:{xpw:0.25}},
+ {id:'e21',br:'e',n:'Professor doutor',d:'+20% de XP (treino e jogos) e +20% de evolução. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['e18','e19','e20'],r:8,x:50,need:2,fx:{xpw:0.2,xpm:0.2,tra:0.2}},
+ {id:'e22',br:'e',n:'Onisciente',d:'+25% de XP (treino e jogos) e +25% de evolução.',c:5,lv:50,pa:['e21'],r:9,x:50,fx:{xpw:0.25,xpm:0.25,tra:0.25}},
+ {id:'p12',br:'p',n:'Descanso eficiente',d:'15% menos desgaste de energia.',c:3,lv:20,pa:['p11'],r:5,x:30,fx:{en:0.15}},
+ {id:'p13',br:'p',n:'Contrato blindado',d:'+25% no bônus por gol.',c:3,lv:20,pa:['p11'],r:5,x:70,fx:{bon:0.25}},
+ {id:'p14',br:'p',n:'Fisioterapeuta pessoal',d:'20% menos risco de lesão.',c:3,lv:25,pa:['p12'],r:6,x:14,fx:{inj:0.2}},
+ {id:'p15',br:'p',n:'Investidor',d:'+20% de reputação e +15% no bônus por gol.',c:3,lv:25,pa:['p12','p13'],r:6,x:38,fx:{fame:0.2,bon:0.15}},
+ {id:'p16',br:'p',n:'Patrocinadores',d:'+30% de reputação ganha.',c:3,lv:25,pa:['p13'],r:6,x:62,fx:{fame:0.3}},
+ {id:'p17',br:'p',n:'Influenciador',d:'+25% de reputação e +20% de confiança ganha.',c:3,lv:25,pa:['p13'],r:6,x:86,fx:{fame:0.25,trp:0.2}},
+ {id:'p18',br:'p',n:'Rotina de campeão',d:'+3 de Físico e 10% menos desgaste.',c:4,lv:30,pa:['p14','p15'],r:7,x:26,fx:{en:0.1},at:[5,3]},
+ {id:'p19',br:'p',n:'Mercado aquecido',d:'+30% no bônus por gol.',c:4,lv:30,pa:['p15','p16'],r:7,x:50,fx:{bon:0.3}},
+ {id:'p20',br:'p',n:'Embaixador',d:'+35% de reputação e +20% de confiança ganha.',c:4,lv:30,pa:['p16','p17'],r:7,x:74,fx:{fame:0.35,trp:0.2}},
+ {id:'p21',br:'p',n:'Lenda viva',d:'15% menos desgaste, 20% menos lesões e +25% de confiança. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['p18','p19','p20'],r:8,x:50,need:2,fx:{en:0.15,inj:0.2,trp:0.25}},
+ {id:'p22',br:'p',n:'Eterno',d:'20% menos desgaste, 25% menos lesões, +30% de reputação e +25% de confiança.',c:5,lv:50,pa:['p21'],r:9,x:50,fx:{en:0.2,inj:0.25,fame:0.3,trp:0.25}}
 ];
-const PCLV=30,pcNeed=lv=>120+40*lv;
+const PCLV=50,pcNeed=lv=>120+30*lv;
 
 /* Seleções da Copa do Mundo: [nome, código, força]. As 16 primeiras são as nacionalidades jogáveis. */
 const WCN=[['Brasil','BRA',86],['Argentina','ARG',87],['Portugal','POR',84],['Espanha','ESP',86],['França','FRA',88],['Inglaterra','ENG',85],['Alemanha','GER',84],['Itália','ITA',82],['Holanda','NED',83],['Turquia','TUR',74],['Uruguai','URU',80],['Colômbia','COL',78],['Nigéria','NGA',73],['Marrocos','MAR',77],['Japão','JPN',75],['EUA','USA',74],

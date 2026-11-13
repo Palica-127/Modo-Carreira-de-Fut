@@ -614,9 +614,8 @@ body.zs #app{zoom:.92}body.zl #app{zoom:1.12}
 .lvf{position:absolute;inset:0;width:100%;height:100%}.lvf *{fill:none;stroke:rgba(255,255,255,.62);stroke-width:.35}.lvf .gl{fill:rgba(255,255,255,.25)}
 .pj{position:absolute;left:0;top:0;width:3.4%;aspect-ratio:1;min-width:15px;border-radius:50%;background:var(--c1);border:2px solid var(--c2);color:var(--tx,#fff);font:700 9px/1 var(--b);display:grid;place-items:center;font-style:normal;box-shadow:0 2px 4px rgba(0,0,0,.45);will-change:transform;z-index:2}
 .pj.gk{filter:brightness(.8) saturate(.7)}.pj.hot{box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.5);z-index:4}
-.pj.me{background:#ffd54a;color:#1b1405;border-color:#fff;width:4.6%;min-width:20px;box-shadow:0 0 0 3px #ffd54a,0 0 14px 4px rgba(255,213,74,.8);z-index:7;text-shadow:none}
-.pj.me .mk{position:absolute;left:50%;bottom:calc(100% + 1px);transform:translateX(-50%);color:#ffd54a;font:900 13px/1 var(--b);text-decoration:none;animation:meb 1s ease-in-out infinite}
-.pj.me .mn{position:absolute;left:50%;top:calc(100% + 3px);transform:translateX(-50%);padding:1px 6px;border-radius:99px;background:#ffd54a;color:#1b1405;font:800 10px/1.3 var(--b);white-space:nowrap;text-decoration:none}
+.pj.me{border:3px solid #ffd54a;z-index:7;box-shadow:0 2px 4px rgba(0,0,0,.45)}
+.pj.me .mk,.pj.me .mn{display:none}
 @keyframes mer{from{transform:scale(.8);opacity:.9}to{transform:scale(1.6);opacity:0}}@keyframes meb{50%{transform:translate(-50%,-4px)}}
 .pb,.pbs{position:absolute;left:0;top:0;width:2.2%;aspect-ratio:1;min-width:10px;border-radius:50%;will-change:transform}
 .pb{background:radial-gradient(circle at 35% 30%,#fff,#ddd 60%,#999);box-shadow:0 1px 3px rgba(0,0,0,.6);z-index:6}.pbs{background:#000;z-index:1}
@@ -723,7 +722,7 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 @media (max-width:820px){.lvmain{grid-template-columns:minmax(0,1fr)}.lvlog .log{max-height:180px}}
 .apur .play{margin-top:10px}
 
-.pj.me::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #ffd54a;opacity:0;animation:mer 1.3s ease-out infinite;pointer-events:none}
+
 .lvpl em.ast{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;background:var(--acc2,#2fd0c8);color:#08111a;font:800 11px var(--d);font-style:normal;margin-left:4px;vertical-align:middle}
 .pgoal::before{will-change:transform}
 
@@ -732,6 +731,26 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 .cbtn{display:flex;align-items:center;gap:8px;text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--ink);font:600 13px var(--b);cursor:pointer;min-height:40px}
 .cbtn img{width:22px;height:22px;object-fit:contain;flex:none}.cbtn .cdot{width:22px;height:22px;border-radius:50%;background:var(--line);flex:none}
 .cbtn[aria-pressed=true]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:0 0 0 1px var(--acc)}
+
+/* ---- treino semanal ---- */
+.trn .sub{margin-top:12px}.xpb.en u{background:linear-gradient(90deg,#3d8bff,#6cb4ff)}
+.trlog{list-style:none;margin:6px 0 0;padding:0}.trlog li{display:grid;grid-template-columns:78px 1fr;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}.trlog small{color:var(--muted)}.trlog .ok{color:#5be3a0}
+.ar .trg{color:#5be3a0;margin-left:4px;font-size:11px}
+/* ---- árvore de habilidades em hexágonos ---- */
+.ptabs .pill small{opacity:.7}.pill.br-f[aria-pressed=true]{background:#e0566a;border-color:#e0566a;color:#fff}.pill.br-e[aria-pressed=true]{background:#4a8ff0;border-color:#4a8ff0;color:#fff}.pill.br-p[aria-pressed=true]{background:#e0a83a;border-color:#e0a83a;color:#1a1204}
+.ptree{position:relative;width:100%;max-width:560px;margin:10px auto 0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.ptree.br-f{background:radial-gradient(ellipse at 50% 40%,rgba(224,86,106,.22),transparent 62%),linear-gradient(#1b0e14,#12090d)}
+.ptree.br-e{background:radial-gradient(ellipse at 50% 40%,rgba(74,143,240,.22),transparent 62%),linear-gradient(#0c1424,#080d18)}
+.ptree.br-p{background:radial-gradient(ellipse at 50% 40%,rgba(224,168,58,.2),transparent 62%),linear-gradient(#18130a,#100c06)}
+.ptree svg{position:absolute;inset:0;width:100%;height:100%}.ptree path{fill:none;stroke:rgba(255,255,255,.16);stroke-width:1.6;vector-effect:non-scaling-stroke}.ptree path.half{stroke:rgba(255,255,255,.34)}.ptree path.on{stroke:#6fe7b0;stroke-width:2.2}
+.pdiv{position:absolute;left:0;right:0;height:0;border-top:1px solid rgba(255,255,255,.22)}.pdiv span{position:absolute;left:50%;top:-11px;transform:translateX(-50%);background:#171717;border:1px solid rgba(255,214,120,.5);color:#f1d27a;font:700 11px var(--d);letter-spacing:.14em;padding:3px 12px;border-radius:99px;white-space:nowrap}
+.pnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;width:82px;background:none;border:0;padding:0;color:var(--ink);cursor:pointer;text-align:center}
+.pnode b{font:700 10.5px var(--b);line-height:1.15;text-shadow:0 1px 3px #000}.pnode small{font-size:9px;opacity:.7}
+.hexn{display:grid;place-items:center;width:46px;height:52px;font-size:20px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#1d2540;position:relative;box-shadow:inset 0 0 0 2px rgba(255,255,255,.14)}
+.pnode.lock{opacity:.42}.pnode.cost .hexn,.pnode.can .hexn{background:#3a3015}.pnode.can .hexn{background:#5b4a14}
+.pnode.can{filter:drop-shadow(0 0 7px #ffd54a)}.pnode.own .hexn{background:#14513a}.pnode.own{filter:drop-shadow(0 0 7px #5be3a0)}.pnode.sel .hexn{background:#2b5aa8}.pnode.sel{filter:drop-shadow(0 0 9px #66b4ff)}
+.pdet{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:12px;margin:6px auto 0;max-width:560px}
+.pdet .hexn.big{width:58px;height:66px;font-size:26px;flex:none}.pdet b{display:block;font-size:16px}.pdet small{display:block;opacity:.7;font-size:12px}.pdet p{margin:6px 0 10px}.pdet .play{width:100%}.pmsg{margin-top:6px;color:var(--acc)}
 
 </style></head>
 <body><div id="app" class="wrap"></div>
@@ -888,7 +907,7 @@ const LEG=[
 const legPts=l=>l.bo*18+(l.wcb||0)*7+(l.ex||0)+l.wc*14+(l.ucl||0)*6+(l.lib||0)*5+(l.mc||0)*3+(l.eu||0)*5+l.lg*1.5+l.g/25;
 
 /* ---------- Árvore de habilidades (portado do BrasLOL, adaptado ao futebol) ----------
-   br = ramo, c = custo em pontos, lv = nível mínimo, pa = pré-requisitos (basta um; `need` no nó final), r = linha (0 topo ... 4 base),
+   br = ramo, c = custo em pontos, lv = nível mínimo, pa = pré-requisitos (basta um; `need` no nó final), r = linha (0 topo ... 9 base; 5+ = Lendas),
    x = posição horizontal em %, at = [atributo, pontos], fx = efeitos: gl gols, ast assistências, rtw nota nas vitórias, bon bônus por gol,
    inj lesões, en desgaste de energia, xpw XP no treino, xpm XP em jogos, tra evolução no treino, fame reputação, trp confiança ganha. */
 const PBR={f:['Decisivo','Decide jogos'],e:['Estudioso','Evolui mais rápido'],p:['Profissional','Vida de atleta']};
@@ -927,9 +946,43 @@ const PERKS=[
  {id:'p9',br:'p',n:'Corpo de aço',d:'+2 de Físico.',c:2,lv:10,pa:['p6','p3'],r:3,x:26,at:[5,2]},
  {id:'p8',br:'p',n:'Negociador',d:'+25% no bônus por gol.',c:2,lv:10,pa:['p3','p2'],r:3,x:50,fx:{bon:.25}},
  {id:'p10',br:'p',n:'Blindado',d:'Mais 20% menos risco de lesão.',c:2,lv:10,pa:['p2','p7'],r:3,x:74,fx:{inj:.20}},
- {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}}
+ {id:'p11',br:'p',n:'Imortal',d:'Menos desgaste, menos lesões e mais confiança. Exige 2 das 3 habilidades ligadas.',c:3,lv:15,pa:['p9','p8','p10'],need:2,r:4,x:50,fx:{en:.15,inj:.15,trp:.2}},
+ /* ---- Lendas (nível 20+) ---- */
+ {id:'f12',br:'f',n:'Instinto matador',d:'+10% de chance de gol.',c:3,lv:20,pa:['f11'],r:5,x:30,fx:{gl:0.1}},
+ {id:'f13',br:'f',n:'Nervos de aço',d:'+0,3 de nota nas vitórias.',c:3,lv:20,pa:['f11'],r:5,x:70,fx:{rtw:0.3}},
+ {id:'f14',br:'f',n:'Finalização de elite',d:'+3 de Finalização.',c:3,lv:25,pa:['f12'],r:6,x:14,at:[1,3]},
+ {id:'f15',br:'f',n:'Craque de decisão',d:'+5% de gol e +0,3 de nota nas vitórias.',c:3,lv:25,pa:['f12','f13'],r:6,x:38,fx:{gl:0.05,rtw:0.3}},
+ {id:'f16',br:'f',n:'Passe açucarado',d:'+15% de chance de assistência.',c:3,lv:25,pa:['f13'],r:6,x:62,fx:{ast:0.15}},
+ {id:'f17',br:'f',n:'Explosão',d:'+3 de Velocidade.',c:3,lv:25,pa:['f13'],r:6,x:86,at:[0,3]},
+ {id:'f18',br:'f',n:'Artilheiro nato',d:'+12% de chance de gol.',c:4,lv:30,pa:['f14','f15'],r:7,x:26,fx:{gl:0.12}},
+ {id:'f19',br:'f',n:'Gene decisivo',d:'+0,4 de nota nas vitórias e +20% no bônus por gol.',c:4,lv:30,pa:['f15','f16'],r:7,x:50,fx:{rtw:0.4,bon:0.2}},
+ {id:'f20',br:'f',n:'Maestro',d:'+15% de assistência.',c:4,lv:30,pa:['f16','f17'],r:7,x:74,fx:{ast:0.15}},
+ {id:'f21',br:'f',n:'Rei da área',d:'+12% de gol, +10% de assistência e +0,3 de nota. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['f18','f19','f20'],r:8,x:50,need:2,fx:{gl:0.12,ast:0.1,rtw:0.3}},
+ {id:'f22',br:'f',n:'Eterno artilheiro',d:'+15% de gol, +12% de assistência, +0,4 de nota e +30% de reputação.',c:5,lv:50,pa:['f21'],r:9,x:50,fx:{gl:0.15,ast:0.12,rtw:0.4,fame:0.3}},
+ {id:'e12',br:'e',n:'Mente analítica',d:'+20% de XP nas partidas.',c:3,lv:20,pa:['e11'],r:5,x:30,fx:{xpm:0.2}},
+ {id:'e13',br:'e',n:'Rotina de estudo',d:'+20% de XP no treino semanal.',c:3,lv:20,pa:['e11'],r:5,x:70,fx:{xpw:0.2}},
+ {id:'e14',br:'e',n:'Passe de elite',d:'+3 de Passe.',c:3,lv:25,pa:['e12'],r:6,x:14,at:[2,3]},
+ {id:'e15',br:'e',n:'Visão de raio-X',d:'+3 de Visão de jogo.',c:3,lv:25,pa:['e12','e13'],r:6,x:38,at:[6,3]},
+ {id:'e16',br:'e',n:'Laboratório tático',d:'+15% de evolução e +10% de XP no treino.',c:3,lv:25,pa:['e13'],r:6,x:62,fx:{tra:0.15,xpw:0.1}},
+ {id:'e17',br:'e',n:'Drible refinado',d:'+3 de Drible.',c:3,lv:25,pa:['e13'],r:6,x:86,at:[3,3]},
+ {id:'e18',br:'e',n:'Mentor',d:'+25% de XP nas partidas.',c:4,lv:30,pa:['e14','e15'],r:7,x:26,fx:{xpm:0.25}},
+ {id:'e19',br:'e',n:'Metodologia própria',d:'+20% de evolução e +15% de XP no treino.',c:4,lv:30,pa:['e15','e16'],r:7,x:50,fx:{tra:0.2,xpw:0.15}},
+ {id:'e20',br:'e',n:'Escola de craques',d:'+25% de XP no treino semanal.',c:4,lv:30,pa:['e16','e17'],r:7,x:74,fx:{xpw:0.25}},
+ {id:'e21',br:'e',n:'Professor doutor',d:'+20% de XP (treino e jogos) e +20% de evolução. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['e18','e19','e20'],r:8,x:50,need:2,fx:{xpw:0.2,xpm:0.2,tra:0.2}},
+ {id:'e22',br:'e',n:'Onisciente',d:'+25% de XP (treino e jogos) e +25% de evolução.',c:5,lv:50,pa:['e21'],r:9,x:50,fx:{xpw:0.25,xpm:0.25,tra:0.25}},
+ {id:'p12',br:'p',n:'Descanso eficiente',d:'15% menos desgaste de energia.',c:3,lv:20,pa:['p11'],r:5,x:30,fx:{en:0.15}},
+ {id:'p13',br:'p',n:'Contrato blindado',d:'+25% no bônus por gol.',c:3,lv:20,pa:['p11'],r:5,x:70,fx:{bon:0.25}},
+ {id:'p14',br:'p',n:'Fisioterapeuta pessoal',d:'20% menos risco de lesão.',c:3,lv:25,pa:['p12'],r:6,x:14,fx:{inj:0.2}},
+ {id:'p15',br:'p',n:'Investidor',d:'+20% de reputação e +15% no bônus por gol.',c:3,lv:25,pa:['p12','p13'],r:6,x:38,fx:{fame:0.2,bon:0.15}},
+ {id:'p16',br:'p',n:'Patrocinadores',d:'+30% de reputação ganha.',c:3,lv:25,pa:['p13'],r:6,x:62,fx:{fame:0.3}},
+ {id:'p17',br:'p',n:'Influenciador',d:'+25% de reputação e +20% de confiança ganha.',c:3,lv:25,pa:['p13'],r:6,x:86,fx:{fame:0.25,trp:0.2}},
+ {id:'p18',br:'p',n:'Rotina de campeão',d:'+3 de Físico e 10% menos desgaste.',c:4,lv:30,pa:['p14','p15'],r:7,x:26,fx:{en:0.1},at:[5,3]},
+ {id:'p19',br:'p',n:'Mercado aquecido',d:'+30% no bônus por gol.',c:4,lv:30,pa:['p15','p16'],r:7,x:50,fx:{bon:0.3}},
+ {id:'p20',br:'p',n:'Embaixador',d:'+35% de reputação e +20% de confiança ganha.',c:4,lv:30,pa:['p16','p17'],r:7,x:74,fx:{fame:0.35,trp:0.2}},
+ {id:'p21',br:'p',n:'Lenda viva',d:'15% menos desgaste, 20% menos lesões e +25% de confiança. Exige 2 das 3 habilidades ligadas.',c:4,lv:40,pa:['p18','p19','p20'],r:8,x:50,need:2,fx:{en:0.15,inj:0.2,trp:0.25}},
+ {id:'p22',br:'p',n:'Eterno',d:'20% menos desgaste, 25% menos lesões, +30% de reputação e +25% de confiança.',c:5,lv:50,pa:['p21'],r:9,x:50,fx:{en:0.2,inj:0.25,fame:0.3,trp:0.25}}
 ];
-const PCLV=30,pcNeed=lv=>120+40*lv;
+const PCLV=50,pcNeed=lv=>120+30*lv;
 
 /* Seleções da Copa do Mundo: [nome, código, força]. As 16 primeiras são as nacionalidades jogáveis. */
 const WCN=[['Brasil','BRA',86],['Argentina','ARG',87],['Portugal','POR',84],['Espanha','ESP',86],['França','FRA',88],['Inglaterra','ENG',85],['Alemanha','GER',84],['Itália','ITA',82],['Holanda','NED',83],['Turquia','TUR',74],['Uruguai','URU',80],['Colômbia','COL',78],['Nigéria','NGA',73],['Marrocos','MAR',77],['Japão','JPN',75],['EUA','USA',74],
@@ -1711,7 +1764,7 @@ const rvStats=r=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.roun
 function newGame(f){
   const pos=f.pos,w=PW[pos],h=f.h,base=RI(44,54);
   const at=A.map((_,i)=>C(base+(w[i]-.14)*40+RI(-5,5)+(i==5?(h-180)/3:0)+(i==0||i==3?(180-h)/4:0)+(i==4?(h-180)/5:0),25,80));
-  S={v:3,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(74,95)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
+  S={v:3,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(82,97)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
      y:2026,week:1,tr:{a:pos=='ZAG'||pos=='VOL'?4:1,i:1},sc:{},hist:[],sn:[],ti:[],aw:[],nw:[],of:[],ev:null,ph:'season',last:[],res:[],peak:0,wm:0,ag:0,
      pc:{lv:1,xp:0,tp:0,perks:{},tr:55},champs:[],bdo:[],bdoPrev:{},cards:[],qU:[],qL:[],dv:{},tb:{},dc:[],ucl:null,lib:null,mc:null,cur:null,sum:null,fin:[],hof:[],lr:{},lrw:0};
   S.cs=mkClubs();mkRivals();rcBuild();
@@ -1978,14 +2031,19 @@ const kBadge=k=>`<span class="kb" style="--kc:${KB[k][1]}">${KB[k][0]}</span>`;
 /* ---------- treino ---------- */
 function trn_(){
   const t=S.tr,im=[.6,1,1.6][t.i],ag=S.p.age,aM=ag<20?1.3:ag<25?1:ag<30?.6:.25,c=cl(S.club),ck=1+C((c.s-55)/150,-.1,.25),K=14/SEASON;
-  if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!')}
+  const c0=S.cond,a0=t.a<7?S.at[t.a]:0,fm=C(.8+(S.form-5)*.09,.7,1.3);/* quem vai bem em campo treina melhor */let xp=0,inj='';
+  if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!');inj='lesionado'}
   else{
-    pcXp(40*[.8,1,1.3][t.i]*(t.a==7?.3:1)*(1+pfx('xpw')));pcTrust(t.a==7?0:[.1,.25,.5][t.i]);
-    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.45*K*im*aM*ck*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
+    xp=Math.round(40*[.8,1,1.3][t.i]*(t.a==7?.3:1)*(1+pfx('xpw')));pcXp(xp);pcTrust(t.a==7?0:[.1,.25,.5][t.i]);
+    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.9*K*im*aM*ck*fm*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
     else if(t.a==8){S.form=Math.min(10,S.form+.1);S.mor=C(S.mor+1.5,0,100)}
-    if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).')}
+    if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).');inj='lesão'}
   }
   S.cond=C(S.cond+18+(t.a==7?16:0)-6*im*(t.a==7?.2:1)+(S.at[5]-60)/20,25,100);
+  /* registro: o que o treino da semana realmente rendeu */
+  if(!S.trl)S.trl=[];if(!S.trg)S.trg=[0,0,0,0,0,0,0];
+  const da=t.a<7?S.at[t.a]-a0:0;if(t.a<7)S.trg[t.a]+=da;
+  S.trl.unshift({y:S.y,w:S.week,a:t.a,i:t.i,da:Math.round(da*100)/100,xp,dc:Math.round(S.cond-c0),inj,lv:S.pc.lv});if(S.trl.length>12)S.trl.length=12;
 }
 
 /* ---------- semana ---------- */
@@ -2198,7 +2256,7 @@ function end(){
   if(ag<24)S.p.pot=C(S.p.pot+(avg>7.2?RI(0,2):avg<6.3&&ys.ap>5?-RI(0,2):0),60,99);
   S.at=S.at.map((v,i)=>{
     const cp=cap(i);let d=0;
-    if(ag<=28)d=(cp-v)*(ag<21?.17:ag<25?.12:.06)*R(.6,1.4)+(ag<27?pf:0);
+    if(ag<=28)d=(cp-v)*(ag<21?.25:ag<25?.17:.07)*R(.7,1.3)+(ag<27?pf*1.5:0);
     if(ag>=29&&i==0)d-=R(.4,1.2)*(ag-27)/3;
     if(ag>=31&&i==5)d-=R(.4,1)*(ag-29)/3;
     if(ag>=33&&i!=0&&i!=5)d-=R(0,.8)*(ag-31)/3;
@@ -2593,7 +2651,7 @@ function chart(ser){
 }
 const evo=()=>S.sn.length<2?'<p class="note">O gráfico aparece depois da primeira metade da temporada.</p>':chart([{n:'OVR',c:CLR[0],d:S.sn.map(s=>s.o)},...A.map((n,i)=>({n,c:CLR[i+1],d:S.sn.map(s=>s.at[i])}))]);
 function bars(ys,vs){const m=Math.max(1,...vs),w=600/ys.length;return `<svg viewBox="0 0 600 150" style="width:100%">${vs.map((v,i)=>`<rect x="${i*w+3}" y="${120-v/m*100}" width="${Math.max(2,w-6)}" height="${v/m*100}" fill="#00F5A0" rx="3"/><text x="${i*w+w/2}" y="${114-v/m*100}" font-size="11" text-anchor="middle" fill="#F4F7FF">${v}</text><text x="${i*w+w/2}" y="140" font-size="9" text-anchor="middle" fill="#9AA7DB">${String(ys[i]).slice(2)}</text>`).join('')}</svg>`}
-const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b></div>`).join('');
+const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b>${S.trg&&S.trg[i]>=.05?`<small class=trg>+${S.trg[i].toFixed(1).replace('.',',')}</small>`:''}</div>`).join('');
 
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
@@ -2658,9 +2716,7 @@ function viewProx(){
   {const c=cl(S.club);h+=`<div class="pn hero2"><div class="hexb">${hx(O(),'lg')}</div><div class="h2i"><h3>${esc(S.p.name)}</h3><p>${S.p.pos} · ${esc(c.n)} · ${role().toLowerCase()} · nível ${S.pc?S.pc.lv:1} · confiança ${S.pc?Math.round(S.pc.tr):55}% · energia ${Math.round(S.cond)}</p><button class="ghost" onclick="ui.pf='at';go('jog')">Abrir carreira</button></div></div>`}
   h+=`<div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
-  h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
-    <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
-    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade.</p>${abars()}</div>
+  h+=`${trainBlock()}<div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
   if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
@@ -2833,28 +2889,56 @@ function pgSel(){
 const PLANS=[['l','Leve',null,0],['n','Normal',null,1],['i','Intenso',null,2],['d','Folga',7,0]];
 function setPlan(k){const p=PLANS.find(x=>x[0]==k);if(p[2]!=null)S.tr.a=p[2];else if(S.tr.a==7)S.tr.a=1;S.tr.i=p[3];save();render(true)}
 function planInfo(a,i){const im=[.6,1,1.6][i],en=18+(a==7?16:0)-6*im*(a==7?.2:1)+(S.at[5]-60)/20,xp=Math.round(40*[.8,1,1.3][i]*(a==7?.3:1)*(1+pfx('xpw'))),tr=a==7?0:[.1,.25,.5][i];return{en:Math.round(en*10)/10,xp,tr,risk:a==7?'nenhum':i==2?'alto':i==1?'baixo':'mínimo'}}
-function planBlock(){
-  const cur=S.tr.a==7?'d':['l','n','i'][S.tr.i];
-  return `<div class="pn"><h2>Plano semanal</h2><div class="pills">${PLANS.map(([k,n])=>`<button class="pill" aria-pressed="${cur==k}" onclick="setPlan('${k}')">${n}</button>`).join('')}</div><div class="plans">${PLANS.map(([k,n,a,i])=>{const f=planInfo(a!=null?a:(S.tr.a==7?1:S.tr.a),i);return `<div class="plan ${cur==k?'on':''}"><b>${n}</b><small>XP ~${f.xp}</small><small>Energia ${f.en>=0?'+':''}${f.en}/sem</small><small>Confiança +${f.tr}</small><small>Lesão: ${f.risk}</small></div>`}).join('')}</div><p class="note">Energia atual: <b>${Math.round(S.cond)}</b>/100. Cansado (abaixo de 40) o treino rende menos. O teste do técnico acontece nas semanas 10 e 22.</p></div>`;
+const FOC=[0,1,2,3,4,5,6,8,9],FOCN={8:'Tático',9:'Fisioterapia'};
+const PROGD={l:'Poupa energia: pouco XP e quase nenhum risco.',n:'Equilíbrio entre XP e desgaste.',i:'Rende mais XP e evolução, mas cansa e pode lesionar.',d:'Dia de folga: recupera bastante energia, quase sem XP.'};
+function trFoc(a){if(S.tr.a==7)S.tr.i=1;S.tr.a=a;save();render(true)}
+function restToday(){const k=S.y*100+S.week;if(S.restW==k)return;S.restW=k;S.cond=Math.min(100,S.cond+25);save();render(true)}
+function trDesc(x){
+  if(x.inj)return'sem treino (lesão)';
+  const f=x.a<7?`${A[x.a]} <b class="ok">${x.da>=0?'+':''}${x.da.toFixed(2).replace('.',',')}</b>`:x.a==7?'Folga':x.a==8?'Treino tático (forma e moral)':'Fisioterapia';
+  return `${f} · +${x.xp} XP · energia ${x.dc>=0?'+':''}${x.dc}`;
+}
+function trainBlock(){
+  const dias=Math.max(1,7-(S.day|0)),cur=S.tr.a==7?'d':['l','n','i'][S.tr.i],fa=S.tr.a==7?1:S.tr.a,f=planInfo(fa,S.tr.i),fd=planInfo(7,0);
+  const fi=cur=='d'?fd:f,en=Math.round(S.cond),done=S.restW==S.y*100+S.week,log=(S.trl||[]).slice(0,6);
+  return `<div class="pn trn"><h2>Treino semanal</h2>
+  <p class="note" style="margin-top:0">Uma vez por semana do calendário o programa abaixo é executado sozinho: dá XP de nível, um pouco de progresso no atributo em foco e pesa na confiança do técnico. Próximo treino em ${dias} dia${dias>1?'s':''}.</p>
+  <div class="sub">Programa</div><div class="pills">${PLANS.map(([k,n])=>`<button class="pill" aria-pressed="${cur==k}" onclick="setPlan('${k}')">${n}</button>`).join('')}</div>
+  <p class="note">${PROGD[cur]} XP base ${fi.xp}, energia ${fi.en>=0?'+':'−'}${Math.abs(fi.en)} por semana · lesão: ${fi.risk}.</p>
+  <div class="sub">Foco (atributo)</div><div class="pills">${FOC.map(i=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="trFoc(${i})">${i<7?A[i]:FOCN[i]}</button>`).join('')}</div>
+  <div class="sub">Energia ${en}/100</div><div class="xpb en"><u style="width:${en}%"></u></div>
+  <div class="row" style="margin-top:10px"><button class="ghost" ${done?'disabled':''} onclick="restToday()">${done?'Já descansou esta semana':'Descansar hoje (+25)'}</button></div>
+  <div class="sub">Últimos treinos</div>${log.length?`<ul class="trlog">${log.map(x=>`<li><small>${x.y} · S${x.w}</small><span>${trDesc(x)}</span></li>`).join('')}</ul>`:'<p class="note" style="margin:0">Nenhum treino realizado ainda: o primeiro acontece ao virar a semana.</p>'}
+  <p class="note">A evolução cai com a idade. O teste do técnico acontece nas semanas 10 e 22. Cansado (energia abaixo de 40) o treino rende menos.</p></div>`;
 }
 
 /* ---------- Habilidades e nível (portado do BrasLOL) ---------- */
 let pcBr='f',pcSel=null,pcMsg='';
-function pcSet(b){pcBr=b;pcSel=null;render(true)}
+const PIC={gl:'⚽',ast:'🎯',rtw:'🏆',bon:'💰',inj:'🩹',en:'🔋',xpw:'📚',xpm:'📈',tra:'💪',fame:'⭐',trp:'🤝'},PAT=['⚡','🥅','🎯','🌀','🛡️','🏋️','👁️'];
+const perkIc=x=>x.at?PAT[x.at[0]]:PIC[Object.keys(x.fx||{})[0]]||'✦';
+const PY=r=>58+r*86+(r>=5?44:0);
+function pcSet(b){pcBr=b;pcSel=PERKS.find(x=>x.br==b&&x.r==0).id;render(true)}
 function pcPick(id){pcSel=id;render(true)}
 function pcDo(id){pcMsg=pcLearn(id);pcSel=id;render(true)}
+function perkTree(){
+  const L=PERKS.filter(x=>x.br==pcBr),H=PY(9)+70,pos=x=>[x.x,PY(x.r)];
+  const lines=L.flatMap(x=>x.pa.map(pid=>{const p=L.find(z=>z.id==pid);if(!p)return'';const[a,b]=pos(p),[c,d]=pos(x),on=S.pc.perks[pid]&&S.pc.perks[x.id],mid=(b+d)/2;
+    return `<path d="M${a} ${b} C${a} ${mid} ${c} ${mid} ${c} ${d}" class="${on?'on':S.pc.perks[pid]?'half':''}"/>`}));
+  const nodes=L.map(x=>{const st=pcPerkSt(x);return `<button class="pnode ${st} ${pcSel==x.id?'sel':''}" style="left:${x.x}%;top:${PY(x.r)}px" onclick="pcPick('${x.id}')" title="${esc(x.n)}"><span class="hexn">${perkIc(x)}</span><b>${esc(x.n)}</b><small>nível ${x.lv}</small></button>`}).join('');
+  const dv=(PY(4)+PY(5))/2;
+  return `<div class="ptree br-${pcBr}" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none">${lines.join('')}</svg><div class="pdiv" style="top:${dv}px"><span>LENDAS · nível 20+</span></div>${nodes}</div>`;
+}
 function pgHab(){
   pcEnsure();const p=S.pc,need=p.lv>=PCLV?1:pcNeed(p.lv),pct=p.lv>=PCLV?100:Math.round(p.xp/need*100),got=PERKS.filter(x=>p.perks[x.id]).length;
-  const tabs=Object.keys(PBR).map(b=>{const n=PERKS.filter(x=>x.br==b&&p.perks[x.id]).length;return `<button class="pill" aria-pressed="${pcBr==b}" onclick="pcSet('${b}')">${PBR[b][0]} <small>${n}/11</small></button>`}).join('');
+  if(!PERKS.find(x=>x.id==pcSel&&x.br==pcBr))pcSel=PERKS.find(x=>x.br==pcBr&&x.r==0).id;
+  const tabs=Object.keys(PBR).map(b=>{const n=PERKS.filter(x=>x.br==b&&p.perks[x.id]).length,t=PERKS.filter(x=>x.br==b).length;return `<button class="pill br-${b}" aria-pressed="${pcBr==b}" onclick="pcSet('${b}')">${PBR[b][0]} <small>${n}/${t}</small></button>`}).join('');
   const tr=Math.round(p.tr),trt=tr>=75?'O técnico confia muito em você.':tr>=55?'Boa relação: você briga por uma vaga.':tr>=35?'Confiança baixa: pouco espaço.':'O técnico não conta com você.';
-  const sel=PERKS.find(x=>x.id==pcSel);
-  const rows=[0,1,2,3,4].map(r=>`<div class="prow">${PERKS.filter(x=>x.br==pcBr&&x.r==r).map(x=>{const st=pcPerkSt(x);return `<button class="perk ${st} ${pcSel==x.id?'sel':''}" onclick="pcPick('${x.id}')"><b>${esc(x.n)}</b><small>${st=='own'?'✓ aprendida':'custo '+x.c+' · nv '+x.lv}</small></button>`}).join('')}</div>`).join('');
-  let det='<p class="note">Toque numa habilidade para ver os detalhes.</p>';
-  if(sel){const st=pcPerkSt(sel);det=`<div class="pdet"><b>${esc(sel.n)}</b><small>${PBR[sel.br][0]} · custo ${sel.c} ponto${sel.c>1?'s':''} · nível ${sel.lv}</small><p>${esc(sel.d)}</p>${st=='own'?'<span class="tag">Aprendida</span>':`<button class="play" ${st=='can'?'':'disabled'} onclick="pcDo('${sel.id}')">Aprender</button>`}</div>`}
-  return `<div class="pn"><h2>Nível ${p.lv}${p.lv>=PCLV?' (máx.)':''}</h2><div class="cab"><div><b class="num">${p.tp}</b><small>Pontos</small></div><div><b class="num">${got}/${PERKS.length}</b><small>Aprendidas</small></div></div>
+  const sel=PERKS.find(x=>x.id==pcSel),st=pcPerkSt(sel);
+  const det=`<div class="pdet br-${sel.br}"><span class="hexn big">${perkIc(sel)}</span><div><b>${esc(sel.n)}</b><small>${PBR[sel.br][0]} · custo ${sel.c} ponto${sel.c>1?'s':''} · nível ${sel.lv}${sel.need?' · exige '+sel.need+' das ligadas':''}</small><p>${esc(sel.d)}</p>${st=='own'?'<span class="tag">Aprendida</span>':`<button class="play" ${st=='can'?'':'disabled'} onclick="pcDo('${sel.id}')">${st=='lock'?'Bloqueada':st=='cost'?'Pontos insuficientes':'Aprender'}</button>`}${pcMsg?`<small class="pmsg">${esc(pcMsg)}</small>`:''}</div></div>`;
+  return `<div class="pn"><h2>Nível ${p.lv}${p.lv>=PCLV?' (máx.)':''}</h2><div class="cab"><div><b class="num">${p.tp}</b><small>Pontos de habilidade</small></div><div><b class="num">${got}/${PERKS.length}</b><small>Aprendidas</small></div></div>
   <div class="xpb"><u style="width:${pct}%"></u></div><p class="note">${p.lv>=PCLV?'Nível máximo.':`XP ${Math.floor(p.xp)}/${need}. Jogue e treine para subir de nível; cada nível dá 1 ponto (2 a cada 5 níveis).`}</p></div>
   <div class="pn"><h2>Confiança do técnico</h2><div class="xpb tr"><u style="width:${tr}%"></u></div><p class="note"><b>${tr}/100</b> · ${trt} Ela sobe com boas notas e treino intenso e cai quando você não joga. Influencia sua vaga de titular.</p></div>
-  <div class="pn full"><h2>Árvore de habilidades</h2><div class="pills">${tabs}</div><p class="note" style="margin:0 0 8px">${PBR[pcBr][0]} · ${PBR[pcBr][1]}. Comece pelo topo e desça. A última exige 2 das 3 ligadas.${pcMsg?` <b>${esc(pcMsg)}</b>`:''}</p>${rows}${det}</div>`;
+  <div class="pn full"><h2>Árvore de habilidades</h2><div class="pills ptabs">${tabs}</div><p class="note" style="margin:0 0 8px">${PBR[pcBr][0]} · ${PBR[pcBr][1]}. Comece pelo topo e desça: cada habilidade se liga às que têm a ver com ela. O nó grande do meio fecha a 1ª metade; a 2ª metade (nível 20 a 50) sai dele e é bem mais cara.</p>${det}${perkTree()}</div>`;
 }
 
 /* ---------- Conquistas e Finanças (portado do BrasLOL) ---------- */

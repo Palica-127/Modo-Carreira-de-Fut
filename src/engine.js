@@ -81,7 +81,7 @@ const rvStats=r=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.roun
 function newGame(f){
   const pos=f.pos,w=PW[pos],h=f.h,base=RI(44,54);
   const at=A.map((_,i)=>C(base+(w[i]-.14)*40+RI(-5,5)+(i==5?(h-180)/3:0)+(i==0||i==3?(180-h)/4:0)+(i==4?(h-180)/5:0),25,80));
-  S={v:3,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(74,95)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
+  S={v:3,p:{name:f.name,nat:f.nat,h,w:f.w,pos,age:16,pot:RI(82,97)},at,cs:null,rv:[],club:0,ct:null,loan:null,cond:100,mor:65,form:6.5,inj:0,rep:5,pop:5,money:0,
      y:2026,week:1,tr:{a:pos=='ZAG'||pos=='VOL'?4:1,i:1},sc:{},hist:[],sn:[],ti:[],aw:[],nw:[],of:[],ev:null,ph:'season',last:[],res:[],peak:0,wm:0,ag:0,
      pc:{lv:1,xp:0,tp:0,perks:{},tr:55},champs:[],bdo:[],bdoPrev:{},cards:[],qU:[],qL:[],dv:{},tb:{},dc:[],ucl:null,lib:null,mc:null,cur:null,sum:null,fin:[],hof:[],lr:{},lrw:0};
   S.cs=mkClubs();mkRivals();rcBuild();
@@ -348,14 +348,19 @@ const kBadge=k=>`<span class="kb" style="--kc:${KB[k][1]}">${KB[k][0]}</span>`;
 /* ---------- treino ---------- */
 function trn_(){
   const t=S.tr,im=[.6,1,1.6][t.i],ag=S.p.age,aM=ag<20?1.3:ag<25?1:ag<30?.6:.25,c=cl(S.club),ck=1+C((c.s-55)/150,-.1,.25),K=14/SEASON;
-  if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!')}
+  const c0=S.cond,a0=t.a<7?S.at[t.a]:0,fm=C(.8+(S.form-5)*.09,.7,1.3);/* quem vai bem em campo treina melhor */let xp=0,inj='';
+  if(S.inj>0){S.inj--;if(t.a==9&&S.inj>0)S.inj--;if(S.inj==0)news('Você está recuperado!');inj='lesionado'}
   else{
-    pcXp(40*[.8,1,1.3][t.i]*(t.a==7?.3:1)*(1+pfx('xpw')));pcTrust(t.a==7?0:[.1,.25,.5][t.i]);
-    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.45*K*im*aM*ck*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
+    xp=Math.round(40*[.8,1,1.3][t.i]*(t.a==7?.3:1)*(1+pfx('xpw')));pcXp(xp);pcTrust(t.a==7?0:[.1,.25,.5][t.i]);
+    if(t.a<7){const cp=cap(t.a),v=S.at[t.a];S.at[t.a]=Math.min(Math.max(cp,v),v+.9*K*im*aM*ck*fm*(1+pfx('tra'))*C((cp-v)/(cp-25),.05,1)*R(.6,1.3)*(S.cond<40?.5:1))}
     else if(t.a==8){S.form=Math.min(10,S.form+.1);S.mor=C(S.mor+1.5,0,100)}
-    if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).')}
+    if(im>1.5&&Math.random()<.014*(1-Math.min(.6,pfx('inj')))*(1+(100-S.cond)/60)){S.inj=RI(1,3);news('🚑 Lesão no treino intenso: fora por '+S.inj+' semana(s).');inj='lesão'}
   }
   S.cond=C(S.cond+18+(t.a==7?16:0)-6*im*(t.a==7?.2:1)+(S.at[5]-60)/20,25,100);
+  /* registro: o que o treino da semana realmente rendeu */
+  if(!S.trl)S.trl=[];if(!S.trg)S.trg=[0,0,0,0,0,0,0];
+  const da=t.a<7?S.at[t.a]-a0:0;if(t.a<7)S.trg[t.a]+=da;
+  S.trl.unshift({y:S.y,w:S.week,a:t.a,i:t.i,da:Math.round(da*100)/100,xp,dc:Math.round(S.cond-c0),inj,lv:S.pc.lv});if(S.trl.length>12)S.trl.length=12;
 }
 
 /* ---------- semana ---------- */
@@ -568,7 +573,7 @@ function end(){
   if(ag<24)S.p.pot=C(S.p.pot+(avg>7.2?RI(0,2):avg<6.3&&ys.ap>5?-RI(0,2):0),60,99);
   S.at=S.at.map((v,i)=>{
     const cp=cap(i);let d=0;
-    if(ag<=28)d=(cp-v)*(ag<21?.17:ag<25?.12:.06)*R(.6,1.4)+(ag<27?pf:0);
+    if(ag<=28)d=(cp-v)*(ag<21?.25:ag<25?.17:.07)*R(.7,1.3)+(ag<27?pf*1.5:0);
     if(ag>=29&&i==0)d-=R(.4,1.2)*(ag-27)/3;
     if(ag>=31&&i==5)d-=R(.4,1)*(ag-29)/3;
     if(ag>=33&&i!=0&&i!=5)d-=R(0,.8)*(ag-31)/3;

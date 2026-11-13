@@ -72,7 +72,7 @@ function chart(ser){
 }
 const evo=()=>S.sn.length<2?'<p class="note">O gráfico aparece depois da primeira metade da temporada.</p>':chart([{n:'OVR',c:CLR[0],d:S.sn.map(s=>s.o)},...A.map((n,i)=>({n,c:CLR[i+1],d:S.sn.map(s=>s.at[i])}))]);
 function bars(ys,vs){const m=Math.max(1,...vs),w=600/ys.length;return `<svg viewBox="0 0 600 150" style="width:100%">${vs.map((v,i)=>`<rect x="${i*w+3}" y="${120-v/m*100}" width="${Math.max(2,w-6)}" height="${v/m*100}" fill="#00F5A0" rx="3"/><text x="${i*w+w/2}" y="${114-v/m*100}" font-size="11" text-anchor="middle" fill="#F4F7FF">${v}</text><text x="${i*w+w/2}" y="140" font-size="9" text-anchor="middle" fill="#9AA7DB">${String(ys[i]).slice(2)}</text>`).join('')}</svg>`}
-const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b></div>`).join('');
+const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b>${S.trg&&S.trg[i]>=.05?`<small class=trg>+${S.trg[i].toFixed(1).replace('.',',')}</small>`:''}</div>`).join('');
 
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
@@ -137,9 +137,7 @@ function viewProx(){
   {const c=cl(S.club);h+=`<div class="pn hero2"><div class="hexb">${hx(O(),'lg')}</div><div class="h2i"><h3>${esc(S.p.name)}</h3><p>${S.p.pos} · ${esc(c.n)} · ${role().toLowerCase()} · nível ${S.pc?S.pc.lv:1} · confiança ${S.pc?Math.round(S.pc.tr):55}% · energia ${Math.round(S.cond)}</p><button class="ghost" onclick="ui.pf='at';go('jog')">Abrir carreira</button></div></div>`}
   h+=`<div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
-  h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
-    <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
-    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade.</p>${abars()}</div>
+  h+=`${trainBlock()}<div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
   if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
@@ -312,28 +310,56 @@ function pgSel(){
 const PLANS=[['l','Leve',null,0],['n','Normal',null,1],['i','Intenso',null,2],['d','Folga',7,0]];
 function setPlan(k){const p=PLANS.find(x=>x[0]==k);if(p[2]!=null)S.tr.a=p[2];else if(S.tr.a==7)S.tr.a=1;S.tr.i=p[3];save();render(true)}
 function planInfo(a,i){const im=[.6,1,1.6][i],en=18+(a==7?16:0)-6*im*(a==7?.2:1)+(S.at[5]-60)/20,xp=Math.round(40*[.8,1,1.3][i]*(a==7?.3:1)*(1+pfx('xpw'))),tr=a==7?0:[.1,.25,.5][i];return{en:Math.round(en*10)/10,xp,tr,risk:a==7?'nenhum':i==2?'alto':i==1?'baixo':'mínimo'}}
-function planBlock(){
-  const cur=S.tr.a==7?'d':['l','n','i'][S.tr.i];
-  return `<div class="pn"><h2>Plano semanal</h2><div class="pills">${PLANS.map(([k,n])=>`<button class="pill" aria-pressed="${cur==k}" onclick="setPlan('${k}')">${n}</button>`).join('')}</div><div class="plans">${PLANS.map(([k,n,a,i])=>{const f=planInfo(a!=null?a:(S.tr.a==7?1:S.tr.a),i);return `<div class="plan ${cur==k?'on':''}"><b>${n}</b><small>XP ~${f.xp}</small><small>Energia ${f.en>=0?'+':''}${f.en}/sem</small><small>Confiança +${f.tr}</small><small>Lesão: ${f.risk}</small></div>`}).join('')}</div><p class="note">Energia atual: <b>${Math.round(S.cond)}</b>/100. Cansado (abaixo de 40) o treino rende menos. O teste do técnico acontece nas semanas 10 e 22.</p></div>`;
+const FOC=[0,1,2,3,4,5,6,8,9],FOCN={8:'Tático',9:'Fisioterapia'};
+const PROGD={l:'Poupa energia: pouco XP e quase nenhum risco.',n:'Equilíbrio entre XP e desgaste.',i:'Rende mais XP e evolução, mas cansa e pode lesionar.',d:'Dia de folga: recupera bastante energia, quase sem XP.'};
+function trFoc(a){if(S.tr.a==7)S.tr.i=1;S.tr.a=a;save();render(true)}
+function restToday(){const k=S.y*100+S.week;if(S.restW==k)return;S.restW=k;S.cond=Math.min(100,S.cond+25);save();render(true)}
+function trDesc(x){
+  if(x.inj)return'sem treino (lesão)';
+  const f=x.a<7?`${A[x.a]} <b class="ok">${x.da>=0?'+':''}${x.da.toFixed(2).replace('.',',')}</b>`:x.a==7?'Folga':x.a==8?'Treino tático (forma e moral)':'Fisioterapia';
+  return `${f} · +${x.xp} XP · energia ${x.dc>=0?'+':''}${x.dc}`;
+}
+function trainBlock(){
+  const dias=Math.max(1,7-(S.day|0)),cur=S.tr.a==7?'d':['l','n','i'][S.tr.i],fa=S.tr.a==7?1:S.tr.a,f=planInfo(fa,S.tr.i),fd=planInfo(7,0);
+  const fi=cur=='d'?fd:f,en=Math.round(S.cond),done=S.restW==S.y*100+S.week,log=(S.trl||[]).slice(0,6);
+  return `<div class="pn trn"><h2>Treino semanal</h2>
+  <p class="note" style="margin-top:0">Uma vez por semana do calendário o programa abaixo é executado sozinho: dá XP de nível, um pouco de progresso no atributo em foco e pesa na confiança do técnico. Próximo treino em ${dias} dia${dias>1?'s':''}.</p>
+  <div class="sub">Programa</div><div class="pills">${PLANS.map(([k,n])=>`<button class="pill" aria-pressed="${cur==k}" onclick="setPlan('${k}')">${n}</button>`).join('')}</div>
+  <p class="note">${PROGD[cur]} XP base ${fi.xp}, energia ${fi.en>=0?'+':'−'}${Math.abs(fi.en)} por semana · lesão: ${fi.risk}.</p>
+  <div class="sub">Foco (atributo)</div><div class="pills">${FOC.map(i=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="trFoc(${i})">${i<7?A[i]:FOCN[i]}</button>`).join('')}</div>
+  <div class="sub">Energia ${en}/100</div><div class="xpb en"><u style="width:${en}%"></u></div>
+  <div class="row" style="margin-top:10px"><button class="ghost" ${done?'disabled':''} onclick="restToday()">${done?'Já descansou esta semana':'Descansar hoje (+25)'}</button></div>
+  <div class="sub">Últimos treinos</div>${log.length?`<ul class="trlog">${log.map(x=>`<li><small>${x.y} · S${x.w}</small><span>${trDesc(x)}</span></li>`).join('')}</ul>`:'<p class="note" style="margin:0">Nenhum treino realizado ainda: o primeiro acontece ao virar a semana.</p>'}
+  <p class="note">A evolução cai com a idade. O teste do técnico acontece nas semanas 10 e 22. Cansado (energia abaixo de 40) o treino rende menos.</p></div>`;
 }
 
 /* ---------- Habilidades e nível (portado do BrasLOL) ---------- */
 let pcBr='f',pcSel=null,pcMsg='';
-function pcSet(b){pcBr=b;pcSel=null;render(true)}
+const PIC={gl:'⚽',ast:'🎯',rtw:'🏆',bon:'💰',inj:'🩹',en:'🔋',xpw:'📚',xpm:'📈',tra:'💪',fame:'⭐',trp:'🤝'},PAT=['⚡','🥅','🎯','🌀','🛡️','🏋️','👁️'];
+const perkIc=x=>x.at?PAT[x.at[0]]:PIC[Object.keys(x.fx||{})[0]]||'✦';
+const PY=r=>58+r*86+(r>=5?44:0);
+function pcSet(b){pcBr=b;pcSel=PERKS.find(x=>x.br==b&&x.r==0).id;render(true)}
 function pcPick(id){pcSel=id;render(true)}
 function pcDo(id){pcMsg=pcLearn(id);pcSel=id;render(true)}
+function perkTree(){
+  const L=PERKS.filter(x=>x.br==pcBr),H=PY(9)+70,pos=x=>[x.x,PY(x.r)];
+  const lines=L.flatMap(x=>x.pa.map(pid=>{const p=L.find(z=>z.id==pid);if(!p)return'';const[a,b]=pos(p),[c,d]=pos(x),on=S.pc.perks[pid]&&S.pc.perks[x.id],mid=(b+d)/2;
+    return `<path d="M${a} ${b} C${a} ${mid} ${c} ${mid} ${c} ${d}" class="${on?'on':S.pc.perks[pid]?'half':''}"/>`}));
+  const nodes=L.map(x=>{const st=pcPerkSt(x);return `<button class="pnode ${st} ${pcSel==x.id?'sel':''}" style="left:${x.x}%;top:${PY(x.r)}px" onclick="pcPick('${x.id}')" title="${esc(x.n)}"><span class="hexn">${perkIc(x)}</span><b>${esc(x.n)}</b><small>nível ${x.lv}</small></button>`}).join('');
+  const dv=(PY(4)+PY(5))/2;
+  return `<div class="ptree br-${pcBr}" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none">${lines.join('')}</svg><div class="pdiv" style="top:${dv}px"><span>LENDAS · nível 20+</span></div>${nodes}</div>`;
+}
 function pgHab(){
   pcEnsure();const p=S.pc,need=p.lv>=PCLV?1:pcNeed(p.lv),pct=p.lv>=PCLV?100:Math.round(p.xp/need*100),got=PERKS.filter(x=>p.perks[x.id]).length;
-  const tabs=Object.keys(PBR).map(b=>{const n=PERKS.filter(x=>x.br==b&&p.perks[x.id]).length;return `<button class="pill" aria-pressed="${pcBr==b}" onclick="pcSet('${b}')">${PBR[b][0]} <small>${n}/11</small></button>`}).join('');
+  if(!PERKS.find(x=>x.id==pcSel&&x.br==pcBr))pcSel=PERKS.find(x=>x.br==pcBr&&x.r==0).id;
+  const tabs=Object.keys(PBR).map(b=>{const n=PERKS.filter(x=>x.br==b&&p.perks[x.id]).length,t=PERKS.filter(x=>x.br==b).length;return `<button class="pill br-${b}" aria-pressed="${pcBr==b}" onclick="pcSet('${b}')">${PBR[b][0]} <small>${n}/${t}</small></button>`}).join('');
   const tr=Math.round(p.tr),trt=tr>=75?'O técnico confia muito em você.':tr>=55?'Boa relação: você briga por uma vaga.':tr>=35?'Confiança baixa: pouco espaço.':'O técnico não conta com você.';
-  const sel=PERKS.find(x=>x.id==pcSel);
-  const rows=[0,1,2,3,4].map(r=>`<div class="prow">${PERKS.filter(x=>x.br==pcBr&&x.r==r).map(x=>{const st=pcPerkSt(x);return `<button class="perk ${st} ${pcSel==x.id?'sel':''}" onclick="pcPick('${x.id}')"><b>${esc(x.n)}</b><small>${st=='own'?'✓ aprendida':'custo '+x.c+' · nv '+x.lv}</small></button>`}).join('')}</div>`).join('');
-  let det='<p class="note">Toque numa habilidade para ver os detalhes.</p>';
-  if(sel){const st=pcPerkSt(sel);det=`<div class="pdet"><b>${esc(sel.n)}</b><small>${PBR[sel.br][0]} · custo ${sel.c} ponto${sel.c>1?'s':''} · nível ${sel.lv}</small><p>${esc(sel.d)}</p>${st=='own'?'<span class="tag">Aprendida</span>':`<button class="play" ${st=='can'?'':'disabled'} onclick="pcDo('${sel.id}')">Aprender</button>`}</div>`}
-  return `<div class="pn"><h2>Nível ${p.lv}${p.lv>=PCLV?' (máx.)':''}</h2><div class="cab"><div><b class="num">${p.tp}</b><small>Pontos</small></div><div><b class="num">${got}/${PERKS.length}</b><small>Aprendidas</small></div></div>
+  const sel=PERKS.find(x=>x.id==pcSel),st=pcPerkSt(sel);
+  const det=`<div class="pdet br-${sel.br}"><span class="hexn big">${perkIc(sel)}</span><div><b>${esc(sel.n)}</b><small>${PBR[sel.br][0]} · custo ${sel.c} ponto${sel.c>1?'s':''} · nível ${sel.lv}${sel.need?' · exige '+sel.need+' das ligadas':''}</small><p>${esc(sel.d)}</p>${st=='own'?'<span class="tag">Aprendida</span>':`<button class="play" ${st=='can'?'':'disabled'} onclick="pcDo('${sel.id}')">${st=='lock'?'Bloqueada':st=='cost'?'Pontos insuficientes':'Aprender'}</button>`}${pcMsg?`<small class="pmsg">${esc(pcMsg)}</small>`:''}</div></div>`;
+  return `<div class="pn"><h2>Nível ${p.lv}${p.lv>=PCLV?' (máx.)':''}</h2><div class="cab"><div><b class="num">${p.tp}</b><small>Pontos de habilidade</small></div><div><b class="num">${got}/${PERKS.length}</b><small>Aprendidas</small></div></div>
   <div class="xpb"><u style="width:${pct}%"></u></div><p class="note">${p.lv>=PCLV?'Nível máximo.':`XP ${Math.floor(p.xp)}/${need}. Jogue e treine para subir de nível; cada nível dá 1 ponto (2 a cada 5 níveis).`}</p></div>
   <div class="pn"><h2>Confiança do técnico</h2><div class="xpb tr"><u style="width:${tr}%"></u></div><p class="note"><b>${tr}/100</b> · ${trt} Ela sobe com boas notas e treino intenso e cai quando você não joga. Influencia sua vaga de titular.</p></div>
-  <div class="pn full"><h2>Árvore de habilidades</h2><div class="pills">${tabs}</div><p class="note" style="margin:0 0 8px">${PBR[pcBr][0]} · ${PBR[pcBr][1]}. Comece pelo topo e desça. A última exige 2 das 3 ligadas.${pcMsg?` <b>${esc(pcMsg)}</b>`:''}</p>${rows}${det}</div>`;
+  <div class="pn full"><h2>Árvore de habilidades</h2><div class="pills ptabs">${tabs}</div><p class="note" style="margin:0 0 8px">${PBR[pcBr][0]} · ${PBR[pcBr][1]}. Comece pelo topo e desça: cada habilidade se liga às que têm a ver com ela. O nó grande do meio fecha a 1ª metade; a 2ª metade (nível 20 a 50) sai dele e é bem mais cara.</p>${det}${perkTree()}</div>`;
 }
 
 /* ---------- Conquistas e Finanças (portado do BrasLOL) ---------- */
