@@ -45,7 +45,11 @@ const roundAt=(l,d,w)=>{const R_=rounds(l,d),n=R_.length;return Math.floor(w*n/S
 const pois=l=>{const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random()}while(p>L);return k-1};
 
 /* ---------- mundo ---------- */
-function divRange(l,d){const q=LEAGUES[l].q;let hi=55+37*q,lo=48+22*q;const W=[0,14,12,10];for(let i=1;i<=d;i++){hi=lo-1;lo=hi-W[i]}return[hi,lo]}
+/* força dos clubes por divisão: elite da melhor liga ~95, Flamengo ~85 (Brasil q=.8), fim da 1ª divisão ~14 pontos abaixo, séries inferiores mais coladas */
+function divRange(l,d){const q=LEAGUES[l].q;let hi=45+50*q,lo=hi-14;const W=[0,7,6,5];for(let i=1;i<=d;i++){hi=lo-1;lo=hi-W[i]}return[hi,lo]}
+/* força efetiva no campo: a diferença entre os times é comprimida (a escala 55-95 é de exibição; o jogo reage forte a poucos pontos) */
+let FK=.3,FC=72;
+const FK_EF=v=>FC+(v-FC)*FK;
 function mkClubs(){
   const cs=[];
   LEAGUES.forEach((L,li)=>L.cl.forEach((str,di)=>{
@@ -916,8 +920,10 @@ function sqReal(c){
   const key=c.id+'|'+S.y+'|'+Math.round(c.s);if(SQC[key])return SQC[key];
   const dy=Math.max(0,S.y-2026),L=c.l>=0?LEAGUES[c.l]:null,pool={GOL:[],ZAG:[],VOL:[],MEI:[],PNT:[],ATA:[]};
   SQ[c.n].split(';').forEach((z,i)=>{
-    const q=z.split('|'),g=q[1],a0=+q[2]||24,h0=hash(q[0]+c.n),ev=q[4];let n=q[0],age=a0+dy,nat=SQNAT[q[3]]||q[3],fix=ev&&ev!='y'?+ev:0;
-    if(age>=(g=='G'||g=='GK'?40:37)){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-(g=='G'||g=='GK'?40:37))%5;fix=0}
+    const q=z.split('|'),g=q[1],a0=+q[2]||24,h0=hash(q[0]+c.n),ev=q[4];let n=SQALIAS[q[0]]||q[0],age=a0+dy,nat=SQNAT[q[3]]||q[3],fix=ev&&ev!='y'?+ev:0;
+    /* veterano real segue no elenco por mais 1 a 3 anos; só depois se aposenta e entra um garoto da base */
+    const lim=Math.max(g=='G'||g=='GK'?40:37,a0+1+h0%3);
+    if(age>=lim){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-lim)%5;fix=0}
     const h=(hash(n+c.n)%1000)/1000;
     /* notas do EA FC (src/squads.js); sem nota: base/juvenil (50-64) ou, em clubes fora da base, estimativa pela força do clube */
     let ovr=fix?fix+sqAdj(age)-sqAdj(a0):ev=='y'||!fix&&q[4]=='y'?50+14*h+(age>21?-2:0):C(c.s-22+16*h,45,80)+sqAdj(age);
@@ -928,10 +934,17 @@ function sqReal(c){
   const LIM={GOL:4,ZAG:9,VOL:5,MEI:5,PNT:4,ATA:5};
   Object.keys(pool).forEach(k=>{pool[k].sort((x,y)=>y.ovr-x.ovr);pool[k]=pool[k].slice(0,LIM[k])});
   const near={GOL:['GOL'],ZAG:['ZAG','VOL'],VOL:['VOL','MEI','ZAG'],MEI:['MEI','VOL','PNT'],PNT:['PNT','ATA','MEI'],ATA:['ATA','PNT','MEI']},out=[];
-  SQP.forEach(p=>{let x=null;for(const k of near[p]){if(pool[k].length){x=pool[k].shift();break}}if(!x){const k=Object.keys(pool).find(k=>k!='GOL'&&pool[k].length);x=k?pool[k].shift():null}if(x)out.push(x);else{const r=mulb(hash(c.n+'|f'+out.length));out.push({n:nmR(L?L.nat:'Brasil',r),nat:L?L.nat:'Brasil',pos:p,age:22,ovr:Math.round(c.s-14),pot:Math.round(c.s-10),club:c.id,q:1})}});
+  SQP.forEach(p=>{let x=null;for(const k of near[p]){if(pool[k].length){x=pool[k].shift();break}}if(!x){const k=Object.keys(pool).find(k=>k!='GOL'&&pool[k].length);x=k?pool[k].shift():null}if(x)out.push(x);else if(out.length>=16)return;else{const r=mulb(hash(c.n+'|f'+out.length));out.push({n:nmR(L?L.nat:'Brasil',r),nat:L?L.nat:'Brasil',pos:p,age:22,ovr:Math.round(c.s-14),pot:Math.round(c.s-10),club:c.id,q:1})}});
   Object.values(pool).forEach(l=>l.forEach(x=>out.push(x)));
   out.forEach((x,i)=>{x.id=c.id+'.'+i;x.slot=i});
   SQC[key]=out;return out;
+}
+const SQALIAS={'Luka Modric':'Luka Modrić'};
+/* busca um jogador real nos elencos do jogo pelo nome (para ligar lendas e Bolas de Ouro a quem ainda joga); minAge evita homônimos jovens */
+let SQIX=null,SQIXY=0;
+function sqFind(n,minAge){
+  if(!SQIX||SQIXY!=S.y){SQIX={};SQIXY=S.y;S.cs.forEach(c=>{if(typeof SQ!=='undefined'&&SQ[c.n])sqReal(c).forEach(x=>{if(x.q&&!SQIX[x.n])SQIX[x.n]=x})})}
+  const x=SQIX[n];return x&&x.age>=(minAge||0)?x:null;
 }
 const sqLen=c=>typeof SQ!=='undefined'&&SQ[c.n]?sqReal(c).length:SQP.length;
 function sqPlayer(c,i){return typeof SQ!=='undefined'&&SQ[c.n]?sqReal(c)[i]:sqGen(c,i)}

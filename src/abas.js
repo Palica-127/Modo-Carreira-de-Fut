@@ -119,7 +119,10 @@ function bdoTop(){
   else{list=BDO_TOP[sel].map((z,i)=>({n:z[0],nat:z[1],cn:z[2],club:cn2id(z[2]),pos:z[3],age:z[4],pts:z[5],rank:i+1,real:1}));note='Votação oficial da France Football (pontos reais). A Bola de Ouro do jogo é apurada ao fim de cada temporada.'}
   return pills(ys.map(y=>[y,y]),sel,'bySet','scroll')+bdoTen(list,sel,note);
 }
-function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:''}
+/* idade mínima de quem ganhou a Bola de Ouro num ano (evita ligar um homônimo jovem, como outro Kaká) */
+const legMin=n=>{const y=Math.max(0,...BDO_REAL.filter(z=>z.n==n).map(z=>z.y));return y?18+(S.y-y):33};
+const sqOn=n=>{const q=sqFind(n,legMin(n));return q?`sheet('q','${q.id}')`:''};
+function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:sqOn(x.n)||(LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:'')}
 const bdoAv=(x,c='lgav')=>legImg(x.n,c)||`<span class="${c} ph">${esc(String(x.n)[0])}</span>`;
 function bdoHero(){
   const all=bdoAll().filter(x=>x.n!='—').sort((a,b)=>b.y-a.y),w=all[0];if(!w)return '';
@@ -164,7 +167,7 @@ function pgLend(){
   const v={jog:lendJog,wc:lendWc,ucl:()=>lendCont('ucl'),lib:()=>lendCont('lib'),clb:lendClb,sel:lendSel}[ui.ld]||lendJog;
   return pills(LD_TABS,ui.ld,'ldSet','scroll')+v();
 }
-const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:`sheet('l','${ek(x.n)}')`;
+const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:sqOn(x.n)||`sheet('l','${ek(x.n)}')`;
 const lgTag=x=>x.me?'<span class="tag">você</span>':x.st=='ativo'?'<span class="tag">ativo</span>':x.st=='ret'?'<span class="tag">aposentado</span>':'';
 /* ---------- Lendas: layout em painéis (pódio, recordes, histórico por ano) ---------- */
 const flg=(k,c='')=>{
@@ -399,34 +402,43 @@ function shQ(s){
   const tmp=`<div class="pn full"><h2>Temporadas no jogo</h2>${rows.length?tbl(['Ano','Time','OVR','Títulos'],rows):'<p class="empty">O histórico de temporadas começa a ser registrado a partir da primeira temporada fechada (jogadores com nota 70 ou mais).</p>'}</div>`;
   return {title:x.n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>${tmp}`};
 }
-/* seleção */
-/* elenco de uma seleção: melhores jogadores da nacionalidade entre todos os clubes do jogo */
+/* seleção: ficha igual à dos clubes (troféus, números, craques, elenco convocado, histórico de Copas) */
+/* convocação: os melhores jogadores da nacionalidade entre todos os clubes com elenco real (com os craques e o seu jogador no lugar certo) */
 const SELSQ={};
 function selSquad(n){
-  const w=WCN.find(x=>x[0]==n),cc=w?w[1]:'',key=n+'|'+S.y;
+  const w=WCN.find(x=>x[0]==n),cc=w?w[1]:'',key=n+'|'+S.y+'|'+S.club+'|'+O();
   if(!SELSQ[key]){
     const all=[];
-    S.cs.forEach(c=>{if(typeof SQ!=='undefined'&&SQ[c.n])sqReal(c).forEach(x=>{if(x.nat==n||x.nat==cc)all.push({...x,cid:c.id})})});
+    S.cs.forEach(c=>{if(typeof SQ!=='undefined'&&SQ[c.n])squadOf(c.id).forEach(x=>{if(x.nat==n||x.nat==cc)all.push({...x,cid:c.id})})});
     all.sort((a,z)=>z.ovr-a.ovr);
     const gk=all.filter(x=>x.pos=='GOL').slice(0,3),rest=all.filter(x=>x.pos!='GOL').slice(0,20);
-    SELSQ[key]=[...gk,...rest];
+    SELSQ[key]=[...gk,...rest].sort((a,z)=>z.ovr-a.ovr);
   }
-  const L=SELSQ[key];if(!L.length)return '<p class="empty">Sem jogadores desta seleção nos clubes do jogo.</p>';
-  const xi=L.slice().sort((a,z)=>z.ovr-a.ovr).slice(0,11),avg=Math.round(xi.reduce((s,x)=>s+x.ovr,0)/xi.length*10)/10;
-  return kv([['Convocados',L.length],['Média dos 11 melhores',avg],['Melhor jogador',esc(L[0]&&xi[0].n)]])+['GOL','ZAG','VOL','MEI','PNT','ATA'].map(p=>{const g=L.filter(x=>x.pos==p);return g.length?`<h3>${PNQ[p]}s · ${g.length}</h3><ul class="rank sq">${g.map(x=>`<li class="lnk" onclick="sheet('c','${x.cid}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}<small>${x.age} anos · ${esc(cl(x.cid).n)}</small></span></li>`).join('')}</ul>`:''}).join('');
+  return SELSQ[key];
+}
+const selOn=x=>x.me?"sheet('me','me')":x.rv?`sheet('p','${x.id}')`:`sheet('q','${x.id}')`;
+function selElenco(L){
+  if(!L.length)return '<p class="empty">Sem jogadores desta seleção nos clubes do jogo.</p>';
+  return ['GOL','ZAG','VOL','MEI','PNT','ATA'].map(p=>{const g=L.filter(x=>x.pos==p);return g.length?`<div class="pn"><h2>${PNQ[p]}s <small class="muted">${g.length}</small></h2><ul class="rank sq">${g.map(x=>`<li class="${x.me?'me':''}" onclick="${selOn(x)}"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':x.rv?'<span class="tag">craque</span>':''}<small>${x.age} anos · ${esc(cl(x.cid).n)}</small></span></li>`).join('')}</ul></div>`:''}).join('');
 }
 function shS(s){
   const n=s.id,st=selStat(n),w=WCN.find(x=>x[0]==n),rk=selRank(),i=rk.findIndex(x=>x.n==n);
   if(i<0)return null;
-  const tabs=[['res','Resumo'],['el','Elenco'],['cp','Copas']],tb=shTab(s,tabs);
-  let b=shTabs(s,tabs);
-  if(tb=='res')b+=kv([['Código',esc(rk[i].c)],['Ranking',(i+1)+'º'],['Títulos',st.t.length],['Vices',st.v.length],['Semifinais (jogo)',st.sf.length],['Pontos',st.pts],['Força',w?w[2]:'—'],['Sua seleção',n==S.p.nat?'Sim':'—']])+yrsLine('Anos dos títulos',st.t)+yrsLine('Anos dos vices',st.v);
-  else if(tb=='el')b+=selSquad(n);
-  else{
-    const rows=[...WC_H.map(x=>({y:x.y,c:x.c,r:x.r})),...S.wc.map(z=>({y:z.y,c:z.champ,r:z.ru,sf:z.sf,g:1}))].filter(x=>x.c==n||x.r==n||(x.sf||[]).includes(n)).sort((a,z)=>z.y-a.y);
-    b+=rows.length?tbl(['Ano','Resultado','Campeã','Vice'],rows.map(x=>({c:[x.y+(x.g?' ⚽':''),x.c==n?'🏆 Campeã':x.r==n?'Vice':'Semifinal',esc(x.c),esc(x.r)]}))):'<p class="empty">Sem títulos, vices ou semifinais registrados.</p>';
-  }
-  return {title:n,body:b};
+  const L=selSquad(n),xi=L.slice(0,11),avg=xi.length?Math.round(xi.reduce((a,x)=>a+x.ovr,0)/xi.length*10)/10:0;
+  const hero=shHero(`<div class="h2b"><b class="h2big">${esc(rk[i].c)}</b><small>Seleção</small></div>`,esc(n),`Seleção nacional${w?' · força '+w[2]:''}`,
+    [n==S.p.nat?'<b>SUA SELEÇÃO</b>':'',`<b>${i+1}º</b> no ranking de seleções`].filter(Boolean),
+    [['Copas do Mundo',st.t.length],['Vices',st.v.length],['Semifinais (jogo)',st.sf.length],['Pontos',st.pts],['Força',w?w[2]:'—'],['Média do XI',avg||'—'],['Convocados',L.length]]);
+  const mk=(a,k)=>a.slice().sort((p,q)=>p-q).map(y=>({k,y}));
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfBox('Copa do Mundo',st.t.slice().sort((a,z)=>a-z),y=>troIcon('wc',y,''))}</div>
+    <div class="pn pod"><h2>Vices e semifinais</h2><div class="chips"><span><b>${st.v.length}</b>Vices</span><span><b>${st.sf.length}</b>Semifinais (jogo)</span></div>${yrsLine('Anos dos vices',st.v)}${yrsLine('Semifinais no jogo',st.sf)}</div>`;
+  const top=L.slice(0,10);
+  const right=`<div class="pn"><h2>Estatísticas</h2>${kv([['Código',esc(rk[i].c)],['Ranking',(i+1)+'º'],['Títulos',st.t.length],['Vices',st.v.length],['Pontos',st.pts],['Força',w?w[2]:'—'],['Média dos 11 melhores',avg||'—'],['Melhor jogador',esc(L[0]?L[0].n:'—')]])}</div>
+    <div class="pn"><h2>Craques da seleção</h2>${top.length?`<ul class="rank">${top.map(x=>`<li onclick="${selOn(x)}"><span class="pos">${x.pos}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}<small>${x.age} anos · ${esc(cl(x.cid).n)}</small></span></li>`).join('')}</ul>`:'<p class="empty">Sem jogadores desta seleção nos clubes do jogo.</p>'}</div>
+    <details class="pn det"><summary>Todos os títulos</summary>${yrsLine('Copas do Mundo',st.t)+yrsLine('Vices',st.v)+yrsLine('Semifinais (jogo)',st.sf)}</details>`;
+  const rows=[...WC_H.map(x=>({y:x.y,c:x.c,r:x.r})),...S.wc.map(z=>({y:z.y,c:z.champ,r:z.ru,sf:z.sf,g:1}))].filter(x=>x.c==n||x.r==n||(x.sf||[]).includes(n)).sort((a,z)=>z.y-a.y);
+  const tmp=`<div class="pn full"><h2>Copas do Mundo</h2>${rows.length?tbl(['Ano','Resultado','Campeã','Vice'],rows.map(x=>({c:[x.y+(x.g?' ⚽':''),x.c==n?'🏆 Campeã':x.r==n?'Vice':'Semifinal',esc(x.c),esc(x.r)]}))):'<p class="empty">Sem títulos, vices ou semifinais registrados.</p>'}</div>`;
+  const el=`<div class="pn full"><h2>Elenco convocado <small class="muted">${L.length}</small></h2></div><div class="shg">${selElenco(L)}</div>`;
+  return {title:n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>${tmp}${el}`};
 }
 /* e-mail */
 function shM(s){
