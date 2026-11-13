@@ -1843,9 +1843,9 @@
 },
 "academica": {
 "n": "Acad\u00e9mica",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Acad\u00e9mica de Coimbra",
+"score": 1.0
 },
 "belenenses": {
 "n": "Belenenses",
@@ -3109,9 +3109,9 @@
 },
 "botafogo-pb": {
 "n": "Botafogo-PB",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Botafogo Futebol Clube (PB)",
+"score": 1.0
 },
 "floresta": {
 "n": "Floresta",
@@ -3163,21 +3163,21 @@
 },
 "barakaldo": {
 "n": "Barakaldo",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Barakaldo CF",
+"score": 1.0
 },
 "unionistas": {
 "n": "Unionistas",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Unionistas de Salamanca CF",
+"score": 1.0
 },
 "sestao-river": {
 "n": "Sestao River",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Sestao River Club",
+"score": 1.0
 },
 "zamora": {
 "n": "Zamora",
@@ -3229,9 +3229,9 @@
 },
 "rot-weiss-essen": {
 "n": "Rot-Weiss Essen",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Rot-Weiss Essen",
+"score": 1.0
 },
 "hallescher-fc": {
 "n": "Hallescher FC",
@@ -3241,9 +3241,9 @@
 },
 "rot-wei-erfurt": {
 "n": "Rot-Wei\u00df Erfurt",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "FC Rot-Wei\u00df Erfurt",
+"score": 1.0
 },
 "ssv-ulm": {
 "n": "SSV Ulm",
@@ -3253,15 +3253,15 @@
 },
 "alemannia-aachen": {
 "n": "Alemannia Aachen",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Alemannia Aachen",
+"score": 1.0
 },
 "rot-wei-oberhausen": {
 "n": "Rot-Wei\u00df Oberhausen",
-"ok": false,
-"why": "sem match",
-"best": null
+"ok": true,
+"team": "Rot-Wei\u00df Oberhausen",
+"score": 1.0
 },
 "uniao-de-leiria": {
 "n": "Uni\u00e3o de Leiria",
