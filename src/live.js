@@ -8,12 +8,12 @@ const lvMs=[1400,700,300,100];
 const lvMine=r=>r.h==S.club||r.a==S.club;
 const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
 const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
-function lvTick(){const L=ui.lv;if(!L||L.pause)return;if(PIT&&PIT.hold)return;L.t=Math.min(90,L.t+1);if(L.t>=90){L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}lvDraw()}
-function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause)LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
+function lvTick(){const L=ui.lv;if(!L||L.pause)return;if(PIT&&PIT.hold){if(!PIT.hs)PIT.hs=Date.now();if(Date.now()-PIT.hs<7000)return;PIT.hs=0;if(PIT.cel)lvKick(PIT);PIT.q=[];PIT.seg=null;PIT.hold=false}else if(PIT)PIT.hs=0;L.t=Math.min(90,L.t+1);if(L.t>=90){L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}L.t>=90?lvDraw():lvUpd()}
+function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause&&typeof requestAnimationFrame=='undefined')LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
 function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;if(!fim)r.sn=1;PIT=null;ui.lv={i,t:fim?90:0,sp:0,pause:false,pend:false};lvTimer();lvDraw()}
 function lvClose(){if(ui.lv&&ui.lv.t<90&&S.lvp)return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();render(true)}
-function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvDraw()}
-function lvPause(){ui.lv.pause=!ui.lv.pause;lvTimer();lvDraw()}
+function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvUpd()}
+function lvPause(){ui.lv.pause=!ui.lv.pause;lvTimer();lvUpd()}
 /* se a página for recarregada no meio da transmissão, ela recomeça */
 function lvBoot(){if(S&&S.lvp&&S.last[S.lvp-1])liveOpen(S.lvp-1);else if(S)S.lvp=0}
 /* contagem de um tipo de lance até o minuto t */
@@ -36,7 +36,7 @@ function lvMom(r,t){
 }
 const lvTeamH=(c,s,cls)=>`<div class="lvt ${cls}">${shield(c,'lg')}<b>${esc(c.n)}</b></div>`;
 function lvPlayers(r){
-  const hd=(s)=>`<div class="lvpc"><h4>${esc(cl(s?r.a:r.h).n)}</h4>${r.pr[s].map(p=>{const mvp=r.mvp&&r.mvp[0]==s&&r.mvp[1]==r.pr[s].indexOf(p);return `<div class="lvpl ${p[6]?'me':''}"><span class="pp">${p[1]}</span><div><span class="pn1"><b>${esc(p[0])}</b>${p[3]?` <em>⚽${p[3]>1?'×'+p[3]:''}</em>`:''}${p[4]?` <em>🅰${p[4]>1?'×'+p[4]:''}</em>`:''}${mvp?' <span class="tag">MVP</span>':''}<strong class="num ${p[5]>=7.5?'hi':p[5]<5.5?'lo':''}">${p[5].toFixed(1)}</strong></span><i class="dbar"><i class="${s?'r':'b'}" style="width:${(p[5]*10).toFixed(0)}%"></i></i></div></div>`}).join('')}</div>`;
+  const hd=(s)=>`<div class="lvpc"><h4>${esc(cl(s?r.a:r.h).n)}</h4>${r.pr[s].map(p=>{const mvp=r.mvp&&r.mvp[0]==s&&r.mvp[1]==r.pr[s].indexOf(p);return `<div class="lvpl ${p[6]?'me':''}"><span class="pp">${p[1]}</span><div><span class="pn1"><b>${esc(p[0])}</b>${p[3]?` <em>⚽${p[3]>1?'×'+p[3]:''}</em>`:''}${p[4]?` <em class="ast" title="Assistências">A${p[4]>1?'×'+p[4]:''}</em>`:''}${mvp?' <span class="tag">MVP</span>':''}<strong class="num ${p[5]>=7.5?'hi':p[5]<5.5?'lo':''}">${p[5].toFixed(1)}</strong></span><i class="dbar"><i class="${s?'r':'b'}" style="width:${(p[5]*10).toFixed(0)}%"></i></i></div></div>`}).join('')}</div>`;
   return `<div class="lvpg">${hd(0)}${hd(1)}</div>`;
 }
 /* ---------- campo: simulação contínua (60 fps) — passes, laterais, escanteios, tiros de meta, finalizações e gols ---------- */
@@ -77,7 +77,9 @@ function lvStep(P,dt){
     if(!P.seg&&P.q.length){const g=P.q.shift();g.t=0;g.from=[B.x,B.y];P.seg=g;if(g.chip){P.chip=g.chip;P.chipT=1700}if(g.ov)Object.assign(P.ov,g.ov)}
     const g=P.seg;
     if(g){
-      g.t+=ms;const p=C(g.t/g.dur,0,1);
+      let adv=ms;
+      if(g.until&&!g.arr){const q=P.pos[g.until[0]][g.until[1]];if(lvDist(q,[B.x,B.y])<1.8||(g.gt=(g.gt||0)+ms)>4200){g.arr=1;P.holder=[g.until[0],g.until[1]];P.poss=g.until[0]}else adv=0}
+      g.t+=adv;const p=C(g.t/g.dur,0,1);
       if(g.k=='carry'){const h=P.pos[P.holder[0]][P.holder[1]];B.x=h[0]+lvDir(P.holder[0])*.012;B.y=h[1];B.h=0}
       else if(g.k=='wait'){B.h=0}
       else{const to=lvTo(P,g.to),e=g.k=='shot'?Math.pow(p,.8):1-Math.pow(1-p,1.8);B.x=g.from[0]+(to[0]-g.from[0])*e;B.y=g.from[1]+(to[1]-g.from[1])*e;B.h=(g.arc||0)*4*p*(1-p)}
@@ -112,9 +114,12 @@ function lvFrame(now){
   LVRAF=0;const P=PIT;
   if(!P||!ui.lv||!P.node.isConnected)return;
   LVRAF=requestAnimationFrame(lvFrame);
-  let dt=P.last?Math.min(.05,(now-P.last)/1000):0;P.last=now;
+  let dt=P.last?Math.min(.1,(now-P.last)/1000):0;P.last=now;
   if(ui.lv.pause)dt=0;
   lvStep(P,dt);lvPaint(P);
+  const L=ui.lv;
+  if(P.hold){P.hs=(P.hs||0)+dt*1000;if(P.hs>9000){if(P.cel)lvKick(P);P.q=[];P.seg=null;P.hold=false;P.hs=0}}else P.hs=0;
+  if(!L.pause&&L.t<90&&!P.hold&&!P.cel){const tm=lvMs[L.sp];L.acc=(L.acc||0)+dt*1000;if(L.acc>=tm){L.acc=Math.min(L.acc-tm,tm);lvTick()}}
 }
 /* comemoração do gol: escudo do time, autor e assistente; depois, novo pontapé inicial */
 function lvGoalIn(P,g){
@@ -123,12 +128,12 @@ function lvGoalIn(P,g){
   const side=g.sy<.5?.07:.93,mates=P.bs[gs].map((b,i)=>i).filter(i=>i!=g.bi&&P.bs[gs][i][2]!='GOL').sort((a,b)=>lvDist(P.pos[gs][a],P.pos[gs][g.bi])-lvDist(P.pos[gs][b],P.pos[gs][g.bi])).slice(0,4);
   P.ov[gs+'-'+g.bi]=[C(X-d*.28,.06,.94),side];
   mates.forEach((i,k)=>{P.ov[gs+'-'+i]=[C(X-d*(.28+.05+.03*k),.04,.96),C(side+(side<.5?1:-1)*(.06+.05*k),.05,.95)]});
-  P.cel={t:0,dur:3200,gs};
+  P.cel={t:0,dur:L.sp>=2?1400:3200,gs};
   const n=document.createElement('div');
   n.className='pgoal '+(r.pl?(gs==my?'w':'l'):'w');
   n.innerHTML=`<div class="pgb">${shield(team,'xl')}<div class="pgt"><small>GOOOL!</small><b>${esc(g.name)}</b><span>${g.an?'Assistência: <em>'+esc(g.an)+'</em>':'Jogada individual'}</span><i>${esc(team.n)}</i></div></div>`;
   P.node.appendChild(n);P.gel=n;
-  lvDraw();
+  lvUpd();
 }
 function lvKick(P){
   const r=P.r,gs=P.cel.gs,cs=1-gs;
@@ -163,16 +168,19 @@ function lvPlan(r,t,tm){
   const np=tm>=1000?3:tm>=500?2:tm>=250?1:0,special=goal||hs||hsh||hc;
   for(let k=0;k<(special?Math.max(0,np-1):np);k++){const j=fwd(side,cur[1],10+k);add({k:'pass',to:{s:side,i:j},w:pw(side,cur[1],j),arc:.1});cur=[side,j]}
   const xg=lvXg(side),d=lvDir(side),ds=1-side,gi=gkI(ds);
-  let D=tm*.9;
+  let D=tm*.9;const DD=x=>tm<350?Math.max(tm*.9,x*.3):x;
   if(goal||hs||hsh){
     const xi=r.xi[side];
     let bi=goal?xi.findIndex(p=>p[0]==goal[2]):-1;
     if(bi<0||xi[bi][1]=='GOL'||bi==cur[1])bi=pickOf(att(side).filter(i=>i!=cur[1]),20)??att(side)[0];
     const by=.5+(R(21)-.5)*.2;
     if(goal){
-      let ai=-1,an='';
-      if(goal[3]==1){ai=xi.findIndex(p=>p[2]);an=S.p.name}
-      else if(R(11)<(xi[bi][2]?.5:.72)){const c=fld(side).filter(i=>i!=bi);ai=pickOf(c,12);an=xi[ai][0]}
+      let ai=-1,an=goal[4]||'';
+      if(an)ai=xi.findIndex(p=>p[0]==an);
+      else if(goal[4]===undefined){
+        if(goal[3]==1){ai=xi.findIndex(p=>p[2]);an=S.p.name}
+        else if(R(11)<(xi[bi][2]?.5:.72)){const c=fld(side).filter(i=>i!=bi);ai=pickOf(c,12);an=xi[ai][0]}
+      }
       const pi=ai>=0&&ai!=bi?ai:pickOf(fld(side).filter(i=>i!=bi),13),ay=R(14)<.5?.16:.84,sy=.5+(R(5)-.5)*.14,gy=C(.5-(sy-.5)*1.7,.38,.62);
       const ov={};ov[side+'-'+pi]=[X_(xg,d,.2),ay];ov[side+'-'+bi]=[X_(xg,d,.12),by];
       if(cur[1]!=pi)add({k:'pass',to:{s:side,i:pi},w:1,arc:.12,ov});else Object.assign(P.ov,ov);
@@ -180,7 +188,7 @@ function lvPlan(r,t,tm){
       add({k:'pass',to:{s:side,i:bi},w:1.1,arc:.38,chip:ai>=0&&ai!=bi?'Cruzamento':''});
       const ov2={};ov2[ds+'-'+gi]=[X_(xg,d,.012),gy];
       add({k:'shot',to:{x:xg+d*.014,y:sy},w:.7,arc:.07,ov:ov2,chip:'Chute!',end:p=>lvGoalIn(p,{gs:side,bi,name:goal[2],an:ai>=0&&ai!=bi?an:'',sy})});
-      D=Math.max(D,2600);L.pend=true;
+      D=Math.max(D,DD(2600));L.pend=true;
     }else{
       const ov={};ov[side+'-'+bi]=[X_(xg,d,.16),by];
       if(cur[1]!=bi)add({k:'pass',to:{s:side,i:bi},w:pw(side,cur[1],bi)+.3,arc:.15,ov});else Object.assign(P.ov,ov);
@@ -188,15 +196,15 @@ function lvPlan(r,t,tm){
       if(hs){
         const sy=.5+(R(6)-.5)*.1,ov2={};ov2[ds+'-'+gi]=[X_(xg,d,.025),sy];
         add({k:'shot',to:{x:X_(xg,d,.025),y:sy},w:.75,arc:.06,ov:ov2,chip:'Chute no alvo',end:p=>{p.holder=[ds,gi];p.poss=ds}});
-        D=Math.max(D,1700);
+        D=Math.max(D,DD(1700));
       }else{
         const sg=R(6)<.5?-1:1,ov2={};
         add({k:'shot',to:{x:xg+d*.02,y:.5+sg*(.1+R(7)*.16)},w:.75,arc:.14,chip:'Chute para fora'});
         ov2[ds+'-'+gi]=[X_(xg,d,.05),.5];
-        add({k:'pass',to:{s:ds,i:gi},w:1.1,arc:.06,ov:ov2,chip:'Tiro de meta'});
-        add({k:'wait',w:.35});
+        add({k:'pass',to:{x:X_(xg,d,.05),y:.5},w:.9,arc:.04,ov:ov2,chip:'Tiro de meta'});
+        add({k:'wait',w:.5,until:[ds,gi]});
         const mid=kind(ds,['VOL','MEI','PNT']);add({k:'pass',to:{s:ds,i:pickOf(mid.length?mid:fld(ds),8)},w:1.6,arc:.5,clr:true});
-        D=Math.max(D,2700);
+        D=Math.max(D,DD(2700));
       }
     }
   }else if(hc){
@@ -204,12 +212,12 @@ function lvPlan(r,t,tm){
     const kk=near(side,fl,-1),ins=fld(side).filter(i=>i!=kk&&P.bs[side][i][2]!='ZAG'||R(40+i)<.3).filter(i=>i!=kk).slice(0,6),df=kind(ds,['ZAG','VOL','MEI']).slice(0,5);
     ov[side+'-'+kk]=fl;ins.forEach((i,k)=>{const b=box[k%box.length];ov[side+'-'+i]=[X_(xg,d,b[0]),b[1]]});df.forEach((i,k)=>{const b=dbox[k%dbox.length];ov[ds+'-'+i]=[X_(xg,d,b[0]),b[1]]});
     const tgt=ins.find(i=>i!=kk)??att(side)[0];
-    add({k:'pass',to:{x:fl[0],y:fl[1]},w:1,arc:.1,chip:'Escanteio'});
-    add({k:'wait',w:1,ov});
+    add({k:'pass',to:{x:fl[0],y:fl[1]},w:1,arc:.1,chip:'Escanteio',ov});
+    add({k:'wait',w:.6,until:[side,kk]});
     add({k:'pass',to:{s:side,i:tgt},w:1.3,arc:.55});
     if(R(4)<.6){const sy=.5+(R(5)-.5)*.1,ov2={};ov2[ds+'-'+gi]=[X_(xg,d,.025),sy];add({k:'shot',to:{x:X_(xg,d,.025),y:sy},w:.6,arc:.05,ov:ov2,chip:'Cabeceio!',end:p=>{p.holder=[ds,gi];p.poss=ds;p.ov={}}})}
     else add({k:'pass',to:{s:ds,i:pickOf(kind(ds,['ZAG','VOL']).length?kind(ds,['ZAG','VOL']):fld(ds),9)},w:1,arc:.45,clr:true,chip:'Cortou!'});
-    D=Math.max(D,2600);
+    D=Math.max(D,DD(2600));
   }else if(hf||ho){
     const fs=hf?1-hf[1]:ds,lab=hf?(hf[2]=='yc'?'Cartão amarelo':hf[2]=='rc'?'Cartão vermelho':'Falta'):'Impedimento';
     if(ho){const ba=pickOf(att(side),30);add({k:'pass',to:{s:side,i:ba},w:.8,arc:.2,chip:lab})}
@@ -217,12 +225,12 @@ function lvPlan(r,t,tm){
     add({k:'pass',to:{s:fs,i:kk},w:.5,arc:.04,chip:ho?'':lab});
     add({k:'wait',w:.8,chip:lab});
     add({k:'pass',to:{s:fs,i:fwd(fs,kk,31)},w:1,arc:.3});
-    D=Math.max(D,1500);
+    D=Math.max(D,DD(1500));
   }else{
     if(tm>=500&&R(9)<.34){
       const p=P.pos[side][cur[1]],ey=p[1]<.5?.0:1,sp=[C(p[0]+d*.05,.03,.97),ey],th=near(side,sp,cur[1]),ov={};ov[side+'-'+th]=[sp[0],ey==0?.015:.985];
-      add({k:'pass',to:{x:sp[0],y:sp[1]},w:.7,arc:.12,chip:'Lateral'});
-      add({k:'wait',w:.6,ov});
+      add({k:'pass',to:{x:sp[0],y:sp[1]},w:.7,arc:.12,chip:'Lateral',ov});
+      add({k:'wait',w:.5,until:[side,th]});
       add({k:'pass',to:{s:side,i:fwd(side,th,32)},w:.8,arc:.2,clr:true});
       D=Math.max(D,tm*.9);
     }else add({k:'carry',w:.9});
@@ -232,9 +240,26 @@ function lvPlan(r,t,tm){
   P.q=Q;P.hold=D>tm*.9+1;
 }
 const X_=(xg,d,off)=>xg-d*off;
+/* uniformes: cores do escudo; se as duas equipes forem parecidas, o visitante usa a cor secundária */
+const lvRgb=c=>{
+  if(c[0]=='#'){const n=parseInt(c.slice(1),16);return [n>>16,n>>8&255,n&255]}
+  const m=String(c).match(/hsl\((\d+)\s+(\d+)%\s+(\d+)%\)/);if(!m)return [128,128,128];
+  const h=+m[1]/360,s=+m[2]/100,l=+m[3]/100,q=l<.5?l*(1+s):l+s-l*s,p=2*l-q,f=t=>{t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p};
+  return [f(h+1/3)*255,f(h)*255,f(h-1/3)*255];
+};
+const lvDst=(a,b)=>{const A=lvRgb(a),B=lvRgb(b);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])};
+const lvLum=c=>{const A=lvRgb(c);return (.299*A[0]+.587*A[1]+.114*A[2])/255};
+function lvKit(r){
+  const a=pal(cl(r.h)),b=pal(cl(r.a));let k0=[a.p,a.s],k1=[b.p,b.s];
+  if(lvDst(k0[0],k1[0])<105){
+    if(lvDst(k0[0],b.s)>=105)k1=[b.s,b.p];
+    else k1=[lvLum(k0[0])>.5?'#1b2233':'#f2f4f8',b.p];
+  }
+  return [k0,k1];
+}
 function lvPitchHtml(r){
-  const c=[cl(r.h),cl(r.a)],pl=[pal(c[0]),pal(c[1])];
-  const dots=[0,1].map(s=>r.xi[s].map((p,i)=>`<i class="pj t${s}${p[2]?' me':''}${p[1]=='GOL'?' gk':''}" data-s="${s}" data-i="${i}" style="--c1:${pl[s].p};--c2:${pl[s].s}" title="${esc(p[0])}">${p[2]?`<s class="mk">▼</s><u class="mn">${esc(p[0].split(' ').slice(-1)[0])} · VOCÊ</u>`:''}${i+1}</i>`).join('')).join('');
+  const c=[cl(r.h),cl(r.a)],kit=lvKit(r),pl=kit.map(k=>({p:k[0],s:k[1]}));
+  const dots=[0,1].map(s=>r.xi[s].map((p,i)=>`<i class="pj t${s}${p[2]?' me':''}${p[1]=='GOL'?' gk':''}" data-s="${s}" data-i="${i}" style="--c1:${pl[s].p};--c2:${pl[s].s};--tx:${lvLum(pl[s].p)>.62?'#10140a':'#fff'}" title="${esc(p[0])}">${p[2]?`<s class="mk">▼</s><u class="mn">${esc(p[0].split(' ').slice(-1)[0])} · VOCÊ</u>`:''}${i+1}</i>`).join('')).join('');
   return `<div id="lvpitch" class="lvpit" data-k="${S.last.indexOf(r)}"><svg class="lvf" viewBox="0 0 105 68" preserveAspectRatio="none" aria-hidden="true"><rect x=".5" y=".5" width="104" height="67"/><line x1="52.5" y1=".5" x2="52.5" y2="67.5"/><circle cx="52.5" cy="34" r="9.15"/><rect x=".5" y="13.85" width="16.5" height="40.3"/><rect x=".5" y="24.85" width="5.5" height="18.3"/><rect x="88" y="13.85" width="16.5" height="40.3"/><rect x="99" y="24.85" width="5.5" height="18.3"/><rect class="gl" x="-1.2" y="29" width="1.7" height="10"/><rect class="gl" x="104.5" y="29" width="1.7" height="10"/></svg>${dots}<b class="pbs"></b><b class="pb"></b><div class="pchip"></div></div>`;
 }
 function lvHtml(){
@@ -243,24 +268,34 @@ function lvHtml(){
   if(fim&&!r.mvp){let b=[0,0,-1];r.pr.forEach((rows,s)=>rows.forEach((p,i)=>{if(p[5]>b[2])b=[s,i,p[5]]}));r.mvp=[b[0],b[1]]}
   const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
-  const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
-  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}</div>`;
+  const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
+  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
   let body;
   if(!fim){
-    const lines=r.ev.filter(e=>e.m<=tv).slice(-10).reverse();
-    body=`${r.xi?'<div id="lvslot"></div>':''}<div class="shg"><div><div class="pn"><h2>Lance a lance</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></div></div><div><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,tv)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,tv)}</div></div></div>`;
+    const lines=r.ev.filter(e=>e.m<=tv).slice(-9).reverse();
+    body=`<div class="lvmain">${r.xi?'<div id="lvslot"></div>':''}<div class="pn lvlog"><h2>Lances</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></div></div><div class="shg"><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,tv)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,tv)}</div></div>`;
   }else{
     const me=r.pl?`<div class="pn"><h2>Sua atuação</h2>${kv([['Nota',r.rt],['Minutos',r.mn+"'"],['Gols',r.gl],['Assistências',r.as],['Cartões',(r.yc?'🟨':'')+(r.rc?'🟥':'')||'—']])}</div>`:`<div class="pn"><h2>Sua atuação</h2><p class="note" style="margin:0">${S.inj>0?'Você está lesionado.':'Você não atuou nesta partida.'}</p></div>`;
     body=`<div class="shg"><div><div class="pn"><h2>Estatísticas da partida</h2>${lvRows(r,90)}</div>${me}</div><div><div class="pn"><h2>Destaques da partida</h2>${lvPlayers(r)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)}</span><span><i class="r"></i>${esc(a.n)}</span></p></div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,90)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)} dominando</span><span><i class="r"></i>${esc(a.n)} dominando</span></p></div></div></div>`;
   }
-  return `<div class="pn sheet fp lvsh">${fim?`<div class="shtop"><button class="ghost" onclick="lvClose()">← Fechar</button></div>`:'<div class="shtop"><small class="muted">Transmissão ao vivo — acompanhe até o fim do jogo</small></div>'}${head}${ctl}${body}</div>`;
+  return `<div class="pn sheet fp lvsh" style="--lc0:${lvKit(r)[0][0]};--lc1:${lvKit(r)[1][0]}">${fim?`<div class="shtop"><button class="ghost" onclick="lvClose()">← Fechar</button></div>`:'<div class="shtop"><small class="muted">Transmissão ao vivo — acompanhe até o fim do jogo</small></div>'}${head}${ctl}${body}</div>`;
 }
+/* atualiza só placar, controles, log e estatísticas: não recria o campo (sem piscar, sem perder a rolagem) */
+function lvUpd(){
+  const o=document.getElementById('lvo'),L=ui.lv;
+  if(!o||!L||L.t>=90||!document.getElementById('lvpitch')){lvDraw();return}
+  const r=S.last[L.i],tmp=document.createElement('div');tmp.innerHTML=lvHtml();
+  for(const sel of ['.lvh .lvc','.lvgs','.lvctl','.lvlog .log','.shg']){const a=o.querySelector(sel),b=tmp.querySelector(sel);if(a&&b&&a.innerHTML!==b.innerHTML)a.innerHTML=b.innerHTML}
+  if(PIT&&r&&PIT.t!=L.t){PIT.t=L.t;lvPlan(r,L.t,lvMs[L.sp])}
+}
+function lvSkip(){const L=ui.lv;if(!L||L.t>=45)return;L.t=45;L.pend=false;PIT=null;lvDraw()}
+function lvSim(){const L=ui.lv;if(!L)return;L.t=90;L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}PIT=null;lvDraw()}
 function lvDraw(){
   let o=document.getElementById('lvo');
   if(!ui.lv){if(o)o.remove();PIT=null;return}
   if(!o){o=document.createElement('div');o.id='lvo';o.className='ov fp lvo';document.body.appendChild(o)}
   const st=o.scrollTop,old=document.getElementById('lvpitch');if(old)old.remove();
-  o.innerHTML=lvHtml();o.scrollTop=st;
+  o.innerHTML=lvHtml();
   const r=S.last[ui.lv.i],slot=document.getElementById('lvslot');
   if(slot&&r&&r.xi){
     let pit=old&&PIT&&PIT.node===old?old:null;
@@ -270,6 +305,7 @@ function lvDraw(){
     lvPaint(PIT);
     if(!LVRAF&&typeof requestAnimationFrame!='undefined'){PIT.last=0;LVRAF=requestAnimationFrame(lvFrame)}
   }else PIT=null;
+  o.scrollTop=st;
 }
 
 /* ---------- calendário: avançar os dias até o jogo, depois jogar ---------- */
@@ -283,13 +319,13 @@ function stripUpd(){
   return true;
 }
 function avancar(){
-  if(ADV||S.ph!='season'||S.ev)return;
+  if(ADV||S.ph!='season'||S.ev||S.apur)return;
   const g=wkPlan()[0];S.day=S.day|0;if(!g||S.day>=g.d)return;
   const b=document.querySelector('#pblk .play');if(b){b.disabled=true;b.textContent='⏳ Avançando…'}
   ADV=setInterval(()=>{S.day++;const ok=stripUpd();if(S.day>=g.d||!ok){clearInterval(ADV);ADV=null;save();render(true)}},260);
 }
 function jogarJogo(){
-  if(ADV||S.ph!='season'||S.ev)return;
+  if(ADV||S.ph!='season'||S.ev||S.apur)return;
   const g=wkPlan()[0];if(!g||(S.day|0)<g.d)return;
   const nt=S.ti.length;
   if(g.ph=='mid')stepMid();else stepEnd();
@@ -304,7 +340,7 @@ function weekStrip(){
     return `<div class="wd ${d==day?'now':''} ${d<day?'past':''} ${g?'gm':''}" ${g?`style="--kc:${KB[g.kk||'lg'][1]}" title="${esc(g.n)}${o?' · '+esc(o.n):''}"`:''}><small>${n}</small><b>${String(wkDate(w,d).getDate()).padStart(2,'0')}</b><span class="wi">${ic}</span>${g?`<em class="wk">${KB[g.kk||'lg'][0]}</em>`:''}</div>`}).join('')}</div>`;
 }
 function playBlock(){
-  S.day=S.day|0;const g=wkPlan()[0],ready=S.day>=g.d,opp=g.h!=null?`${cl(g.h).n} x ${cl(g.a).n}`:'';
+  S.day=S.day|0;const g=wkPlan()[0],ready=S.day>=g.d,opp=g.h!=null?`${cl(g.h).n} x ${cl(g.a).n} · ${g.h==S.club?'em casa':'fora'}`:'';
   const evb=S.ev?'disabled':'';
   return `<div id="pblk">${weekStrip()}<p class="note" style="margin:8px 0">📅 <b id="pdt">${dTxt(S.week,S.day)}</b> · próximo jogo: <b>${dTxt(S.week,g.d)}</b> — ${esc(g.n)}${opp?' ('+esc(opp)+')':''}</p>
   ${ready?`<button class="play" onclick="jogarJogo()" ${evb}>⚽ Jogar — ${esc(g.n)}</button><p class="note" style="margin:6px 0">É dia de jogo. A partida é transmitida ao vivo.</p>`:`<button class="play" onclick="avancar()" ${evb}>▶ Avançar</button><p class="note" style="margin:6px 0">Faltam ${g.d-S.day} dia(s) para o jogo. O tempo corre direto até lá.</p>`}</div>`;

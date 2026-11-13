@@ -30,19 +30,23 @@ function calEvents(){
     ev.push({w:wk,d:lgDay(wk),k:'lg',o:home?m[1]:m[0],home,res:S.res.filter(x=>x.w==wk&&x.c=='Liga').map(x=>x.t).join('')||null,nm:'Liga'})});
   allComps().forEach(k=>{
     for(let r=0;r<k.rn.length;r++){
-      const wk=k.wk[r],nm=k.rn[r],full=k.n+' — '+nm,lg=k.log.find(x=>x[0]==r&&(x[1]==S.club||x[2]==S.club));
-      const rs=S.res.find(x=>x.w==wk&&x.c==full);
-      if(lg)ev.push({w:wk,d:kDay(k.k),k:k.k,o:lg[1]==S.club?lg[2]:lg[1],home:lg[1]==S.club,res:rs?rs.t:null,nm:k.n+' · '+nm});
-      else if(k.ch==null&&k.al.includes(S.club)){
-        if(r==k.rd){const m=(k.dr||[]).find(p=>p.includes(S.club));ev.push({w:wk,d:kDay(k.k),k:k.k,o:m?(m[0]==S.club?m[1]:m[0]):null,home:m?m[0]==S.club:true,res:null,nm:k.n+' · '+nm})}
-        else if(r>k.rd)ev.push({w:wk,d:kDay(k.k),k:k.k,o:null,res:null,fut:1,nm:k.n+' · '+nm});
-      }
+      const nm=k.rn[r];
+      (k.legs&&k.legs[r]==2?[1,2]:[0]).forEach(L=>{
+        const wk=L==2?k.w2[r]:k.wk[r],suf=L==1?' (ida)':L==2?' (volta)':'',full=k.n+' — '+nm+suf;
+        const lg=k.log.find(x=>x[0]==r&&(x[1]==S.club||x[2]==S.club)&&(x[7]||0)==L),rs=S.res.find(x=>x.w==wk&&x.c==full);
+        if(lg)ev.push({w:wk,d:kDay(k.k),k:k.k,o:lg[1]==S.club?lg[2]:lg[1],home:lg[1]==S.club,res:rs?rs.t:null,nm:k.n+' · '+nm+suf});
+        else if(k.ch==null&&k.al.includes(S.club)){
+          if(r==k.rd){const m=(k.dr||[]).find(p=>p.includes(S.club)),hm=m?(L==2?m[1]:m[0]):null;ev.push({w:wk,d:kDay(k.k),k:k.k,o:m?(m[0]==S.club?m[1]:m[0]):null,home:m?hm==S.club:true,res:null,nm:k.n+' · '+nm+suf})}
+          else if(r>k.rd)ev.push({w:wk,d:kDay(k.k),k:k.k,o:null,res:null,fut:1,nm:k.n+' · '+nm+suf});
+        }
+      });
     }
   });
+  ev.push({w:SEASON+1,d:0,k:'bo',o:null,res:null,apur:1,nm:'Bola de Ouro · Apuração'});
   if(!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))ev.push({w:SEASON,d:2,k:'mc',o:S.ucl.ch==S.club?S.lib.ch:S.ucl.ch,home:true,res:null,nm:'Mundial de Clubes · Final'});
   return ev.sort((a,b)=>a.w-b.w||a.d-b.d);
 }
-const evOpp=e=>e.o!=null?(e.home===false?'<small class="muted">fora</small> ':'<small class="muted">casa</small> ')+tn(cl(e.o)):e.fut?'<span class="muted">A definir (sorteio)</span>':'<span class="muted">Sorteio pendente</span>';
+const evOpp=e=>e.apur?'<span class="muted">Títulos + desempenho individual: top 10 e vencedor</span>':e.o!=null?(e.home===false?'<small class="muted">fora</small> ':'<small class="muted">casa</small> ')+tn(cl(e.o)):e.fut?'<span class="muted">A definir (sorteio)</span>':'<span class="muted">Sorteio pendente</span>';
 /* próximos jogos da liga e das copas (as fases seguintes das copas só valem se o clube avançar) */
 function upcoming(){
   const rows=calEvents().filter(e=>e.w>S.week&&e.w<=S.week+5&&!e.res).map(e=>({c:[dTxt(e.w,e.d),kBadge(e.k),esc(e.nm.split(' · ')[1]||'')+(e.fut?' (se avançar)':''),evOpp(e),e.o!=null?Math.round(cl(e.o).s):'—'],cls:'kr kr-'+e.k}));
@@ -77,10 +81,10 @@ function viewTab(){
 }
 function viewCal(){
   const c=cl(S.club),ks=[S.dc[c.l],S.ucl,S.lib],ev=calEvents();
-  const lg=`<p class="kleg">${['lg','dom','ucl','lib','mc'].map(kBadge).join('')}</p>`;
+  const lg=`<p class="kleg">${['lg','dom','ucl','lib','mc','bo'].map(kBadge).join('')}</p>`;
   const rsc=t=>{const m=t&&t.match(/(\d+) x (\d+)/);return m?m[1]+' x '+m[2]:'—'};
   let h=`<div class="pn full"><h2>Calendário — ${dvName(c)}</h2>${lg}${tbl(['Sem','Data','Torneio','Adversário','Resultado'],ev.map(e=>({c:[e.w,dTxt(e.w,e.d),kBadge(e.k)+(e.k=='lg'?'':' <small class="muted">'+esc(e.nm.split(' · ')[1]||'')+'</small>'),evOpp(e),rsc(e.res)],cls:'kr kr-'+e.k+(e.w==S.week&&S.ph=='season'?' mine':'')})))}</div>`;
-  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[kBadge(k.k)+' '+esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+')').join(' · ')],cls:'kr kr-'+k.k+(k.ch==null&&k.al.includes(S.club)?' mine':'')})).concat([{c:[kBadge('mc')+' Mundial de Clubes','Final ('+dTxt(SEASON,2)+'), entre os campeões da Champions e da Libertadores'],cls:'kr kr-mc'}]))}</div>`;
+  h+=`<div class="pn"><h2>Datas das copas</h2>${tbl(['Competição','Fases (data)'],ks.map(k=>({c:[kBadge(k.k)+' '+esc(k.n),k.rn.map((n,i)=>esc(n)+' ('+dTxt(k.wk[i],kDay(k.k))+(k.w2&&k.w2[i]?' e '+dTxt(k.w2[i],kDay(k.k)):'')+')').join(' · ')],cls:'kr kr-'+k.k+(k.ch==null&&k.al.includes(S.club)?' mine':'')})).concat([{c:[kBadge('mc')+' Mundial de Clubes','Final ('+dTxt(SEASON,2)+'), entre os campeões da Champions e da Libertadores'],cls:'kr kr-mc'}]))}</div>`;
   return h;
 }
 const viewCopa=()=>lgPills()+compView(S.dc[ui.lg])+compView(S.ucl)+compView(S.lib)+(S.mc?compView(S.mc):'');
@@ -97,22 +101,23 @@ function pgBdo(){
   if(ui.bk=='art')return h+viewArt();
   return h+bdoHero()+bdoTop()+bdoWinners();
 }
+function bdoTen(list,y,note){
+  const nt=x=>x.nat?flg(natCode(x.nat)):'',cn=x=>x.real?x.cn:cl(x.club).n,cb=x=>x.real?clubBadge(x.cn,x.club,'sm'):shield(cl(x.club),'sm');
+  const ph=(x,c)=>legImg(x.n,c)||`<span class="${c} ph">${esc(String(x.n)[0])}</span>`,on=x=>{const w=bdoWho(x);return w?`onclick="${w}"`:''};
+  const mv=x=>{if(!x.prev&&!x.real)return '';const p=x.prev,i=x.rank-1;return x.real?'':!p?'':p>i+1?` <span class="mv up">▲${p-i-1}</span>`:p<i+1?` <span class="mv dn">▼${i+1-p}</span>`:''};
+  const pod=(x,i)=>`<div class="pdm p${i+1}${x.me?' me':''}" ${on(x)}><span class="pdn">${i+1}</span>${ph(x,'pdp')}<b>${esc(x.n)}</b><small>${x.pos} · ${nt(x)} · ${x.age} anos</small><em>${esc(cn(x))}</em><strong>${Math.round(x.pts)}</strong><i>PTS</i></div>`;
+  const row=(x,i)=>ldRow({pos:i+1,lead:ph(x,'lgav')+cb(x),name:esc(x.n)+(x.me?'<span class="tag">você</span>':'')+mv(x),sub:`${esc(cn(x))} · ${x.pos} · ${x.age} anos`,mid:nt(x),pts:Math.round(x.pts),unit:'PTS',on:bdoWho(x)?bdoWho(x):null,cls:x.me?'me':''});
+  return `<div class="pn full"><h2>Top 10 · Bola de Ouro ${y}</h2><div class="pods">${list.slice(0,3).map(pod).join('')}</div><ul class="lrk">${list.slice(3,10).map((x,i)=>row(x,i+3)).join('')}</ul><p class="note">${note}</p></div>`;
+}
 function bdoTop(){
-  const live=S.ph=='season',ys=S.bdo.map(b=>String(b.y)).reverse();
-  let sel=ui.by;if(!(sel=='now'&&live)&&!ys.includes(String(sel)))sel=live?'now':(ys[0]||'now');
-  let h=(live||ys.length)?pills([...(live?[['now',S.y+' (em disputa)']]:[]),...ys.map(y=>[y,y])],sel,'bySet','scroll'):'';
-  if(sel=='now'){
-    const l=bdoList(false);
-    if(!l.length)h+='<div class="pn"><p class="empty">A corrida da Bola de Ouro começa depois das primeiras rodadas. A pontuação combina nota média, gols, assistências, títulos, OVR, reputação e força da liga.</p></div>';
-    else{
-      const top=l.slice(0,10),me=l.findIndex(x=>x.me);
-      h+=podiumOf(l)+`<div class="pn"><h2>Top 10 · corrida ${S.y}</h2><p class="note" style="margin-top:0">Parcial da semana ${Math.max(1,S.week-1)} de ${SEASON}, projetada.${Object.keys(S.bdoPrev).length?' As setas comparam com a temporada passada.':''}</p>${bdoRows(top,x=>S.bdoPrev[x.id]||0,Object.keys(S.bdoPrev).length>0)}${me>=10?`<p class="note">Sua posição: <b>${me+1}º</b> com ${Math.round(l[me].pts)} pontos.</p>`:me<0?'<p class="note">Você precisa de mais jogos para entrar na disputa.</p>':''}</div>`;
-    }
-  }else{
-    const b=S.bdo.find(x=>String(x.y)==String(sel));
-    if(b)h+=podiumOf(b.top)+`<div class="pn"><h2>Top 10 · Bola de Ouro ${b.y}</h2>${bdoRows(b.top,x=>x.prev,S.bdo.length>1)}<p class="note">${b.me?`Você terminou em ${b.me}º.`:'Você ficou fora da disputa.'}</p></div>`;
-  }
-  return h;
+  const ys=[...new Set([...S.bdo.map(b=>String(b.y)),...Object.keys(BDO_TOP)])].sort((a,b)=>b-a);
+  if(!ys.length)return '';
+  let sel=ui.by;if(!ys.includes(String(sel)))sel=ys[0];
+  const b=S.bdo.find(x=>String(x.y)==sel);
+  let list,note;
+  if(b){list=b.top;note=(b.me?`Você terminou em ${b.me}º.`:'Você ficou fora da disputa.')+' A apuração soma títulos da equipe, desempenho individual, OVR e prestígio.'}
+  else{list=BDO_TOP[sel].map((z,i)=>({n:z[0],nat:z[1],cn:z[2],club:cn2id(z[2]),pos:z[3],age:z[4],pts:z[5],rank:i+1,real:1}));note='Votação oficial da France Football (pontos reais). A Bola de Ouro do jogo é apurada ao fim de cada temporada.'}
+  return pills(ys.map(y=>[y,y]),sel,'bySet','scroll')+bdoTen(list,sel,note);
 }
 function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:''}
 const bdoAv=(x,c='lgav')=>legImg(x.n,c)||`<span class="${c} ph">${esc(String(x.n)[0])}</span>`;
@@ -125,15 +130,13 @@ function bdoWinners(){
   const all=bdoAll().sort((a,b)=>b.y-a.y),cnt={},nat={};
   all.forEach(x=>{if(x.n!='—'){cnt[x.n]=(cnt[x.n]||0)+1;nat[x.n]=x.nat}});
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const live=S.ph=='season'?bdoList(false):[];
   const card=x=>{
     if(x.n=='—')return `<div class="bdc"><span class="yr">${x.y}</span><span class="muted">Não houve premiação</span></div>`;
     const on=bdoWho(x);
     return `<div class="bdc ${x.me?'me':''}" ${on?`onclick="${on}"`:''}><span class="yr">${x.y}${x.g?' ⚽':''}</span>${bdoAv(x)}<span class="nm2"><b>${esc(x.n)}</b>${x.nat?' '+flg(x.nat):''}${x.me?'<span class="tag">você</span>':''}<small>${esc(x.c||'')}${x.g&&x.pts?' · '+Math.round(x.pts)+' pts':''}</small></span></div>`;
   };
-  const cur=live.length?`<div class="bdc live" onclick="${bdoWho(live[0])}"><span class="yr">${S.y} ⏱</span>${bdoAv(live[0])}<span class="nm2"><b>${esc(live[0].n)}</b> ${flg(natCode(live[0].nat))}<small>Em disputa · ${esc(cl(live[0].club).n)}</small></span></div>`:'';
   const mp=top.map(([n,k],i)=>ldRow({pos:i+1,lead:'',name:esc(n)+' '+flg(nat[n]||''),sub:'',pts:k,unit:k>1?'PRÊMIOS':'PRÊMIO',cls:'',on:null})).join('');
-  return `<div class="ldg"><div class="pn"><h2>Arquivo de vencedores · ${all[all.length-1].y}–${all[0].y}</h2><div class="bdg">${cur}${all.map(card).join('')}</div><p class="note">1956–2025: histórico real. De 2026 em diante (⚽): os vencedores do jogo, ano a ano.</p></div>
+  return `<div class="ldg"><div class="pn"><h2>Arquivo de vencedores · ${all[all.length-1].y}–${all[0].y}</h2><div class="bdg">${all.map(card).join('')}</div><p class="note">1956–2025: histórico real. De 2026 em diante (⚽): os vencedores do jogo, ano a ano.</p></div>
   <div class="ldc"><div class="pn"><h2>Mais premiados</h2><ul class="lrk">${mp}</ul></div></div></div>`;
 }
 const natb=c=>`<span class="natb" style="display:inline-grid;padding:0 6px">${esc(c)}</span>`;

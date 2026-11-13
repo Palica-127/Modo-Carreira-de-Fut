@@ -22,7 +22,7 @@ IC.jogar=IC.jg;IC.bdo=IC.rk;IC.lend=IC.lg;IC.elen=IC.el;IC.jog=IC.pf;
 const BALL='<svg viewBox="0 0 40 40"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00F5A0"/><stop offset="1" stop-color="#00C2FF"/></linearGradient></defs><circle cx="20" cy="20" r="18" fill="none" stroke="url(#bg1)" stroke-width="3"/><path d="M20 10l7 5-2.7 8.3h-8.6L13 15z" fill="url(#bg1)"/><path d="M20 10V3M27 15l7-2M24.3 23.3l4.2 6.2M15.7 23.3l-4.2 6.2M13 15l-7-2" stroke="url(#bg1)" stroke-width="2.4" stroke-linecap="round"/></svg>';
 const short=n=>{const p=String(n).split(' ');return p.length>1?p[0][0]+'. '+p.slice(1).join(' '):n};
 const ab=n=>{const w=n.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(x=>x.length>2||/\d/.test(x));return(w.length>1?w[0][0]+w[1][0]:n.replace(/[^A-Za-zÀ-ÿ]/g,'').slice(0,3)).toUpperCase()};
-const pal=c=>{const k=CCLR[c.n];if(k)return{p:k[0],s:k[1],k:1};const h=c.hue;return{p:`hsl(${h} 58% 38%)`,s:`hsl(${(h+40)%360} 70% 62%)`,k:0}};
+const pal=c=>{const k=CCLR[c.n]||(typeof CRESTCLR!='undefined'&&CRESTCLR[c.n]);if(k)return{p:k[0],s:k[1],k:1};const h=c.hue;return{p:`hsl(${h} 58% 38%)`,s:`hsl(${(h+40)%360} 70% 62%)`,k:0}};
 const hexL=x=>{if(x[0]!='#')return .2;const n=parseInt(x.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
 const shield=(c,sz='')=>{
   if(typeof CREST!=='undefined'&&CREST[c.n])return `<span class="shield img ${sz}"><img src="${CREST[c.n]}" alt="" loading="lazy"></span>`;
@@ -76,7 +76,7 @@ const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar">
 
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
-  const idx=S.ph!='season'?4:S.week==1?0:S.week<=MIDW?1:S.week<=MIDW+2?2:3;
+  const idx=S.ph!='season'||S.apur?4:S.week==1?0:S.week<=MIDW?1:S.week<=MIDW+2?2:3;
   const c=cl(S.club);
   return `<header class="hud"><div class="logo lnk" onclick="sheet('c','${c.id}')">${shield(c,'lg')}<div><div class="eyebrow">${esc(c.n)} · ${esc(dvName(c))}</div><h1>${GAME_NAME}</h1></div></div><div class="season"><small>Temporada</small><b>${S.y}</b></div></header>
     <ol class="trk">${['Início','1º turno','Janela','2º turno','Prêmios'].map((n,i)=>`<li class="${i<idx?'done':i==idx?'now':''}"><i></i>${n}</li>`).join('')}</ol>`;
@@ -94,7 +94,7 @@ function nextMatches(){
   const c=cl(S.club),w=S.week,o=[];
   const m=(roundAt(c.l<0?0:c.l,c.d,w)||[]).find(x=>x.includes(S.club));
   if(m)o.push({n:'Liga — '+dvName(c),h:m[0],a:m[1]});
-  allComps().forEach(k=>{if(k.ch==null&&k.wk[k.rd]==w&&k.al.includes(S.club))o.push({n:k.n+' — '+k.rn[k.rd]})});
+  allComps().forEach(k=>{if(kDue(k,w)&&k.al.includes(S.club)){const m=kPair(k);o.push({n:k.n+' — '+k.rn[k.rd]+kLegTxt(k),h:m?m[0]:null,a:m?m[1]:null})}});
   if(w==30&&S.ucl.ch!=null&&S.lib.ch!=null&&!S.mc&&(S.ucl.ch==S.club||S.lib.ch==S.club))o.push({n:'Mundial de Clubes — Final',h:S.ucl.ch,a:S.lib.ch});
   return o;
 }
@@ -119,9 +119,13 @@ function offBlock(){
   <div class="pn"><h2>Campeões do ano</h2><div class="kv"><div><small>Liga dos Campeões</small><b>${m.ucl!=null?esc(cl(m.ucl).n):'—'}</b></div><div><small>Libertadores</small><b>${m.lib!=null?esc(cl(m.lib).n):'—'}</b></div><div><small>Mundial de Clubes</small><b>${m.mc!=null?esc(cl(m.mc).n):'—'}</b></div></div></div>
   <button class="play" onclick="roll()">Iniciar temporada ${S.y+1}</button>`;
 }
+function apurBlock(){
+  return `<div class="pn apur"><div class="banner"><small>Fim da temporada ${S.y}</small><b>Apuração da Bola de Ouro</b></div><p class="note">Os jogos acabaram. Ao apurar, o jogo soma as conquistas coletivas (liga, copas, Champions, Libertadores e Mundial), o desempenho individual (nota média, gols e assistências), o OVR, o prestígio e a força da liga de cada candidato. Depois divulga o top 10 do ano e o vencedor da Bola de Ouro.</p><button class="play" onclick="apurar()">🏆 Apurar Bola de Ouro ${S.y}</button></div>`;
+}
 function viewProx(){
   let h='';
   if(S.ph=='off')h+=offBlock();
+  else if(S.apur)h+=apurBlock();
   else{
     const nm=nextMatches();
     h+=`<div class="pn"><div class="banner"><small>Semana ${S.week} de ${SEASON} · ${dTxt(S.week,S.day|0)}</small><b>Próximos jogos</b></div>
@@ -151,11 +155,11 @@ function stTable(l,d){
   return tbl(['','#','Clube','J','V','E','D','SG','Pts'],rows)+`<div class="lgd">${d==0&&UCLQ[L.k]?'<span><i style="background:var(--acc2)"></i>Champions</span>':''}${d==0&&LIBQ[L.k]?'<span><i style="background:var(--gold)"></i>Libertadores</span>':''}${d>0?'<span><i style="background:var(--ok)"></i>Acesso</span>':''}${d<nd-1?'<span><i style="background:var(--bad)"></i>Rebaixamento</span>':''}</div>`;
 }
 function compView(k){
-  const st=k.ch!=null?`Campeão: <b style="color:var(--gold)">${esc(cl(k.ch).n)}</b>${k.ru!=null?' · vice: '+esc(cl(k.ru).n):''}`:k.rd<k.rn.length?`Próxima fase: <b>${k.rn[k.rd]}</b> (semana ${k.wk[k.rd]}) · ${k.al.length} clube(s) vivo(s)`:'';
+  const st=k.ch!=null?`Campeão: <b style="color:var(--gold)">${esc(cl(k.ch).n)}</b>${k.ru!=null?' · vice: '+esc(cl(k.ru).n):''}`:k.rd<k.rn.length?`Próxima fase: <b>${k.rn[k.rd]}</b> (semana ${k.wk[k.rd]}${kTwo(k)?' e '+k.w2[k.rd]:''}) · ${k.al.length} clube(s) vivo(s)`:'';
   const rds=[...new Set(k.log.map(x=>x[0]))].reverse();
-  const dr=k.ch==null&&k.dr&&k.dr.length?`<div class="sub">Sorteio · ${k.rn[k.rd]} (semana ${k.wk[k.rd]})</div>${k.dr.map(([x,y])=>`<div class="m ${x==S.club||y==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(x).id}')">${shield(cl(x),'xs')}<span>${esc(cl(x).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(y).id}')">${shield(cl(y),'xs')}<span>${esc(cl(y).n)}</span></div></div></div>`).join('')}`:'';
+  const dr=k.ch==null&&k.dr&&k.dr.length?`<div class="sub">Sorteio · ${k.rn[k.rd]} (semana ${k.wk[k.rd]}${kTwo(k)?' e '+k.w2[k.rd]:''})</div>${k.dr.map(([x,y])=>`<div class="m ${x==S.club||y==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn lnk" onclick="sheet('c','${cl(x).id}')">${shield(cl(x),'xs')}<span>${esc(cl(x).n)}</span></div><div class="sc" style="font-size:16px"><i>x</i></div><div class="tn b lnk" onclick="sheet('c','${cl(y).id}')">${shield(cl(y),'xs')}<span>${esc(cl(y).n)}</span></div></div></div>`).join('')}`:'';
   return `<div class="pn"><h2>${esc(k.n)}</h2><p class="note" style="margin-top:0">${st}${k.pl?'<span class="tag">seu clube</span>':''}</p>${dr}
-  ${rds.length?rds.map(rd=>`<div class="sub">${k.rn[rd]}</div>${k.log.filter(x=>x[0]==rd).map(x=>`<div class="m ${x[1]==S.club||x[2]==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${x[5]==x[1]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[1]).id}')">${shield(cl(x[1]),'xs')}<span>${esc(cl(x[1]).n)}</span></div><div class="sc" style="font-size:20px">${x[3]}<i>x</i>${x[4]}</div><div class="tn b ${x[5]==x[2]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[2]).id}')">${shield(cl(x[2]),'xs')}<span>${esc(cl(x[2]).n)}</span></div></div>${x[6]?'<div class="mi"><span>decidido nos pênaltis</span></div>':''}</div>`).join('')}`).join(''):'<p class="empty">A competição ainda não começou.</p>'}</div>`;
+  ${rds.length?rds.map(rd=>`<div class="sub">${k.rn[rd]}</div>${k.log.filter(x=>x[0]==rd).map(x=>`<div class="m ${x[1]==S.club||x[2]==S.club?'mine':''}" style="padding:6px 10px;margin-bottom:5px"><div class="mt"><div class="tn ${x[5]==null?'':x[5]==x[1]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[1]).id}')">${shield(cl(x[1]),'xs')}<span>${esc(cl(x[1]).n)}</span></div><div class="sc" style="font-size:20px">${x[3]}<i>x</i>${x[4]}</div><div class="tn b ${x[5]==null?'':x[5]==x[2]?'win':'lose'} lnk" onclick="sheet('c','${cl(x[2]).id}')">${shield(cl(x[2]),'xs')}<span>${esc(cl(x[2]).n)}</span></div></div>${x[7]==1?'<div class="mi"><span>Jogo de ida</span></div>':x[7]==2?`<div class="mi"><span>Volta · agregado ${x[8]}x${x[9]}${x[6]?' · decidido nos pênaltis':''}</span></div>`:x[6]?'<div class="mi"><span>decidido nos pênaltis</span></div>':''}</div>`).join('')}`).join(''):'<p class="empty">A competição ainda não começou.</p>'}</div>`;
 }
 function champHist(l){
   const L=LEAGUES[l];

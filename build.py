@@ -17,13 +17,45 @@ _i=data.index('const LEG=[')
 for _n in re.findall(r"\{n:'([^']+)'",data[_i:data.index('];',_i)]):
     _f='assets/legends/'+_slug(_n)+'.webp'
     if os.path.exists(_f):legimg[_n]='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode()
+_bn=[]
+_a=hist.index('const BDO_REAL=rowsOf(`')+len('const BDO_REAL=rowsOf(`');_b=hist.index('`)',_a)
+for _l in hist[_a:_b].strip().splitlines():_bn.append(_l.strip().split('|')[1])
+_bn+=re.findall(r"\['([^']+)','[A-Z]{3}','",hist[hist.index('const BDO_TOP'):])
+for _n in _bn:
+    _f='assets/legends/'+_slug(_n)+'.webp'
+    if _n not in legimg and os.path.exists(_f):legimg[_n]='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode()
+crestclr={}
+def _dom(path):
+    from PIL import Image
+    im=Image.open(path).convert('RGBA');im.thumbnail((56,56));bins={}
+    for r,g,b,a in im.getdata():
+        if a<200:continue
+        mx,mn=max(r,g,b),min(r,g,b)
+        if mn>222 or mx<48:continue
+        sat=(mx-mn)/max(1,mx);w=1+sat*2.5;v=bins.setdefault((r>>5,g>>5,b>>5),[0,0,0,0.0,0]);v[0]+=r*w;v[1]+=g*w;v[2]+=b*w;v[3]+=w;v[4]+=1
+    cols=[((v[0]/v[3],v[1]/v[3],v[2]/v[3]),v[3]) for v in bins.values()]
+    cols.sort(key=lambda x:-x[1])
+    if not cols:return None
+    h=lambda c:'#%02x%02x%02x'%tuple(int(x) for x in c)
+    c1=cols[0][0];c2=None
+    for c,_ in cols[1:]:
+        if sum((a-b)**2 for a,b in zip(c,c1))**.5>90:c2=c;break
+    if c2 is None:c2=(245,245,245) if sum(c1)<400 else (24,28,40)
+    return [h(c1),h(c2)]
+for _s,_r in (json.load(open('tools/crests_report.json')) if os.path.exists('tools/crests_report.json') else {}).items():
+    _f='assets/crests/'+_s+'.webp'
+    if _r.get('ok') and os.path.exists(_f):
+        try:
+            _c=_dom(_f)
+            if _c:crestclr[_r['n']]=_c
+        except Exception:pass
 flagimg={}
 if os.path.exists('tools/flags.json'):
     for _n,(_c,_i) in json.load(open('tools/flags.json',encoding='utf-8')).items():
         _f='assets/flags/'+_i+'.webp'
         if os.path.exists(_f):
             _d='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode();flagimg[_n]=_d;flagimg[_c]=_d
-crests='const FLAGIMG='+json.dumps(flagimg,ensure_ascii=False)+';\nconst LEGIMG='+json.dumps(legimg,ensure_ascii=False)+';\nconst CREST='+json.dumps(crest,ensure_ascii=False)+';\n'
+crests='const CRESTCLR='+json.dumps(crestclr,ensure_ascii=False)+';\nconst FLAGIMG='+json.dumps(flagimg,ensure_ascii=False)+';\nconst LEGIMG='+json.dumps(legimg,ensure_ascii=False)+';\nconst CREST='+json.dumps(crest,ensure_ascii=False)+';\n'
 boot="\nif(typeof document!='undefined'){optLoad();S=null;render()}\n"
 js="'use strict';\n"+crests+strip(data)+"\n"+strip(sqd)+"\n"+strip(hist)+"\n"+strip(eng)+"\n"+strip(ui)+"\n"+strip(abas)+"\n"+strip(live)+"\n"+strip(menu)+boot
 icon="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='#060A22' stroke='#00F5A0' stroke-width='3'/><path d='M20 10l7 5-2.7 8.3h-8.6L13 15z' fill='#00C2FF'/></svg>"

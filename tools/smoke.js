@@ -58,6 +58,7 @@ let seasons=0;
 while(ev('S.ph')!='ret'&&seasons<26){
   let g=0;
   while(ev("S.ph")=='season'&&g++<60){
+    if(ev('!!S.apur')){allPages('apur'+seasons);ev('apurar()');break}
     if(ev('!!S.ev')){allPages('evento');ev('pick(0)')}
     else{ev('simN(10)'); if(g%2==0)allPages('s'+seasons+'w'+ev('S.week'))}
   }

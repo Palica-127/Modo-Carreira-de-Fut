@@ -257,3 +257,6 @@ const MCH={'Real Madrid':8,'Barcelona':3,'Bayern München':4,'Milan':4,'Inter':3
 
 /* códigos de seleções que não estão no jogo */
 const SELC={'Hungria':'HUN','Tchecoslováquia':'TCH'};
+
+/* Bola de Ouro 2025 (votação oficial da France Football): nome | país | clube | posição | idade | pontos */
+const BDO_TOP={2025:[['Ousmane Dembélé','FRA','Paris Saint-Germain','PNT',28,1380],['Lamine Yamal','ESP','Barcelona','PNT',18,1059],['Vitinha','POR','Paris Saint-Germain','MEI',25,703],['Mohamed Salah','EGY','Liverpool','PNT',33,657],['Raphinha','BRA','Barcelona','PNT',28,620],['Achraf Hakimi','MAR','Paris Saint-Germain','ZAG',27,484],['Kylian Mbappé','FRA','Real Madrid','ATA',26,378],['Cole Palmer','ENG','Chelsea','MEI',23,211],['Gianluigi Donnarumma','ITA','Manchester City','GOL',26,172],['Nuno Mendes','POR','Paris Saint-Germain','ZAG',23,171]]};

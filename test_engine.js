@@ -6,7 +6,7 @@ function playCareer(opts){
   const rows=[];let t0=Date.now();
   while(S.ph!='ret'&&S.y<2026+24){
     let guard=0;
-    while(S.ph=='season'&&guard++<200){ if(S.ev)pick(0); else {
+    while(S.ph=='season'&&guard++<200){ if(S.apur){S.apur=0;end();break} if(S.ev)pick(0); else {
       if(S.week==16||S.week==17){ // aceita melhor oferta
         const best=S.of.map((o,i)=>[cl(o.club).s,i,o]).filter(x=>x[2].t!='emp').sort((a,b)=>b[0]-a[0])[0];
         if(best&&best[0]>cl(S.club).s+4){acc(best[1]);}
