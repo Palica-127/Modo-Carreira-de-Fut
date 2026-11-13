@@ -869,7 +869,7 @@ function sqReal(c){
     let ovr=fix?fix+sqAdj(age)-sqAdj(a0):ev=='y'||!fix&&q[4]=='y'?50+14*h+(age>21?-2:0):C(c.s-22+16*h,45,80)+sqAdj(age);
     ovr=Math.round(C(ovr,35,97));const pot=Math.round(C(ovr+(age<24?(24-age)*1.6*(.5+h):h*2),ovr,96));
     const pos=g=='G'||g=='GK'?'GOL':g=='D'||g=='CB'||g=='LB'||g=='RB'?'ZAG':g=='CDM'?'VOL':g=='CM'||g=='CAM'?'MEI':g=='LW'||g=='RW'?'PNT':g=='ST'?'ATA':g=='M'?(h0%5<2?'VOL':'MEI'):(h0%5<2?'PNT':'ATA');
-    pool[pos].push({n,nat,pos,age,ovr,pot,club:c.id,q:1});
+    pool[pos].push({n,nat,pos,fp:g,age,ovr,pot,club:c.id,q:1});
   });
   const LIM={GOL:4,ZAG:9,VOL:5,MEI:5,PNT:4,ATA:5};
   Object.keys(pool).forEach(k=>{pool[k].sort((x,y)=>y.ovr-x.ovr);pool[k]=pool[k].slice(0,LIM[k])});

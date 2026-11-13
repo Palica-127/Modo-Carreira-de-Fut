@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(__dirname+'/../src/motor.js','utf8').replace(/^'use strict';/,'')+';this.MT=MT',ctx);
+for(const m of ['motor','atrib'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -52,6 +52,53 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
  perto(a.mean('gols'),2.7,.12,'média de gols da partida de mentira');
  ok(a.n('gols')===2000,'lote registra todas as partidas');ok(a.report().length==2,'relatório do lote');
  ok(a.share('gols',0)===1&&a.share('gols',99)===0,'share() nos extremos');}
+
+
+/* ===== módulo 1: atributos ===== */
+{
+ const POS=[['GOL','GK'],['ZAG','CB'],['ZAG','LB'],['VOL','CDM'],['MEI','CM'],['MEI','CAM'],['PNT','LW'],['ATA','ST']];
+ const mk=(pos,fp,ovr,age,n)=>MT.atrib({n,pos,fp,ovr,age,nat:'Brasil'});
+ /* determinismo */
+ {const a=mk('ATA','ST',78,24,'Fulano'),b=mk('ATA','ST',78,24,'Fulano');ok(JSON.stringify(a)===JSON.stringify(b),'ficha reproduzível');
+  ok(JSON.stringify(a.a)!==JSON.stringify(mk('ATA','ST',78,24,'Beltrano').a),'nomes diferentes => fichas diferentes');}
+ /* 40 atributos na escala certa */
+ {let bad=0,miss=0,n=0;for(const [p,fp] of POS)for(let o=40;o<=92;o+=4)for(let age=17;age<=38;age+=3)for(let i=0;i<4;i++){const f=mk(p,fp,o,age,'J'+i+p+o);n++;
+   MT.ATTR_KEYS.forEach(k=>{const v=f.a[k];if(v==null||isNaN(v))miss++;else if(v<1||v>99||v!==Math.round(v))bad++})}
+  ok(MT.ATTR.length==40,'são 40 atributos');ok(miss==0,'nenhum atributo faltando ('+miss+')');ok(bad==0,'todos entre 1 e 99 e inteiros ('+bad+')');}
+ /* a nota geral calculada pelos atributos bate com o OVR informado */
+ {for(const [p,fp] of POS){let s=0,mx=0,n=0;for(let o=45;o<=90;o+=5)for(let i=0;i<30;i++){const f=mk(p,fp,o,23+i%10,'P'+i+fp+o),d=Math.abs(MT.ovrOf(f.a,f.cls)-o);s+=d;n++;if(d>mx)mx=d}
+   ok(s/n<.6&&mx<2.5,'nota geral coerente em '+fp+' (média do erro '+(s/n).toFixed(2)+', máx '+mx.toFixed(2)+')')}}
+ /* diferenças entre funções */
+ const med=(p,fp,k,o=75)=>{let s=0;for(let i=0;i<200;i++)s+=mk(p,fp,o,25,'M'+i+fp).a[k];return s/200};
+ ok(med('ZAG','CB','des')>med('ATA','ST','des')+20,'zagueiro desarma muito mais que o atacante');
+ ok(med('ZAG','CB','mar')>med('MEI','CAM','mar')+15,'zagueiro marca mais que o meia ofensivo');
+ ok(med('ATA','ST','fin')>med('ZAG','CB','fin')+25,'atacante finaliza muito mais que o zagueiro');
+ ok(med('MEI','CAM','pas')>med('ZAG','CB','pas')+12,'meia passa melhor que o zagueiro');
+ ok(med('MEI','CAM','vis')>med('ZAG','CB','vis')+15,'meia tem mais visão de jogo que o zagueiro');
+ ok(med('MEI','CAM','pal')>med('ZAG','CB','pal')+5,'meia faz passe longo melhor que o zagueiro');
+ ok(med('ZAG','CB','cab')>med('PNT','LW','cab')+20,'zagueiro cabeceia mais que o ponta');
+ ok(med('PNT','LW','vel')>med('ZAG','CB','vel')+15,'ponta é bem mais veloz que o zagueiro');
+ ok(med('ZAG','LB','cru')>med('ZAG','CB','cru')+20,'lateral cruza mais que o zagueiro central');
+ ok(med('ZAG','LB','res')>med('ZAG','CB','res')+8,'lateral tem mais fôlego que o zagueiro central');
+ ok(med('GOL','GK','ref')>80&&med('ATA','ST','ref')<20,'só o goleiro tem reflexos');
+ ok(med('GOL','GK','fin')<med('ATA','ST','fin')-30,'goleiro não finaliza como atacante');
+ ok(med('ATA','ST','fin',90)>med('ATA','ST','fin',60)+15,'craque finaliza mais que o mediano');
+ /* idade: veterano perde ritmo e ganha cabeça (mesmo OVR) */
+ {const m=(age,k)=>{let s=0;for(let i=0;i<200;i++)s+=MT.atrib({n:'V'+i,pos:'MEI',fp:'CM',ovr:78,age,nat:'X'}).a[k];return s/200};
+  ok(m(21,'ace')>m(35,'ace')+8,'o veterano é mais lento');ok(m(35,'dec')>m(21,'dec')+4,'o veterano decide melhor');ok(m(35,'res')<m(24,'res')-2,'o veterano tem menos fôlego');}
+ /* individualidade: mesmos dados de função, fichas diferentes entre si, mesma nota */
+ {let sd=0;for(let i=0;i<50;i++){const x=mk('ATA','ST',80,25,'X'+i),y=mk('ATA','ST',80,25,'Y'+i);let q=0;MT.ATTR_KEYS.forEach(k=>q+=Math.abs(x.a[k]-y.a[k]));sd+=q/40}
+  ok(sd/50>3,'jogadores de mesma função e nota são diferentes entre si (dif. média '+(sd/50).toFixed(1)+')');}
+ /* pé e bola parada */
+ {let e=0,d=0,a=0;for(let i=0;i<4000;i++){const f=mk('MEI','CM',70,25,'Pe'+i);f.foot=='E'?e++:f.foot=='D'?d++:a++;}
+  perto(d/4000,.76,.03,'destros');perto(e/4000,.22,.03,'canhotos');
+  const g=mk('GOL','GK',80,28,'G');ok(g.a.fal<g.a.tec,'goleiro bate pior bola parada que a própria técnica');}
+ /* seu jogador: os 7 atributos do jogo mandam nos grupos */
+ {const at=[62,70,55,48,40,66,58],f=MT.atribUser(at,{n:'Eu',pos:'ATA',fp:'ST',ovr:60,age:19,nat:'Brasil'});
+  const gr=[['vel','ace'],['fin','pen'],['pas','pal','cru','tec'],['dri','pt','agi'],['des','mar','ant','pos'],['for','res','equ','imp','cnd'],['vis','dec','cri']];
+  gr.forEach((g,i)=>{const m=g.reduce((s,k)=>s+f.a[k],0)/g.length;perto(m,at[i],1.2,'grupo '+i+' do seu jogador segue o atributo do jogo')});
+  const f2=MT.atribUser([62,80,55,48,40,66,58],{n:'Eu',pos:'ATA',fp:'ST',ovr:60,age:19,nat:'Brasil'});ok(f2.a.fin>f.a.fin+7,'subir Finalização sobe a ficha');}
+}
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);
 process.exitCode=falhas?1:0;
