@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -98,6 +98,60 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const gr=[['vel','ace'],['fin','pen'],['pas','pal','cru','tec'],['dri','pt','agi'],['des','mar','ant','pos'],['for','res','equ','imp','cnd'],['vis','dec','cri']];
   gr.forEach((g,i)=>{const m=g.reduce((s,k)=>s+f.a[k],0)/g.length;perto(m,at[i],1.2,'grupo '+i+' do seu jogador segue o atributo do jogo')});
   const f2=MT.atribUser([62,80,55,48,40,66,58],{n:'Eu',pos:'ATA',fp:'ST',ovr:60,age:19,nat:'Brasil'});ok(f2.a.fin>f.a.fin+7,'subir Finalização sobe a ficha');}
+}
+
+/* ===== módulo 2: núcleo da posse ===== */
+{
+ const RAPIDO=!!process.env.RAPIDO,N=RAPIDO?12:60;
+ const par=(fa,fb,seed,ff,fg)=>[MT.timeTeste(fa,ff||'4-3-3','Casa',seed*2),MT.timeTeste(fb,fg||'4-3-3','Fora',seed*2+1)];
+ /* determinismo e integridade do registro */
+ {const [A,B]=par(70,70,3),r1=MT.simula(A,B,77),r2=MT.simula(A,B,77),r3=MT.simula(A,B,78);
+  ok(r1.log.digest()===r2.log.digest(),'mesma seed => partida idêntica');ok(r1.log.digest()!==r3.log.digest(),'outra seed => outra partida');
+  const ev=r1.log.ev;ok(ev[0].k=='inicio'&&ev[ev.length-1].k=='fim','começa em inicio e termina em fim');
+  ok(ev.every((e,i)=>i==0||e.t>=ev[i-1].t)&&ev[ev.length-1].t<=5400+120,'tempo crescente e dentro dos 90 minutos');
+  ok(ev.filter(e=>e.k=='fim_tempo').length==1,'um intervalo');
+  ok(r1.g[0]+r1.g[1]==ev.filter(e=>e.k=='gol').length,'placar bate com os gols do registro');}
+ /* auditoria: toda ação com a bola é feita por quem a tem; chute só de quem recebeu ou conquistou; gol só após chute; assistência só de passe */
+ {let bad=[],n=0;
+  for(let sd=1;sd<=(RAPIDO?3:10);sd++){const [A,B]=par(70,70,sd),r=MT.simula(A,B,sd+500),ev=r.log.ev;let hold=null,last=null;
+   for(const e of ev){
+    if(e.k=='inicio'||e.k=='fim_tempo'){hold=null;continue}
+    if(e.k=='recuperou'){hold=[e.s,e.p];last=e;continue}
+    if(e.k=='tiro_meta'){hold=[e.s,0];last=e;continue}
+    if(['passe','lancamento','cruzamento','conducao','drible','chute'].includes(e.k)){
+      n++;if(hold&&(hold[0]!=e.s||hold[1]!=e.p))bad.push(e.k+' de quem não tinha a bola (t='+e.t+')');
+      if(['passe','lancamento','cruzamento'].includes(e.k)&&e.o=='ok')hold=[e.s,e.q];
+      if(e.k=='chute'&&last&&last.k=='chute')bad.push('dois chutes seguidos');
+    }
+    if(e.k=='gol'){const c=ev[e.i-1];if(!c||c.k!='chute'||c.s!=e.s||c.p!=e.p)bad.push('gol sem chute do mesmo jogador');hold=null}
+    if(e.k=='assistencia'){const g=ev[e.i-1];if(!g||g.k!='gol'||g.q!=e.p)bad.push('assistência sem gol');}
+    if(e.k=='defesa'){hold=[e.s,e.p]}
+    if(e.k=='desarme'&&e.o=='ok'||e.k=='intercepta'){hold=null}
+    last=e;
+   }}
+  ok(bad.length==0,'auditoria do registro: '+bad.slice(0,3).join('; ')+' ('+n+' ações verificadas)');}
+ /* estatística de partidas equilibradas */
+ {const st=MT.lote(sd=>{const [A,B]=par(70,70,sd),r=MT.simula(A,B,sd),a=r.st[0],b=r.st[1];
+    return{gols:(r.g[0]+r.g[1])/2,chutes:(a.chutes+b.chutes)/2,alvo:(a.alvo+b.alvo)/2,passes:(a.pas+b.pas)/2,acerto:100*(a.pasOk+b.pasOk)/(a.pas+b.pas),des:(a.desarmes+b.desarmes)/2,
+      inter:(a.inter+b.inter)/2,posse:100*a.posse/(a.posse+b.posse),conv:(a.chutes+b.chutes)?100*(a.gols+b.gols)/(a.chutes+b.chutes):0}},N,1);
+  const faixa=(k,lo,hi,m)=>ok(st.mean(k)>=lo&&st.mean(k)<=hi,m+': '+st.mean(k).toFixed(2)+' (esperado '+lo+' a '+hi+')');
+  faixa('gols',RAPIDO?.7:1.0,RAPIDO?2.2:1.8,'gols por time');faixa('chutes',9,16.5,'chutes por time');faixa('alvo',3.2,6.5,'chutes no alvo por time');
+  faixa('passes',330,540,'passes por time');faixa('acerto',77,89,'precisão dos passes (%)');faixa('des',9,27,'desarmes por time');faixa('inter',6,20,'interceptações por time');
+  faixa('posse',46,54,'posse do time da casa (%)');faixa('conv',6,15,'conversão dos chutes (%)');}
+ /* o mais forte vence mais; os atributos fazem diferença */
+ {const fav=MT.lote(sd=>{const [A,B]=par(78,62,sd),r=MT.simula(A,B,sd);return{v:r.g[0]>r.g[1]?1:0,e:r.g[0]==r.g[1]?1:0,sg:r.g[0]-r.g[1],pos:100*r.st[0].posse/(r.st[0].posse+r.st[1].posse)}},RAPIDO?12:40,1);
+  ok(fav.mean('v')>=.55,'time muito superior vence a maioria ('+(100*fav.mean('v')).toFixed(0)+'%)');ok(fav.mean('sg')>1.0,'saldo médio do favorito > 1 ('+fav.mean('sg').toFixed(2)+')');ok(fav.mean('pos')>51.5,'favorito tem mais posse ('+fav.mean('pos').toFixed(0)+'%)');
+  /* mesmos times, mas o time B com passe, toque e visão ruins: precisão de passe cai */
+  const ruim=T=>{T.xi.forEach(p=>{p.a={...p.a};['pas','pal','tec','pt','vis'].forEach(k=>p.a[k]=Math.max(5,p.a[k]-25))});return T};
+  const pa=MT.lote(sd=>{const A=MT.timeTeste(70,'4-3-3','Casa',sd*2),B=ruim(MT.timeTeste(70,'4-3-3','Fora',sd*2+1)),r=MT.simula(A,B,sd);return{a:100*r.st[0].pasOk/r.st[0].pas,b:100*r.st[1].pasOk/r.st[1].pas}},RAPIDO?10:30,1);
+  ok(pa.mean('a')>pa.mean('b')+4,'passe/técnica/visão ruins derrubam a precisão ('+pa.mean('a').toFixed(1)+' x '+pa.mean('b').toFixed(1)+')');
+  /* goleiro excelente x goleiro fraco: a conversão dos chutes do adversário cai */
+  const gk=(v)=>T=>{const p=T.xi[0];p.a={...p.a};['ref','aga','gpo','sai','um1'].forEach(k=>p.a[k]=v);return T};
+  let gb=0,sb=0,gf=0,sf=0;
+  for(let sd=1;sd<=(RAPIDO?10:40);sd++){const A=MT.timeTeste(70,'4-3-3','Casa',sd*2),r=MT.simula(A,gk(92)(MT.timeTeste(70,'4-3-3','Fora',sd*2+1)),sd),r2=MT.simula(A,gk(35)(MT.timeTeste(70,'4-3-3','Fora',sd*2+1)),sd);
+    gb+=r.st[0].gols;sb+=r.st[0].chutes;gf+=r2.st[0].gols;sf+=r2.st[0].chutes}
+  ok(gb/sb<gf/sf,'goleiro bom converte menos chutes do adversário que o ruim ('+(100*gb/sb).toFixed(1)+'% x '+(100*gf/sf).toFixed(1)+'%)');
+}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);
