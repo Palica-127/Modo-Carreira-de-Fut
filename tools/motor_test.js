@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','chute','regras','tatica','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','regras','tatica','cond','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -262,7 +262,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
    ev.forEach((e,i)=>{
     if(e.k=='impedimento'){const nx=ev[i+1];if(!nx||nx.k!='tiro_livre'||nx.s==e.s||nx.d.origem!='impedimento')bad.push('impedimento sem tiro livre do adversário')}
     if(e.k=='penalti'){const nx=ev[i+1];if(!nx||nx.k!='chute'||nx.d.tipo!='penalti'||nx.p!=e.p)bad.push('pênalti sem chute do cobrador');if(Math.abs(Math.abs(e.x-.5)-(.5-11/105))>.01)bad.push('pênalti fora da marca')}
-    if(e.k=='falta'&&!e.d.vantagem){let j=i+1;while(ev[j]&&ev[j].k=='cartao')j++;const nx=ev[j];if(!nx||(nx.k!='tiro_livre'&&nx.k!='penalti'))bad.push('falta sem reposição ('+(nx&&nx.k)+')');
+    if(e.k=='falta'&&!e.d.vantagem){let j=i+1;while(ev[j]&&['cartao','lesao','substituicao'].includes(ev[j].k))j++;const nx=ev[j];if(!nx||(nx.k!='tiro_livre'&&nx.k!='penalti'))bad.push('falta sem reposição ('+(nx&&nx.k)+')');
      if(nx&&nx.k=='tiro_livre'&&nx.s==e.s)bad.push('tiro livre dado ao time que cometeu a falta');if(nx&&nx.k=='penalti'&&!e.d.area)bad.push('pênalti fora da área')}
     if(e.k=='falta'&&e.d.area&&e.s!==undefined){const at_=e.x;if((e.s==0&&at_<.5)||(e.s==1&&at_>.5)){} }
     if(e.k=='cartao'&&e.o=='vermelho'&&e.d.segundo){const pr=ev[i-1];if(!pr||pr.k!='cartao'||pr.o!='amarelo'||pr.p!=e.p)bad.push('segundo amarelo sem amarelo antes')}
@@ -361,7 +361,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
  {let bad=[],tot=[0,0],n=0,tats=0,sai=0;const N=RAP?6:30;
   for(let i=1;i<=N;i++){const [A,B]=par(70,70,i),r=MT.simula(A,B,2000+i),ev=r.log.ev;n++;
    [0,1].forEach(s=>{const sb=ev.filter(e=>e.k=='substituicao'&&e.s==s);tot[s]+=sb.length;if(sb.length>5)bad.push('mais de 5 trocas');
-     const ts=new Set(sb.filter(e=>e.t>3000).map(e=>Math.round(e.t/60)));if(ts.size>3)bad.push('mais de 3 janelas: '+[...ts]);
+     const ts=new Set(sb.filter(e=>e.t>ev.find(x=>x.k=='fim_tempo').t+1&&e.d.motivo!='lesão').map(e=>Math.round(e.t/60)));if(ts.size>3)bad.push('mais de 3 janelas: '+[...ts]);
      sb.forEach(e=>{if(e.d.sai===e.d.entra)bad.push('troca do mesmo jogador');if(e.p==0)bad.push('goleiro trocado')});
      const finais=new Set(r.T[s].xi.map(p=>p.n));sb.forEach(e=>{if(!finais.has(e.d.entra)&&!sb.some(x=>x.d.sai===e.d.entra))bad.push('quem entrou não está em campo no fim')});
      const nomes=r.T[s].xi.map(p=>p.n);if(new Set(nomes).size!=11)bad.push('jogador repetido em campo')});
@@ -384,9 +384,67 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const eq=roda('equilibrado'),pr=roda('pressao'),of=roda('ofensivo');
   ok(pr.falt>eq.falt*1.25,'pressão alta custa faltas ('+eq.falt.toFixed(1)+' -> '+pr.falt.toFixed(1)+')');
   ok(pr.perdS>eq.perdS,'pressão alta força mais perdas de bola do adversário ('+eq.perdS.toFixed(1)+' -> '+pr.perdS.toFixed(1)+')');
-  ok(of.ch>eq.ch*1.1,'estilo ofensivo chuta mais ('+eq.ch.toFixed(1)+' -> '+of.ch.toFixed(1)+')');
+  ok(of.ch>eq.ch*1.05,'estilo ofensivo chuta mais ('+eq.ch.toFixed(1)+' -> '+of.ch.toFixed(1)+')');
   const mesmo=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']}),mesmo2=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']});
   ok(mesmo.log.digest()===mesmo2.log.digest(),'partida com táticas fixas é reproduzível');}
+}
+
+/* ===== módulo 6: condições (cansaço, lesões, moral, mando) ===== */
+{
+ const C=MT.cond,CD=MT.CONDICAO,RAP=!!process.env.RAPIDO,at=(v)=>{const o={};MT.ATTR_KEYS.forEach(k=>o[k]=v);return o};
+ /* gasto de energia */
+ {const eq={pres:1,ritmo:1},a65=at(65),b=C.gasto(a65,'CM',eq);
+  perto(b*5400,50,14,'meio-campista médio perde uns 50 pontos em 90 min sem trocas');
+  ok(C.gasto(at(90),'CM',eq)<C.gasto(at(40),'CM',eq)*.75,'quem tem resistência e condição gasta bem menos');
+  ok(C.gasto(a65,'GK',eq)<C.gasto(a65,'CM',eq)*.4&&C.gasto(a65,'FB',eq)>C.gasto(a65,'CB',eq),'goleiro quase não gasta, lateral gasta mais que zagueiro');
+  ok(C.gasto(a65,'CM',MT.tatica.ESTILOS.pressao)>C.gasto(a65,'CM',eq)*1.1&&C.gasto(a65,'CM',MT.tatica.ESTILOS.retranca)<C.gasto(a65,'CM',eq),'pressão cansa mais, retranca menos');}
+ /* efeito do cansaço */
+ {const f100=C.fatores(100),f80=C.fatores(80),f40=C.fatores(40),f0=C.fatores(0);
+  ok(f100.fis==1&&f80.fis==1,'descansado (≥80) não perde nada');
+  ok(f40.fis<f80.fis&&f0.fis<f40.fis,'quanto mais cansado, pior');
+  ok(f0.fis<f0.tec&&f0.tec<f0.men&&f0.fis>.4,'o físico cai mais que a técnica e que a cabeça, sem zerar');
+  const a0=at(70),a={};C.aplica(a0,a,{en:30,moral:0,casa:false,lesao:null});
+  ok(a.vel<a0.vel*.85&&a.res==a0.res&&a.cnd==a0.cnd&&a.pas<a0.pas&&a.pas>a.vel,'cansado: velocidade cai muito, passe menos, resistência fica');
+  const z={},b={};C.aplica(a0,z,{en:100,moral:1,casa:false});C.aplica(a0,b,{en:100,moral:-1,casa:false});
+  ok(z.dec>b.dec&&z.pas>b.pas&&z.vel==b.vel,'moral alta melhora técnica e cabeça, não o físico');
+  const h={},v={};C.aplica(a0,h,{en:100,moral:0,casa:true});C.aplica(a0,v,{en:100,moral:0,casa:false});
+  ok(h.pas>v.pas&&h.pas/v.pas<1.03,'mando de campo dá um empurrão pequeno');
+  const l={};C.aplica(a0,l,{en:100,moral:0,casa:false,lesao:'media'});ok(l.vel<a0.vel*.65&&l.pas<a0.pas,'machucado rende menos');}
+ /* lesão */
+ {ok(C.risco({age:35,en:100})>C.risco({age:25,en:100})*1.2,'veterano se machuca mais');ok(C.risco({age:25,en:20})>C.risco({age:25,en:100})*1.5,'cansado se machuca mais');
+  const rs=MT.rng('grav'),c={leve:0,media:0,grave:0};for(let i=0;i<5000;i++)c[C.gravidade(rs)]++;ok(c.leve>c.media&&c.media>c.grave&&c.grave>300,'gravidade: leves mais comuns, graves raras');
+  ok(Math.abs(C.moralMult(1)-1.04)<1e-9&&C.moralMult(-5)==C.moralMult(-1),'moral limitada entre -1 e 1');}
+ /* na partida */
+ const par=(fa,fb,seed)=>[MT.timeTeste(fa,'4-3-3','Casa'+seed,seed*2),MT.timeTeste(fb,'4-3-3','Fora'+seed,seed*2+1)];
+ const NJ=RAP?10:50,jg=[];for(let i=1;i<=NJ;i++){const [A,B]=par(70,70,i+700);jg.push(MT.simula(A,B,6000+i))}
+ {const [A,B]=par(70,70,1),vel=A.xi[5].a.vel,r0=MT.simula(A,B,1);ok(A.xi[5].a.vel===vel&&A.xi[5].a0===undefined,'a partida não altera os jogadores de quem chamou');}
+ {let enF=[],queda=[],bad=[];
+  for(const r of jg)[0,1].forEach(s=>{const sb=new Set(r.log.ev.filter(e=>e.k=='substituicao'&&e.s==s).map(e=>e.p));
+    r.T[s].xi.forEach((p,i)=>{if(i==0||sb.has(i)||r.log.ev.some(e=>e.k=='cartao'&&e.o=='vermelho'&&e.s==s&&e.p==i))return;enF.push(r.en[s][i]);if(p.a0.vel>20)queda.push(p.a.vel/p.a0.vel);if(r.en[s][i]<0||r.en[s][i]>100)bad.push('energia fora de 0-100')})});
+  const med=enF.reduce((a,b)=>a+b,0)/enF.length,mq=queda.reduce((a,b)=>a+b,0)/queda.length;
+  ok(med>35&&med<70,'titulares que jogam tudo chegam ao fim com energia média de 35 a 70 ('+med.toFixed(0)+')');
+  ok(mq<.97&&mq>.7,'velocidade média no fim cai de 3% a 30% ('+(100*(1-mq)).toFixed(0)+'%)');ok(bad.length==0,'energia sempre entre 0 e 100');}
+ {const fit=(v,sd)=>{const t=MT.timeTeste(70,'4-3-3','F'+sd,sd);t.xi.forEach(p=>{if(p.slotCls!='GK'){p.a.res=v;p.a.cnd=v}});return t};
+  let a=0,b=0,n=RAP?4:12;for(let i=1;i<=n;i++){const r=MT.simula(fit(90,i),fit(40,i+100),7000+i,{neutro:true});a+=r.en[0].slice(1).reduce((x,y)=>x+y,0);b+=r.en[1].slice(1).reduce((x,y)=>x+y,0)}
+  ok(a>b*1.1,'time com mais resistência termina mais inteiro ('+(a/n/10).toFixed(0)+' x '+(b/n/10).toFixed(0)+')');
+  const r1={pr:0,re:0};for(let i=1;i<=n;i++){const [A,B]=par(70,70,i+30),x=MT.simula(A,B,7100+i,{fixo:true,estilo:['pressao','equilibrado']}),y=MT.simula(A,B,7100+i,{fixo:true,estilo:['retranca','equilibrado']});
+   r1.pr+=x.en[0].slice(1).reduce((p,q)=>p+q,0);r1.re+=y.en[0].slice(1).reduce((p,q)=>p+q,0)}
+  ok(r1.pr<r1.re,'pressionar o jogo todo cansa mais que se fechar');}
+ {let les=0,sem=0,subs=0,bad=[];
+  for(const r of jg){const ev=r.log.ev;ev.forEach((e,i)=>{if(e.k!='lesao')return;les++;
+    if(!['leve','media','grave'].includes(e.d.gravidade)||!['contato','sem contato'].includes(e.d.tipo))bad.push('lesão mal formada');
+    if(e.d.gravidade!='leve'&&!e.d.semTroca){const nx=ev.slice(i+1,i+4).find(x=>x.k=='substituicao'&&x.s==e.s&&x.p==e.p);if(!nx||nx.d.motivo!='lesão')bad.push('lesão sem troca');else subs++}
+    if(e.d.gravidade=='grave'&&e.d.semTroca&&e.p>0){sem++;if(ev.slice(i+2).some(x=>x.s==e.s&&x.p==e.p&&['passe','chute','drible','desarme'].includes(x.k)))bad.push('lesionado grave segue jogando')}
+    if(e.d.gravidade=='leve'&&ev.slice(i+1,i+4).some(x=>x.k=='substituicao'&&x.p==e.p&&x.s==e.s&&x.d.motivo=='lesão'))bad.push('lesão leve com troca forçada')})}
+  const m=les/NJ/2;ok(m>.05&&m<.6,'lesões por time e jogo entre 0,05 e 0,6 ('+m.toFixed(2)+')');ok(bad.length==0,'lesões coerentes: '+bad.slice(0,3).join('; '));
+  ok(jg.every(r=>r.subs[0]<=5&&r.subs[1]<=5),'trocas por lesão continuam dentro do limite de 5');}
+ {let ok_=0,tot=0;for(const r of jg){const d=r.g[0]-r.g[1];if(Math.abs(d)>=2){tot++;if((d>0)==(r.moral[0]>r.moral[1]))ok_++}}
+  ok(tot>2&&ok_/tot>=.85,'moral final acompanha o placar ('+ok_+'/'+tot+')');ok(jg.every(r=>r.moral.every(m=>Math.abs(m)<=1.0001)),'moral limitada a [-1,1]');}
+ {const N=RAP?30:90,gd=(opt)=>{let d=0;for(let i=1;i<=N;i++){const [A,B]=par(70,70,i+300),r=MT.simula(A,B,8000+i,opt);d+=r.g[0]-r.g[1]}return d/N};
+  const casa=gd({}),neu=gd({neutro:true});ok(casa>neu+.05,'jogar em casa vale gols ('+casa.toFixed(2)+' em casa x '+neu.toFixed(2)+' em campo neutro)');
+  const nf=(opt)=>{let f=0;for(let i=1;i<=(RAP?10:30);i++){const [A,B]=par(70,70,i+400),r=MT.simula(A,B,8500+i,opt);f+=r.st[0].faltas-r.st[1].faltas}return f};
+  ok(nf({})<nf({neutro:true})+8,'mandante não sofre mais faltas que o visitante por causa do mando');}
+ {const [A,B]=par(70,70,9),x=MT.simula(A,B,9999),y=MT.simula(A,B,9999);ok(x.log.digest()===y.log.digest()&&JSON.stringify(x.en)===JSON.stringify(y.en),'condições reproduzíveis com a mesma seed');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);

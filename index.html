@@ -2879,10 +2879,18 @@ const MT=(()=>{
     opt=opt||{};
     const rg=MT.rng(seed),RD=rg.fork('dec'),RU=rg.fork('duelo'),RS=rg.fork('chute'),RM=rg.fork('misc'),RF=rg.fork('regras');
     /* cópia dos times: trocas e expulsões não podem alterar os objetos de quem chamou */
-    const T=[A,B].map(tm=>({...tm,xi:tm.xi.map(x=>({...x})),banco:(tm.banco||[]).map(x=>({...x}))})),log=MT.Log(),G=[0,0];
+    const cp=x=>({...x,a:{...x.a},a0:{...x.a}}),T=[A,B].map(tm=>({...tm,xi:tm.xi.map(cp),banco:(tm.banco||[]).map(cp)})),log=MT.Log(),G=[0,0];
     const st=[0,1].map(()=>({pas:0,pasOk:0,chutes:0,alvo:0,gols:0,xg:0,desarmes:0,desOk:0,dribles:0,dribOk:0,inter:0,perdas:0,cruz:0,cruzOk:0,posse:0,conducoes:0,defesas:0,bloq:0,lanc:0,cabecas:0,grandes:0,grandesGol:0,faltas:0,faltasSof:0,amarelos:0,vermelhos:0,imped:0,escanteios:0,laterais:0,penaltis:0,penGol:0,tl:0,tlChutes:0,tlGol:0}));
     let t=0,ps=0,h=0,bx=.5,by=.5,ult=null;
     const exp=[new Set(),new Set()],am=[{},{}],RG=MT.REGRAS,TA=MT.tatica,subsN=[0,0],jan=[0,0],subT=[{},{}];let t2=null,chk=false;
+    /* condições: energia, lesões, moral e mando de campo (módulo 6) */
+    const RL=rg.fork('condicao'),CO=MT.cond,CD=MT.CONDICAO,casaOn=!(opt&&opt.neutro);
+    const en=T.map(tm=>tm.xi.map(()=>100)),les=[{},{}],lesoes=[0,0];
+    const mo=[((opt&&opt.moral&&opt.moral[0])||0)+(casaOn?CD.moral.casa:0),(opt&&opt.moral&&opt.moral[1])||0];
+    let tDr=0,tRef=0;
+    function refresh(){
+      for(let s=0;s<2;s++)T[s].xi.forEach((p,i)=>{if(exp[s].has(i)&&i>0&&!les[s][i])return;CO.aplica(p.a0,p.a,{en:en[s][i],moral:mo[s],casa:casaOn&&s==0,lesao:les[s][i]||null})});
+    }
     /* treinador-IA: perfil, estilo inicial e parâmetros em jogo */
     const avg=tm=>tm.xi.reduce((a,p)=>a+p.ovr,0)/11,RT=rg.fork('tatica');
     const setEst=(s,chave)=>{const tc=T[s].tec,e={...TA.ESTILOS[chave]};e.risco=clamp(e.risco+tc.ofensivo*.15,-1,1);T[s].chave=chave;T[s].est=e};
@@ -3042,7 +3050,7 @@ const MT=(()=>{
       const base={s,p:sh,x:+bx.toFixed(3),y:+by.toFixed(3)};
       evento('chute',{...base,d:{xg:+R.xg.toFixed(3),dist:+c.d.toFixed(1),tipo:c.tipo,origem:c.origem,pe:c.tipo=='cabeca'?'cabeca':fraco?(p.foot=='D'?'E':'D'):(p.foot=='A'?'D':p.foot),fraco,grande:R.big,ass:c.ass?c.ass.i:null}});
       if(R.res=='gol'){
-        G[s]++;st[s].alvo++;st[s].gols++;if(R.big)st[s].grandesGol++;
+        G[s]++;golMoral(s);st[s].alvo++;st[s].gols++;if(R.big)st[s].grandesGol++;
         const ass=c.ass&&t-c.ass.t<9?c.ass:null;
         evento('gol',{...base,q:ass?ass.i:undefined});if(ass)evento('assistencia',{s,p:ass.i,q:sh});
         /* recomeço no meio: quem sofreu o gol */
@@ -3074,6 +3082,7 @@ const MT=(()=>{
       const o=I(opp(s),m.i).a,a=pl(s,h);
       const ub=toU(s,bx),zp=ub<.33?.35:ub<.66?.85:1,pt=PAR.desarme.prob*clamp(1.6-m.d/PAR.desarme.raio*.8,.3,1.2)*Math.sqrt(T[opp(s)].est.pres)*zp;
       if(!RU.chance(pt))return false;
+      gastaEn(opp(s),m.i,.25);
       if(RF.chance(MT.regras.pFalta('tackle',o,a,rigZ(s,[bx,by])*Math.sqrt(T[opp(s)].est.pres))))return faltaEm(opp(s),m.i,s,h,'tackle',[bx,by],RF.chance(.35));
       const tk=o.des*.35+o.ant*.2+o.for*.15+o.agi*.15+o.pos*.15,hq=a.pt*.3+a.dri*.25+a.for*.2+a.equ*.15+a.agi*.1;
       st[opp(s)].desarmes++;
@@ -3085,7 +3094,7 @@ const MT=(()=>{
     }
 
     /* ---------- regras: reposições, faltas, cartões, pênalti (módulo 4) ---------- */
-    const REF={rig:1},rigZ=(vs,pt)=>REF.rig*(MT.regras.dentroArea(toU(vs,pt[0]),toV(vs,pt[1]))?.08:1);
+    const REF={rig:1},rigZ=(vs,pt)=>REF.rig*(MT.regras.dentroArea(toU(vs,pt[0]),toV(vs,pt[1]))?.08:1)*(casaOn&&vs==1?CD.casa.falta:1);
     const pickMeio=s=>{const k=T[s].xi.findIndex((p,i)=>vivo(s,i)&&(p.slotCls=='CM'||p.slotCls=='DM'||p.slotCls=='AM'));return k<0?T[s].xi.findIndex((p,i)=>i>0&&vivo(s,i)):k};
     const melhor=(s,f)=>{let b=-1,bv=-1;T[s].xi.forEach((p,i)=>{if(i==0||!vivo(s,i))return;const v=f(p.a);if(v>bv){bv=v;b=i}});return b};
     const fx=v=>+v.toFixed(3);
@@ -3151,7 +3160,7 @@ const MT=(()=>{
       if(car.c=='amarelo'){am[df][k]=1;st[df].amarelos++;evento('cartao',{...b,o:'amarelo',d:{motivo:car.motivo}})}
       else if(car.c=='vermelho'){
         if(car.segundo){am[df][k]=2;st[df].amarelos++;evento('cartao',{...b,o:'amarelo',d:{motivo:'segundo amarelo',n:2}})}
-        st[df].vermelhos++;evento('cartao',{...b,o:'vermelho',d:{motivo:car.motivo,segundo:!!car.segundo}});if(k>0)exp[df].add(k);
+        st[df].vermelhos++;mo[df]=clamp(mo[df]-CD.moral.vermelho,-1,1);evento('cartao',{...b,o:'vermelho',d:{motivo:car.motivo,segundo:!!car.segundo}});if(k>0)exp[df].add(k);
       }
       perdido+=RG.tempo.cartao;
     }
@@ -3161,10 +3170,11 @@ const MT=(()=>{
       st[df].faltas++;st[vs].faltasSof++;perdido+=RG.tempo.falta;
       const dog=tipo!='recep'&&tipo!='aereo'&&ub>.75&&Math.abs(vb-.5)<.22&&maisPerto(df,pt,3,true).filter(o=>o.i!=k&&o.d<10).length<1?(area?'area':'fora'):null;
       const tat=!area&&!dog&&ub>.35&&ub<.85&&tipo!='aereo'&&RF.chance(.25);
-      const car=MT.regras.cartao({agr:a.agr,tatica:tat,dogso:dog,area,amarelos:am[df][k]||0,rig:REF.rig},RF);
+      const car=MT.regras.cartao({agr:a.agr,tatica:tat,dogso:dog,area,amarelos:am[df][k]||0,rig:REF.rig*(casaOn&&df==0?CD.casa.cartao:1)},RF);
       const vOk=!area&&mantem&&!vant&&tipo!='aereo'&&!car.segundo&&car.c!='vermelho'&&RF.chance(clamp(th(ub,vb)*1.6+.1,0,.6));
       evento('falta',{s:df,p:k,q:vi,x:fx(pt[0]),y:fx(pt[1]),d:{tipo,area,vantagem:vOk,dogso:dog}});
       if(car.c)cartaoEv(df,k,car,pt);
+      if(!vOk&&RL.chance(CD.lesao.contato*(1+CD.lesao.contatoAgr*a.agr/100)*(tipo=='tackle'?1.3:tipo=='recep'?.6:1)))lesiona(vs,vi,'contato');
       if(vOk){evento('vantagem',{s:vs,p:vi,x:fx(pt[0]),y:fx(pt[1])});vant={s:vs,t,pt,area,k,vi};return false}
       if(area)penaltiLance(vs,vi);else tiroLivre(vs,pt,'falta');
       return true;
@@ -3180,7 +3190,7 @@ const MT=(()=>{
       const r=MT.regras.penalti(I(vs,tk).a,T[adv].xi[0].a,RF),xg=r.p;
       st[vs].chutes++;st[vs].xg+=xg;st[vs].grandes++;
       evento('chute',{...base,d:{xg:fx(xg),dist:11,tipo:'penalti',origem:'nenhuma',pe:I(vs,tk).foot=='A'?'D':I(vs,tk).foot,fraco:false,grande:true,ass:null}});
-      if(r.res=='gol'){G[vs]++;st[vs].alvo++;st[vs].gols++;st[vs].grandesGol++;st[vs].penGol++;evento('gol',{...base,d:{penalti:true}});saidaGol(adv);perdido+=RG.tempo.gol;t+=40;return}
+      if(r.res=='gol'){G[vs]++;golMoral(vs);st[vs].alvo++;st[vs].gols++;st[vs].grandesGol++;st[vs].penGol++;evento('gol',{...base,d:{penalti:true}});saidaGol(adv);perdido+=RG.tempo.gol;t+=40;return}
       if(r.res=='defesa'){
         st[vs].alvo++;st[adv].defesas++;evento('defesa',{s:adv,p:0,q:tk,x:fx(bx),y:fx(by),d:{seg:r.rebote?'rebote':'segurou',penalti:true}});
         if(r.rebote){posicoes();const dono=RF.chance(.5)?vs:adv,k=maisPerto(dono,[toX(vs,.95),.5],3,true)[0];recupera(dono,k.i,[toX(vs,.93),.5],'rebote');return}
@@ -3215,6 +3225,36 @@ const MT=(()=>{
     /* joga até o relógio chegar a 'lim' (segundos) */
     let guarda=0,proxChk=900;const jans=[];
     const minuto=()=>t2==null?t/60:45+(t-t2)/60;
+    const golMoral=s=>{mo[s]=clamp(mo[s]+CD.moral.gol,-1,1);mo[1-s]=clamp(mo[1-s]-CD.moral.sofre,-1,1);refresh()};
+    const gastaEn=(s,i,v)=>{en[s][i]=Math.max(0,en[s][i]-v)};
+    /* cansaço por tempo corrido e risco de lesão sem contato */
+    function drena(dt){
+      let H=0;const hz=[];
+      for(let s=0;s<2;s++)T[s].xi.forEach((p,i)=>{
+        if(!vivo(s,i))return;
+        en[s][i]=Math.max(0,en[s][i]-CO.gasto(p.a0,p.slotCls,T[s].est)*dt*(s==1&&casaOn?CD.casa.gasto:1));
+        if(!les[s][i]){const r=CO.risco({age:p.age,en:en[s][i]})*dt;H+=r;hz.push({s,i,r})}
+      });
+      if(RL.f()<1-Math.exp(-H)){const x=RL.weighted(hz,o=>o.r);if(x)lesiona(x.s,x.i,'sem contato')}
+    }
+    function bancoIdx(s,cls){
+      const b=T[s].banco;let k=-1,bv=-1;
+      b.forEach((p,j)=>{const c=p.cls||MT.cls(p.pos,p.fp);if((cls=='GK')!=(c=='GK'))return;const v=p.ovr+(c==cls?20:0);if(v>bv){bv=v;k=j}});
+      return k;
+    }
+    /* lesão: leve joga machucado; média ou grave sai (se houver troca) ou fica no sacrifício/deixa o time com 10 */
+    function lesiona(s,i,tipo){
+      if(les[s][i]||!vivo(s,i))return;
+      const g=CO.gravidade(RL),p=T[s].xi[i],k=g=='leve'?-1:bancoIdx(s,i==0?'GK':p.slotCls),pode=k>=0&&subsN[s]<5;
+      lesoes[s]++;
+      evento('lesao',{s,p:i,d:{tipo,gravidade:g,nome:p.n,minuto:Math.round(minuto()),semTroca:g!='leve'&&!pode}});
+      perdido+=RG.tempo.lesao;t+=30;
+      if(g=='leve'){les[s][i]='leve'}
+      else if(pode)aplicaSub(s,i,k,'lesão');
+      else if(g=='grave'&&i>0){exp[s].add(i);if(ps==s&&h==i){posicoes();const m=maisPerto(s,[bx,by],1,true)[0];if(m)h=m.i}}
+      else les[s][i]=g;
+      refresh();
+    }
     function adaptaTodos(){
       if(opt&&opt.fixo)return;
       for(const s of [0,1]){
@@ -3239,13 +3279,13 @@ const MT=(()=>{
     function aplicaSub(s,out,k,motivo){
       const old=T[s].xi[out],nw=T[s].banco.splice(k,1)[0],cls=nw.cls||MT.cls(nw.pos,nw.fp),mudou=cls!=old.slotCls;
       T[s].xi[out]={...nw,u0:mudou?TA.PADRAO[cls]:old.u0,v0:old.v0,slotCls:mudou?cls:old.slotCls,fora:false};
-      delete am[s][out];subT[s][out]=t;subsN[s]++;perdido+=RG.tempo.sub;
+      delete am[s][out];delete les[s][out];en[s][out]=100;subT[s][out]=t;subsN[s]++;perdido+=RG.tempo.sub;
       evento('substituicao',{s,p:out,d:{sai:old.n,entra:nw.n,motivo,minuto:Math.round(minuto()),pos:T[s].xi[out].slotCls}});
     }
     function janela(ht){
       for(const s of [0,1]){
         if(!ht)jan[s]++;
-        const rt=notas(s),xi=T[s].xi.map((p,i)=>({cls:p.slotCls,ovr:p.ovr,rt:rt[i],am:(am[s][i]||0)>=1,exp:!vivo(s,i)||(ps==s&&h==i),gk:i==0}));
+        const rt=notas(s),xi=T[s].xi.map((p,i)=>({cls:p.slotCls,ovr:p.ovr,en:en[s][i],rt:rt[i],am:(am[s][i]||0)>=1,exp:!vivo(s,i)||(ps==s&&h==i),gk:i==0}));
         const banco=T[s].banco.map(p=>({cls:p.cls||MT.cls(p.pos,p.fp),ovr:p.ovr,gk:(p.cls||MT.cls(p.pos,p.fp))=='GK'}));
         const l=TA.subs({min:minuto(),saldo:G[s]-G[1-s],xi,banco,feitas:subsN[s],janelas:jan[s]-(ht?0:1),ht},T[s].tec,RT);
         /* indices do banco mudam a cada troca: aplica de trás para frente */
@@ -3255,6 +3295,7 @@ const MT=(()=>{
     function joga(lim){
     while(t<lim&&guarda++<60000){
       if(vant&&t-vant.t>=6)vant=null;
+      {const dt=t-tDr;if(dt>0){tDr=t;drena(dt);if(t-tRef>=60){tRef=t;mo[0]*=CD.moral.decai;mo[1]*=CD.moral.decai;refresh()}}}
       if(chk||t>=proxChk){proxChk=t+300;chk=false;adaptaTodos()}
       while(jans.length&&t>=jans[0]){jans.shift();janela(false)}
       posicoes();
@@ -3304,7 +3345,7 @@ const MT=(()=>{
           const k=maisPerto(opp(s),e.tgt,1,false)[0];recupera(opp(s),k.i,e.tgt,'erro');
         }
       }else if(op.t=='cond'){
-        gasta(s,PAR.dur.cond+op.dist*PAR.dur.condM);
+        gasta(s,PAR.dur.cond+op.dist*PAR.dur.condM);gastaEn(s,h,op.dist*.03);
         if(RU.chance(op.pc)){st[s].conducoes++;if(op.dist>=9)evento('conducao',{s,p:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tx:+op.np[0].toFixed(3),ty:+op.np[1].toFixed(3)}});bx=op.np[0];by=op.np[1];ult=null}
         else{
           const k=maisPerto(opp(s),op.np,1,true)[0];
@@ -3313,7 +3354,7 @@ const MT=(()=>{
           evento('desarme',{s:opp(s),p:k.i,q:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tipo:'conducao'}});recupera(opp(s),k.i,[bx,by],'desarme');
         }
       }else if(op.t=='drib'){
-        st[s].dribles++;gasta(s,PAR.dur.drib);
+        st[s].dribles++;gasta(s,PAR.dur.drib);gastaEn(s,h,.5);
         if(RU.chance(op.pd)){st[s].dribOk++;evento('drible',{s,p:h,q:op.m,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok'});bx=toX(s,op.nu);by=toY(s,op.nv);ult=null}
         else if(RF.chance(MT.regras.pFalta('drib',I(opp(s),op.m).a,me,rigZ(s,[bx,by])*Math.sqrt(T[opp(s)].est.pres)))){if(!faltaEm(opp(s),op.m,s,h,'drib',[bx,by],RF.chance(.35))){bx=toX(s,op.nu);by=toY(s,op.nv);ult=null}continue}
         else{st[s].perdas++;evento('drible',{s,p:h,q:op.m,x:+bx.toFixed(3),y:+by.toFixed(3),o:'falha'});st[opp(s)].desarmes++;st[opp(s)].desOk++;evento('desarme',{s:opp(s),p:op.m,q:h,x:+bx.toFixed(3),y:+by.toFixed(3),o:'ok',d:{tipo:'drible'}});recupera(opp(s),op.m,[bx,by],'desarme')}
@@ -3327,10 +3368,10 @@ const MT=(()=>{
     const tempo=(n)=>{
       const add=MT.regras.acrescimo(perdido);evento('acrescimo',{d:{min:add,periodo:n}});perdido=0;return add;
     };
-    inicio(0);evento('inicio',{});
+    refresh();inicio(0);evento('inicio',{});
     [0,1].forEach(s=>evento('tatica',{s,d:{estilo:T[s].chave,form:T[s].form,treinador:T[s].tec.nome,minuto:0}}));
     joga(2700);const a1=tempo(1);joga(2700+a1*60);
-    evento('fim_tempo',{});vant=null;inicio(1);t2=t;janela(true);jans.push(t2+900,t2+1500,t2+2100);
+    evento('fim_tempo',{});vant=null;inicio(1);t2=t;for(let s=0;s<2;s++)en[s]=en[s].map(v=>Math.min(100,v+CD.descanso));refresh();janela(true);jans.push(t2+900,t2+1500,t2+2100);
     joga(t2+2700);const a2=tempo(2);joga(t2+2700+a2*60);
     let pen=null;
     if(opt&&opt.mataMata&&G[0]==G[1]){
@@ -3339,7 +3380,7 @@ const MT=(()=>{
       if(G[0]==G[1]&&!(opt&&opt.semPenaltis))pen=disputa();
     }
     evento('fim',{});
-    return{log,g:G,st,T,t,pen,subs:subsN.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
+    return{log,g:G,st,T,t,pen,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
   }
 
   /* o treinador-IA escolhe a formação que melhor aproveita o elenco (nota dos 11, com desconto por jogador fora de função) */

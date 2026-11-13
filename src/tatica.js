@@ -75,7 +75,7 @@
     const procura=saldo<0?'ataque':saldo>0&&min>=70?'defesa':'neutro';
     const cand=xi.map((p,i)=>({p,i})).filter(o=>!o.p.gk&&!o.p.exp);
     const sc=o=>{
-      let s=-(o.p.rt||0)*1.2-(o.p.ovr-65)/40+(o.p.am?.35:0)+rs.gauss(0,.25);
+      let s=-(o.p.rt||0)*1.2-(o.p.ovr-65)/40+(o.p.am?.35:0)+rs.gauss(0,.25)+Math.max(0,65-(o.p.en??100))/35;
       if(procura=='ataque'&&['CB','DM','FB'].includes(o.p.cls))s+=.5;
       if(procura=='defesa'&&['ST','W','AM'].includes(o.p.cls))s+=.5;
       return s;
