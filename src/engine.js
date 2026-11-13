@@ -191,10 +191,10 @@ function lnp(){
 const role=()=>{const d=O()-cl(S.club).s+(S.pc?(S.pc.tr-50)/8:0);return S.inj?'Lesionado':d>=-5?'Titular':d>=-12?'Rodízio':'Reserva'};
 
 function pm(h,a,label,knock,kind,ag){
-  const me=S.club,my=h==me?0:1,o=cl(my?h:a),mc=cl(me),ov=O(),pos=S.p.pos,lu=lnp();
+  const me=S.club,my=h==me?0:1,o=cl(my?h:a),mc=cl(me),ov=O(),pos=S.p.pos,pre=(typeof PRE!=='undefined'&&PRE&&PRE.h==h&&PRE.a==a&&PRE.w==S.week)?PRE:null,lu=pre?pre.lu:lnp();
   const r={comp:label,kind,h,a,ev:[],sc:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0};
   let inn=0,out=0;
-  if(lu){inn=lu.s?1:RI(52,78);out=lu.s&&Math.random()<.3?RI(68,90):90}
+  if(lu){inn=lu.s?1:pre?pre.inn:RI(52,78);out=lu.s&&Math.random()<.3?RI(68,90):90}
   const on=m=>lu&&m>=inn&&m<=out,e=(m,t,c='')=>r.ev.push({m,t,c});
   const pf=.7+S.cond/200+(S.form-6.5)/20;
   const sm=mc.s+(lu?(ov-mc.s)*.12*(out-inn+1)/90*pf:0),sh=my?o.s:sm,sa=my?sm:o.s;
@@ -206,7 +206,7 @@ function pm(h,a,label,knock,kind,ag){
   const AA=({ATA:.4,PNT:.7,MEI:1,VOL:.4,ZAG:.1})[pos]*(S.at[2]/70)*(S.at[6]/70)*(1+pfx('ast'));
   const isLg=kind=='lg';
   /* motor de partidas novo (src/ponte.js); se falhar, segue o motor antigo logo abaixo */
-  if(typeof pmMotor=='function'&&pmMotor(r,{h,a,my,lu,knock,kind,ag,isLg,inn})){
+  if(typeof pmMotor=='function'&&pmMotor(r,{h,a,my,lu,knock,kind,ag,isLg,inn,pre})){
     const gf=r.g[my],ga=r.g[1-my];
     if(lu&&r.pl){
       const c=S.cur;c.ap++;c.g+=r.gl;c.a+=r.as;c.rs+=r.rt;c.mn+=r.mn;c.y1+=r.yc;c.r1+=r.rc;

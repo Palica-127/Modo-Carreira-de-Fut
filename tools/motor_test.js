@@ -549,5 +549,38 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
  {const r=jg.find(x=>x.pen)||null;if(r){const N=MT.narra(r);ok(N.some(x=>x.k=='penaltis')&&/pênaltis/.test(N[N.length-1].txt),'disputa de pênaltis narrada e no resultado final')}else ok(true,'(sem disputa na amostra)');}
 }
 
+/* ===== módulo 11: partida em andamento e jogadas interativas ===== */
+{
+ const RAP=!!process.env.RAPIDO,mk=i=>[MT.timeTeste(72,'4-3-3','Azul'+i,i*2+7000),MT.timeTeste(68,'4-4-2','Rubro'+i,i*2+7001)];
+ /* avançar aos poucos dá exatamente a mesma partida */
+ {let iguais=0,n=RAP?3:8;
+  for(let i=1;i<=n;i++){const [A,B]=mk(i),a=MT.simula(A,B,15000+i,i%2?{mataMata:true}:{}),p=MT.partida(...mk(i),15000+i,i%2?{mataMata:true}:{});
+   for(let m=1;m<=90;m++)p.ateMinuto(m);p.avanca(Infinity);const b=p.resultado();if(a.log.digest()===b.log.digest()&&a.g.join()===b.g.join())iguais++}
+  ok(iguais==n,'avançar a partida minuto a minuto gera a mesma partida ('+iguais+'/'+n+')');}
+ /* a transmissão: no minuto m só existem lances até m, e o jogo termina no fim */
+ {const p=MT.partida(...mk(21),15021);p.ateMinuto(30);const t30=p.resultado().t,n30=p.resultado().log.ev.length;
+  ok(t30>=1800&&t30<1800+60&&!p.feito(),'ao minuto 30 a partida não passou muito de 30 min ('+Math.round(t30/60)+')');
+  p.ateMinuto(60);const r60=p.resultado();ok(r60.t>=(r60.min.a1*60)+2700+900&&r60.log.count('fim_tempo')==1&&!p.feito(),'ao minuto 60 já houve o intervalo');
+  p.ateMinuto(90);ok(p.feito()&&p.resultado().log.count('fim')==1&&p.resultado().log.ev.length>n30,'ao minuto 90 a partida está encerrada');}
+ /* jogada interativa: pausa, aceita a escolha e é reproduzível */
+ {const alvo='Azul31 10';let pausas=0,tipos=new Set(),ok1=true;
+  const roda=(escolha)=>{const [A,B]=mk(31),p=MT.partida(A,B,15031,{vivo:{s:0,nome:A.xi[9].n,cd:120}});let n=0;const log=[];
+   for(let g=0;g<400&&!p.feito();g++){p.avanca(Infinity);const z=p.pausa();if(z){n++;z.ops.forEach(o=>tipos.add(o.t));const c=escolha(z);log.push(c.t);p.escolhe(c)}}
+   return{p,n,log,r:p.resultado()}};
+  const a=roda(z=>({t:'auto'})),b=roda(z=>({t:'auto'}));
+  ok(a.n>=1&&a.p.feito(),'o jogador do usuário tem lances de decisão na partida ('+a.n+')');
+  ok(a.r.log.digest()===b.r.log.digest(),'mesmas escolhas, mesma partida');
+  const c=roda(z=>z.ops.find(o=>o.t=='chute')?{t:'chute'}:{t:'auto'});
+  ok(c.p.feito()&&c.r.log.ev.some(e=>e.k=='chute'),'a partida segue depois de escolhas diferentes');
+  ok(tipos.has('chute')||tipos.has('passe'),'as opções incluem chute e passe ('+[...tipos].join(',')+')');
+  /* escolher chutar nos lances em que há chute: o jogador chuta mais do que se o jogo decidisse */
+  const conta=(rr,nome)=>rr.log.ev.filter(e=>e.k=='chute'&&e.s==0&&rr.ini[0][e.p]&&rr.ini[0][e.p].n==nome).length;
+  let ca=0,cb=0;for(let i=40;i<48;i++){const nn=MT.timeTeste(72,'4-3-3','Azul'+i,i*2).xi[9].n;
+   for(const [modo,sink] of [['auto',0],['chute',1]]){const [A,B]=mk(i),p=MT.partida(A,B,15100+i,{vivo:{s:0,nome:A.xi[9].n,cd:120}});
+    for(let g=0;g<400&&!p.feito();g++){p.avanca(Infinity);const z=p.pausa();if(z)p.escolhe(modo=='chute'&&z.ops.find(o=>o.t=='chute')?{t:'chute'}:{t:'auto'})}
+    const k=p.resultado().log.ev.filter(e=>e.k=='chute'&&e.s==0&&e.p==9).length;if(sink)cb+=k;else ca+=k}}
+  ok(cb>=ca,'escolher chutar faz o jogador chutar pelo menos tanto quanto deixar o jogo decidir ('+ca+' -> '+cb+')');}
+}
+
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);
 process.exitCode=falhas?1:0;

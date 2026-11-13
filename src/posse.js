@@ -87,7 +87,7 @@
     return clamp(p,.003,.78);
   }
 
-  function simula(A,B,seed,opt){
+  function partida(A,B,seed,opt){
     opt=opt||{};
     const rg=MT.rng(seed),RD=rg.fork('dec'),RU=rg.fork('duelo'),RS=rg.fork('chute'),RM=rg.fork('misc'),RF=rg.fork('regras');
     /* cópia dos times: trocas e expulsões não podem alterar os objetos de quem chamou */
@@ -207,7 +207,7 @@
     }
 
     /* escolha entre as opções: valor esperado de cada uma + ruído de percepção, escolha suave */
-    function decide(s,h,P){
+    function decide(s,h,P,forca){
       const a=pl(s,h),ub=toU(s,bx),vb=toV(s,by),cls=I(s,h).slotCls,ops=[];
       const ruido=(100-a.vis)/100*PAR.decisao.ruido+(100-a.dec)/100*.05,tau=PAR.decisao.tau0+(100-a.dec)/100*PAR.decisao.tauDec;
       const V=PAR.valor,vOwn=(u,v)=>V.keep+th(u,v),vOpp=(u,v)=>-(V.keep+th(1-u,v)*.9);
@@ -241,8 +241,13 @@
        if(c){const ev=c.xg*V.gol+(1-c.xg)*(-(V.keep+.02))+(c.xg>.1?PAR.chute.instinto*Math.min(1,c.xg/.3):0)+((cls=='CM'||cls=='AM'||cls=='DM')&&c.d<27?PAR.chute.meia:0)+(a.agr>70?.01:0)+(100-a.dec)/100*.03*(c.d<26?1:.5);ops.push({t:'chute',c,u:ev+RD.gauss(0,ruido*.4)})}}
       if(!ops.length)return null;
       /* impulso: quem é agressivo ou atrevido bate de longe mesmo sem ser a melhor opção */
+      if(forca&&forca.lista)return ops;
+      if(forca&&forca.t){
+        const ok=ops.filter(o=>forca.t=='passe'?((o.t=='passe'||o.t=='cruz')&&(forca.j==null||o.e.j==forca.j)):o.t==forca.t);
+        if(ok.length)return ok.reduce((a,b)=>b.u>a.u?b:a)
+      }
       const sh=ops.find(o=>o.t=='chute');
-      if(sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.7*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
+      if(!forca&&sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.7*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
       const mx=Math.max(...ops.map(o=>o.u));
       let tot=0;const w=ops.map(o=>{const v=Math.exp((o.u-mx)/tau);tot+=v;return v});
       let r=RD.f()*tot;for(let i=0;i<ops.length;i++){r-=w[i];if(r<=0)return ops[i]}
@@ -551,6 +556,20 @@
       T[s].xi.forEach((p,i)=>{if(i==0||!vivo(s,i)||(ps==s&&h==i))return;const v=en[s][i]+(p.slotCls==cls?-40:0);if(v<bv){bv=v;b=i}});
       if(b>=0)aplicaSub(s,b,k,'decisão do técnico');
     }
+    /* ---------- jogo interativo: o jogador do usuário decide em alguns lances ---------- */
+    const VIVO=opt.vivo?{s:opt.vivo.s,nome:opt.vivo.nome,esc:[],ult:-1e9,cd:opt.vivo.cd||170,n:0}:null;let pausa=null;
+    function momentoVivo(s,h){
+      const ub=toU(s,bx),c=I(s,h).slotCls,lim=c=='ST'||c=='W'?.7:c=='AM'||c=='CM'?.6:c=='DM'?.5:.45;
+      return ub>lim;
+    }
+    const resumoOps=ops=>{
+      const o=[],ch=ops.find(x=>x.t=='chute');
+      if(ch)o.push({t:'chute',xg:+ch.c.xg.toFixed(3),d:+ch.c.d.toFixed(1)});
+      ops.filter(x=>x.t=='passe'||x.t=='cruz').sort((a,b)=>b.u-a.u).slice(0,3).forEach(x=>o.push({t:'passe',j:x.e.j,nome:I(ps,x.e.j).n,q:+x.e.q.toFixed(2),cruz:x.t=='cruz',d:+x.e.d.toFixed(0),ru:+x.e.ru.toFixed(2)}));
+      const cd=ops.find(x=>x.t=='cond');if(cd)o.push({t:'cond',pc:+cd.pc.toFixed(2)});
+      const dr=ops.find(x=>x.t=='drib');if(dr)o.push({t:'drib',pd:+dr.pd.toFixed(2)});
+      return o;
+    };
     function joga(lim){
     while(t<lim&&guarda++<60000){
       if(vant&&t-vant.t>=6)vant=null;
@@ -562,7 +581,13 @@
       const s=ps,me=pl(s,h),m=maisPerto(opp(s),[bx,by],1,true)[0],P=clamp(sig((4.6-(m?m.d:12))/1.7)*(.3+.7*Math.sqrt(T[opp(s)].est.pres)),0,1);
       const reiniciou=rei;rei=false;
       if(!reiniciou&&tentaDesarme(s,h,P))continue;
-      const op=decide(s,h,P);
+      /* jogada interativa: a bola está com o jogador do usuário num momento de decisão */
+      let forca=null;
+      if(VIVO&&s==VIVO.s&&h>0&&!reiniciou&&t-VIVO.ult>=VIVO.cd&&T[s].xi[h].n==VIVO.nome&&vivo(s,h)&&momentoVivo(s,h)){
+        if(VIVO.esc.length){const c=VIVO.esc.shift();VIVO.ult=t;forca=c.t=='auto'?null:c}
+        else{const ops=decide(s,h,P,{lista:true});if(ops&&ops.length>1){pausa={s,h,t,ops:resumoOps(ops)};rei=reiniciou;return}}
+      }
+      const op=decide(s,h,P,forca);
       if(!op){gasta(s,2);continue}
       if(op.t=='passe'||op.t=='cruz'){
         const e=op.e,kind=op.t=='cruz'?'cruzamento':e.longo?'lancamento':'passe',r=RU.f();
@@ -631,20 +656,43 @@
     const tempo=(n)=>{
       const add=MT.regras.acrescimo(perdido);evento('acrescimo',{d:{min:add,periodo:n}});perdido=0;return add;
     };
+    /* ---------- fases do jogo (a partida pode ser avançada aos poucos e pausada em lances interativos) ---------- */
+    let fase=0,limF=2700,feito=false,a1=0,a2=0,pen=null,tp=0,usouET=false;
+    const ET=()=>opt&&opt.mataMata&&G[0]==G[1];
+    function avanca(alvo,faseMin){
+      faseMin=faseMin||0;
+      while(!feito&&!pausa&&(t<alvo||fase<faseMin)){
+        if(t>=limF){
+          fase++;
+          if(fase==1){a1=tempo(1);limF=2700+a1*60}
+          else if(fase==2){
+            evento('fim_tempo',{});vant=null;inicio(1);t2=t;for(let s=0;s<2;s++)en[s]=en[s].map(v=>Math.min(100,v+CD.descanso));
+            refresh();janela(true);jans.push(t2+900,t2+1500,t2+2100);limF=t2+2700;
+          }
+          else if(fase==3){a2=tempo(2);limF=t2+2700+a2*60}
+          else if(fase==4){if(ET()){usouET=true;evento('prorrogacao',{d:{periodo:1}});inicio(RF.chance(.5)?0:1);tp=t;limF=tp+900}else fase=6}
+          else if(fase==5){evento('prorrogacao',{d:{periodo:2}});vant=null;inicio(RF.chance(.5)?0:1);tp=t;limF=tp+900}
+          if(fase>=6){if(usouET&&G[0]==G[1]&&!(opt&&opt.semPenaltis))pen=disputa();evento('fim',{});feito=true}
+          continue;
+        }
+        joga(fase<faseMin?limF:Math.min(limF,alvo));
+      }
+    }
+    const resultado=()=>({log,g:G,st,T,t,pen,arb:ARB,ini,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length});
+    /* avança até o minuto m do relógio da transmissão (1º tempo com acréscimos termina no 45; o fim vem no 90) */
+    function ateMinuto(m){
+      if(m>=90)return avanca(Infinity);
+      if(m>=45&&fase<3)return avanca(0,3);
+      if(m<45)return avanca(fase==0?Math.min(m*60,2700):0);
+      if(fase>=3)avanca(t2+(m-45)*60);
+    }
     refresh();inicio(0);evento('inicio',{});
     [0,1].forEach(s=>evento('tatica',{s,d:{estilo:T[s].chave,form:T[s].form,treinador:T[s].tec.nome,minuto:0}}));
-    joga(2700);const a1=tempo(1);joga(2700+a1*60);
-    evento('fim_tempo',{});vant=null;inicio(1);t2=t;for(let s=0;s<2;s++)en[s]=en[s].map(v=>Math.min(100,v+CD.descanso));refresh();janela(true);jans.push(t2+900,t2+1500,t2+2100);
-    joga(t2+2700);const a2=tempo(2);joga(t2+2700+a2*60);
-    let pen=null;
-    if(opt&&opt.mataMata&&G[0]==G[1]){
-      evento('prorrogacao',{d:{periodo:1}});inicio(RF.chance(.5)?0:1);let tp=t;joga(tp+900);
-      evento('prorrogacao',{d:{periodo:2}});vant=null;inicio(RF.chance(.5)?0:1);tp=t;joga(tp+900);
-      if(G[0]==G[1]&&!(opt&&opt.semPenaltis))pen=disputa();
-    }
-    evento('fim',{});
-    return{log,g:G,st,T,t,pen,arb:ARB,ini,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
+    return{log,avanca,ateMinuto,resultado,feito:()=>feito,pausa:()=>pausa,
+      escolhe:c=>{if(VIVO&&pausa){VIVO.esc.push(c);pausa=null}},
+      pendentes:()=>VIVO?VIVO.esc.length:0};
   }
+  function simula(A,B,seed,opt){const p=partida(A,B,seed,opt);p.avanca(Infinity);return p.resultado()}
 
   /* o treinador-IA escolhe a formação que melhor aproveita o elenco (nota dos 11, com desconto por jogador fora de função) */
   function timeIA(js,nome){
@@ -654,5 +702,5 @@
     return best;
   }
   MT.timeIA=timeIA;
-  MT.PAR=PAR;MT.FORM=FORM;MT.timeDe=timeDe;MT.timeTeste=timeTeste;MT.simula=simula;MT.xgPos=xgPos;MT.thPos=th;
+  MT.PAR=PAR;MT.FORM=FORM;MT.timeDe=timeDe;MT.timeTeste=timeTeste;MT.simula=simula;MT.partida=partida;MT.xgPos=xgPos;MT.thPos=th;
 })();

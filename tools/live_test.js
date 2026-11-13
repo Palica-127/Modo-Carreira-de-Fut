@@ -7,7 +7,7 @@ const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:'h
   beforeParse(w){w.scrollTo=()=>{};w.confirm=()=>true;w.addEventListener('error',e=>errors.push('ERR '+e.message));w.console.error=(...a)=>errors.push('console.error '+a.join(' '))}});
 const w=dom.window,ev=c=>w.eval(c);
 ev(`TITLE=null;render()`);ev(`document.querySelector('#fl').value='1';start()`);
-let games=0,goals=0,cels=0,maxHold=0,kinds={};
+let decs=0,games=0,goals=0,cels=0,maxHold=0,kinds={};
 for(let wk=0;wk<14&&games<8;wk++){
   ev(`S.day=7`);
   const i0=ev(`(function(){const g=wkPlan()[0];S.day=g.d;return g.ph})()`);
@@ -22,6 +22,7 @@ for(let wk=0;wk<14&&games<8;wk++){
   let now=0,tickAcc=0,frames=0,guard=0;
   while(ev(`ui.lv&&ui.lv.t<90`)&&guard++<400000){
     now+=16;frames++;
+    if(ev(`!!(ui.lv&&ui.lv.dec)`)){decs++;ev(`lvEsc(${decs%3==0?-1:0})`);if(!ev(`!!ui.lv`))break}
     ev(`lvFrame(${now})`);
     tickAcc+=16;
     const st=ev(`PIT?JSON.stringify({c:!!PIT.cel,h:PIT.hold,s:PIT.seg&&PIT.seg.k,nan:[PIT.ball.x,PIT.ball.y].some(isNaN)||PIT.pos.flat().some(p=>isNaN(p[0])||isNaN(p[1]))}):'null'`);
@@ -33,5 +34,5 @@ for(let wk=0;wk<14&&games<8;wk++){
   ev(`lvClose&&0;clearInterval(LVT);ui.lv=null;S.lvp=0;lvDraw()`);
   ev(`S.ev=null;while(S.ph=='season'&&S.wb!=undefined&&S.week<${wk+2}){step()}`);
 }
-console.log('jogos',games,'gols',goals,'quadros de comemoração',cels,'trechos',JSON.stringify(kinds));
+console.log('decisões',decs,'jogos',games,'gols',goals,'quadros de comemoração',cels,'trechos',JSON.stringify(kinds));
 console.log(errors.length?'ERROS:\n'+errors.join('\n'):'sem erros');

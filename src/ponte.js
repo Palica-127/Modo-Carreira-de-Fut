@@ -19,21 +19,82 @@ function motorElenco(cid,lu){
   return js;
 }
 
+/* monta os dois times e as opções do motor para uma partida do clube do usuário */
+function montaMotor(x){
+  const{h,a,my,lu,knock,ag}=x,me=S.club,ids=[h,a];
+  const js=ids.map(id=>motorElenco(id,id==me?lu:null));
+  const T=ids.map((id,i)=>MT.timeIA(js[i],cl(id).n));
+  const opt={entradas:[],moral:[0,0]};
+  opt.moral[my]=C((S.mor-50)/100+(S.form-6.5)/6,-.6,.6);
+  if(lu&&!lu.s)opt.entradas.push({s:my,nome:S.p.name,min:x.inn});
+  if(knock&&!ag)opt.mataMata=true;
+  return{js,T,opt};
+}
+
 /* partida do clube do usuário pelo motor novo; null se não puder (o jogo cai no motor antigo) */
+let PRE=null;   /* partida jogada ao vivo, à espera de ser lançada no calendário */
 function pmMotor(r,x){
   if(!MOTOR_ON||typeof MT==='undefined'||!MT.simula)return null;
   try{
-    const{h,a,my,lu,knock,kind,ag,isLg}=x,me=S.club,ids=[h,a];
-    const js=ids.map(id=>motorElenco(id,id==me?lu:null));
-    const T=ids.map((id,i)=>MT.timeIA(js[i],cl(id).n));
-    const opt={entradas:[],moral:[0,0]};
-    opt.moral[my]=C((S.mor-50)/100+(S.form-6.5)/6,-.6,.6);
-    if(lu&&!lu.s)opt.entradas.push({s:my,nome:S.p.name,min:x.inn});
-    if(knock&&!ag)opt.mataMata=true;
-    const m=MT.simula(T[0],T[1],Math.floor(Math.random()*2147483000),opt);
+    let m,js;
+    if(x.pre){m=x.pre.m;js=x.pre.js;PRE=null}
+    else{
+      const q=montaMotor(x);js=q.js;
+      m=MT.simula(q.T[0],q.T[1],Math.floor(Math.random()*2147483000),q.opt);
+    }
     adaptaResultado(r,m,x,js);
     return r;
   }catch(e){console.error('motor novo falhou, usando o antigo:',e);return null}
+}
+
+/* ---------- partida ao vivo: o motor roda enquanto a transmissão avança e o jogador decide alguns lances ---------- */
+/* dados do jogo do clube do usuário na rodada (os mesmos que o calendário usaria ao simulá-lo) */
+function userFixture(g){
+  const me=S.club;
+  if(g.ph=='end'){return g.h==null?null:{h:g.h,a:g.a,my:g.h==me?0:1,knock:0,kind:'lg',ag:null,label:'Liga',isLg:true}}
+  const k=allComps().find(k=>kDue(k,S.week)&&k.al.includes(me));if(!k)return null;
+  const m=kPair(k);if(!m)return null;
+  const base={h:m[0],a:m[1],my:m[0]==me?0:1,kind:k.k,isLg:false};
+  if(kTwo(k)&&!k.l1)return{...base,knock:0,ag:null,label:k.n+' — '+k.rn[k.rd]+' (ida)'};
+  if(kTwo(k)){const i=k.dr.findIndex(q=>q.includes(me)),g1=k.l1[i];return{...base,knock:1,ag:[g1[1],g1[0]],label:k.n+' — '+k.rn[k.rd]+' (volta)'}}
+  return{...base,knock:1,ag:null,label:k.n+' — '+k.rn[k.rd]};
+}
+/* cria a partida ao vivo (ou a recria, a partir do que foi salvo, para o jogador não poder "sortear de novo" recarregando) */
+function pmViva(g,pj){
+  if(!MOTOR_ON||typeof MT==='undefined'||!MT.partida)return null;
+  try{
+    const f=userFixture(g);if(!f)return null;
+    const lu=pj?pj.lu:lnp(),inn=pj?pj.inn:(lu&&!lu.s?RI(52,78):1),x={...f,lu,inn},q=montaMotor(x);
+    q.opt.vivo={s:x.my,nome:S.p.name,cd:170};
+    const seed=pj?pj.seed:Math.floor(Math.random()*2147483000),p=MT.partida(q.T[0],q.T[1],seed,q.opt);
+    const V={p,x,js:q.js,seed,lu,inn,dec:pj?pj.dec.slice():[],w:S.week,ph:g.ph,r:{comp:f.label,kind:f.kind,h:f.h,a:f.a,ev:[],sc:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0,vivo:1},min:0};
+    return V;
+  }catch(e){console.error('partida ao vivo falhou:',e);return null}
+}
+/* atualiza o resultado parcial (o que a transmissão mostra) com o que o motor já jogou */
+function vivoRefresh(V){
+  const m=V.p.resultado();
+  if(!m.log.ev.length)return;
+  adaptaResultado(V.r,m,{...V.x,parcial:true},V.js);
+}
+/* recoloca a partida salva no ponto em que estava: refaz os lances com as mesmas escolhas */
+function vivoReplay(V,min){
+  const fila=V.dec.slice();
+  for(let m=1;m<=min;m++){
+    V.p.ateMinuto(m);
+    while(V.p.pausa()&&fila.length){V.p.escolhe(fila.shift());V.p.ateMinuto(m)}
+    if(V.p.pausa())break;
+  }
+  V.min=min;vivoRefresh(V);return V.p.pausa();
+}
+/* fim da partida: lança o resultado no calendário (tabela, copas, estatísticas) como qualquer outra partida */
+function vivoFecha(V){
+  for(let n=0;n<50&&!V.p.feito();n++){if(V.p.pausa())V.p.escolhe({t:'auto'});V.p.avanca(Infinity)}
+  PRE={h:V.x.h,a:V.x.a,w:V.w,lu:V.lu,inn:V.inn,m:V.p.resultado(),js:V.js};
+  const nt=S.ti.length;
+  try{if(V.ph=='mid')stepMid();else stepEnd()}finally{PRE=null}
+  S.pj=null;
+  return nt;
 }
 
 function adaptaResultado(r,m,x,js){
@@ -50,13 +111,13 @@ function adaptaResultado(r,m,x,js){
     r.sc.push([mn(e.t),e.s,aut,mine?1:0,as]);
   });
   /* creditar rivais (gols, assistências, notas) e artilheiros do campeonato */
-  r.sc.forEach(z=>{
+  if(!x.parcial)r.sc.forEach(z=>{
     const cid=ids[z[1]],rv=(RC[cid]||[]).find(q=>q.n==z[2]);
     if(rv&&z[2]!=nome){rv.cur.g++;if(isLg)rv.cur.lg++}
     else if(z[2]!=nome&&isLg){const k=cid+'#'+z[2],e2=S.sc[k]||(S.sc[k]={n:z[2],c:cid,g:0});e2.g++}
     const ra=z[4]&&z[4]!=nome?(RC[cid]||[]).find(q=>q.n==z[4]):null;if(ra)ra.cur.a++;
   });
-  E.lista.forEach(j=>{if(j.min<1)return;const rv=(RC[ids[j.s]]||[]).find(q=>q.n==j.nome);if(rv&&j.nome!=nome){rv.cur.ap++;rv.cur.rs+=j.nota}});
+  if(!x.parcial)E.lista.forEach(j=>{if(j.min<1)return;const rv=(RC[ids[j.s]]||[]).find(q=>q.n==j.nome);if(rv&&j.nome!=nome){rv.cur.ap++;rv.cur.rs+=j.nota}});
   /* texto: narração do motor; o seu jogador aparece como "você" */
   const re=new RegExp(nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
   r.ev=[];
@@ -88,7 +149,8 @@ function adaptaResultado(r,m,x,js){
   r.sh=[X[0].chutes,X[1].chutes];r.po=Math.round(C(X[0].posseP,25,75));
   /* decisão do mata-mata */
   const ag=x.ag;
-  if(x.knock){
+  if(x.parcial){r.win=null;r.pen=0}
+  else if(x.knock){
     if(m.pen){r.win=m.pen.vencedor==0?h:a;r.pen=1}
     else if(ag&&r.g[0]+ag[0]==r.g[1]+ag[1]){r.win=pen(h,a);r.pen=1;r.ev.push({m:90,t:`${ag?'Empate no agregado!':'Empate!'} Nos pênaltis, vitória do ${cl(r.win).n}.`,c:''})}
     else r.win=r.g[0]>r.g[1]?h:r.g[1]>r.g[0]?a:null;
