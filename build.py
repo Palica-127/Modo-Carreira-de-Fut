@@ -1,7 +1,7 @@
 import re,urllib.parse
 src='src/'
 rd=lambda f:open(src+f,encoding='utf-8').read()
-data=rd('data.js');sqd=rd('squads.js');hist=rd('hist.js');eng=rd('engine.js');motor=rd('motor.js');atrib=rd('atrib.js');posse=rd('posse.js');ui=rd('ui.js');abas=rd('abas.js');live=rd('live.js');menu=rd('menu.js');css=rd('style.css')
+data=rd('data.js');sqd=rd('squads.js');hist=rd('hist.js');eng=rd('engine.js');motor=rd('motor.js');atrib=rd('atrib.js');chute=rd('chute.js');posse=rd('posse.js');ui=rd('ui.js');abas=rd('abas.js');live=rd('live.js');menu=rd('menu.js');css=rd('style.css')
 strip=lambda t:t.replace("'use strict';\n","",1)
 import os,json,base64
 crest={}

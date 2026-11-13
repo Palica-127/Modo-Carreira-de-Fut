@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -152,6 +152,60 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
     gb+=r.st[0].gols;sb+=r.st[0].chutes;gf+=r2.st[0].gols;sf+=r2.st[0].chutes}
   ok(gb/sb<gf/sf,'goleiro bom converte menos chutes do adversário que o ruim ('+(100*gb/sb).toFixed(1)+'% x '+(100*gf/sf).toFixed(1)+'%)');
 }
+}
+
+/* ===== módulo 3: chute e goleiro ===== */
+{
+ const C=MT.chute,at=(v)=>{const o={};MT.ATTR_KEYS.forEach(k=>o[k]=v);return o};
+ const pen=(1-11/105),ctx0={u:.9,v:.5,tipo:'pe',origem:'passe',nDef:0,pres:0};
+ /* xG do lance: geometria, tipo, origem, marcação */
+ {const x=(o)=>C.xgModel({...ctx0,...o});
+  ok(x({u:.97})>x({u:.93})&&x({u:.93})>x({u:.88})&&x({u:.88})>x({u:.8}),'xG cai com a distância');
+  ok(x({v:.5})>x({v:.7})&&x({v:.7})>x({v:.9}),'xG cai com o ângulo (bola pela lateral)');
+  ok(x({tipo:'cabeca'})<x({tipo:'pe'})*.7,'cabeçada vale menos que chute de pé');
+  ok(x({origem:'filtrado'})>x({origem:'passe'})&&x({origem:'cruz'})<x({origem:'passe'}),'passe em profundidade aumenta, cruzamento diminui');
+  ok(x({nDef:2})<x({nDef:0})&&x({pres:1})<x({pres:0}),'marcação e pressão reduzem o xG');
+  const p=x({u:pen,v:.5,nDef:0}),p6=x({u:1-5.5/105,v:.5});ok(p>.06&&p<.4&&p6>.25&&p6<.6&&p6>2*p,'xG: pequena área alto, 11 m central moderado ('+p6.toFixed(2)+' / '+p.toFixed(2)+')');
+  ok(x({u:.6,v:.5})<.06,'chute de longe vale pouco ('+x({u:.6,v:.5}).toFixed(3)+')');
+  ok(x({u:.99,v:.5,origem:'filtrado'})<=.8,'xG nunca passa de 0,80');}
+ /* habilidade do finalizador e pé fraco */
+ {const bom=at(85),ruim=at(35);
+  ok(C.habil(bom,'pe',false,60)>C.habil(ruim,'pe',false,60)+.4,'finalizador bom multiplica bem mais que o ruim');
+  ok(C.habil(bom,'pe',true,40)<C.habil(bom,'pe',false,40),'pé fraco desconta');
+  ok(C.habil(bom,'pe',true,80)>C.habil(bom,'pe',true,35),'pé fraco melhor desconta menos');
+  const so=at(50);so.cab=95;so.imp=90;so.for=85;so.fin=30;ok(C.habil(so,'cabeca',false,55)>C.habil(so,'pe',false,55),'bom cabeceador rende mais na cabeçada que no pé');}
+ /* goleiro: depende do tipo de lance */
+ {const g=at(50);g.um1=95;g.sai=90;const g2=at(50);g2.aer=95;g2.sai=90;
+  ok(C.qGoleiro(g,{tipo:'pe',origem:'filtrado',d:9})>C.qGoleiro(g,{tipo:'pe',origem:'passe',d:25}),'um contra um e saída pesam em lance de 1x1');
+  ok(C.qGoleiro(g2,{tipo:'cabeca',origem:'cruz',d:8})>C.qGoleiro(g2,{tipo:'pe',origem:'passe',d:25}),'jogo aéreo pesa em cruzamento');
+  ok(C.gkMult(1)<C.gkMult(0)&&C.gkMult(1)>=.85&&C.gkMult(0)<=1.3,'multiplicador do goleiro dentro de 0,86–1,28');}
+ /* desfecho: a chance total de gol bate com a calculada, respeita goleiro e finalizador */
+ {const f=(c,a,g,n,fraco)=>{const rs=MT.rng('res'+JSON.stringify(c)),cnt={gol:0,defesa:0,bloqueio:0,fora:0,trave:0,seg:0,reb:0};let pG=0;
+    for(let i=0;i<n;i++){const R=C.resolve(c,a,g,rs,fraco,55);cnt[R.res]++;pG=R.pG;if(R.seg=='rebote')cnt.reb++;if(R.seg=='segurou')cnt.seg++}
+    return{...cnt,pG,n}};
+  const c={u:.9,v:.5,d:11,tipo:'pe',origem:'passe',nDef:1,pres:0},m=at(70),r=f(c,m,m,40000);
+  perto(r.gol/r.n,r.pG,.012,'frequência de gols = chance calculada');
+  ok(r.gol+r.defesa+r.bloqueio+r.fora+r.trave==r.n,'todo chute tem um desfecho');
+  ok(r.bloqueio/r.n>.1&&r.bloqueio/r.n<.45,'bloqueios entre 10% e 45% ('+(100*r.bloqueio/r.n).toFixed(0)+'%)');
+  ok(r.trave>0&&r.trave<r.fora*.12,'trave é parte pequena dos chutes para fora');
+  ok(r.reb>0&&r.reb/(r.reb+r.seg)<.35,'rebote é minoria das defesas');
+  const gB=f(c,m,at(92),20000),gR=f(c,m,at(35),20000);ok(gB.gol<gR.gol*.85,'goleiro bom sofre menos gols que o ruim ('+gB.gol+' x '+gR.gol+')');
+  const fB=f(c,at(90),m,20000),fR=f(c,at(40),m,20000);ok(fB.gol>fR.gol*1.5,'finalizador bom faz bem mais gols que o ruim ('+fB.gol+' x '+fR.gol+')');
+  const fw=f(c,m,m,20000,true);ok(fw.gol<r.gol*.5*0+f(c,m,m,20000,false).gol,'pé fraco converte menos');
+  const a1=C.resolve(c,m,m,MT.rng(5),false,55),a2=C.resolve(c,m,m,MT.rng(5),false,55);ok(JSON.stringify(a1)==JSON.stringify(a2),'desfecho reproduzível com a mesma seed');
+  const rs=MT.rng(9);let usados=0;for(let i=0;i<50;i++){const b=rs.calls;C.resolve(c,m,m,rs,false,55);usados+=(rs.calls-b>=3?1:0)}ok(usados==50,'sempre consome sorteios (não desalinha a seed)');}
+ /* na partida: tipos, chances claras, pé, coerência do registro */
+ {const sd=[],tipos={pe:0,primeira:0,cabeca:0};let ch=0,gr=0,grG=0,outros=0,outG=0,fr=0,comPe=0,xgS=0,gols=0;
+  for(let i=1;i<=(process.env.RAPIDO?6:25);i++){const A=MT.timeTeste(72,'4-3-3','Casa',i*2),B=MT.timeTeste(68,'4-4-2','Fora',i*2+1),r=MT.simula(A,B,300+i),ev=r.log.ev;
+   ev.forEach((e,k)=>{if(e.k!='chute')return;ch++;tipos[e.d.tipo]++;xgS+=e.d.xg;if(e.d.fraco)fr++;if(e.d.pe)comPe++;
+     const golo=ev[k+1]&&ev[k+1].k=='gol'&&ev[k+1].p==e.p;if(golo)gols++;
+     if(e.d.grande){gr++;if(golo)grG++}else{outros++;if(golo)outG++}});}
+  ok(tipos.cabeca>0&&tipos.primeira>0&&tipos.pe>0,'os três tipos de chute aparecem');
+  ok(tipos.cabeca/ch>.04&&tipos.cabeca/ch<.3,'cabeçadas entre 4% e 30% dos chutes ('+(100*tipos.cabeca/ch).toFixed(0)+'%)');
+  ok(gr>0&&grG/gr>.25&&grG/gr>3*(outG/outros),'chances claras convertem bem mais ('+(100*grG/gr).toFixed(0)+'% x '+(100*outG/outros).toFixed(0)+'%)');
+  ok(fr>0&&fr/ch<.2,'pé fraco é usado em minoria dos chutes ('+(100*fr/ch).toFixed(0)+'%)');
+  ok(comPe==ch,'todo chute registra o pé usado');
+  ok(Math.abs(gols-xgS)/xgS<.45,'gols próximos do xG somado ('+gols+' x '+xgS.toFixed(1)+')');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);
