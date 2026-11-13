@@ -2,7 +2,7 @@
    Uso (na raiz): node tools/motor_cal.js [N] [forçaCasa] [forçaFora] [formaçãoCasa] [formaçãoFora] */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-const mods=['motor','atrib','chute','regras','posse'];
+const mods=['motor','atrib','chute','regras','tatica','posse'];
 for(const m of mods)vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 /* PAR='{"desarme":{"prob":.1}}' sobrescreve constantes sem editar o código */

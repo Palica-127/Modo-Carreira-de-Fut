@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','chute','regras','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','regras','tatica','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -300,6 +300,93 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(prorr>0,'mata-mata empatado vai à prorrogação');ok(pens>0,'prorrogação empatada vai aos pênaltis');ok(bad.length==0,'mata-mata coerente: '+bad.slice(0,3).join('; '));}
  /* reprodutível */
  {const [A,B]=par(70,70,5),a=MT.simula(A,B,4242),b=MT.simula(A,B,4242);ok(a.log.digest()===b.log.digest()&&a.st[0].faltas==b.st[0].faltas,'regras reproduzíveis com a mesma seed');}
+}
+
+/* ===== módulo 5: tática e treinador ===== */
+{
+ const TA=MT.tatica,RAP=!!process.env.RAPIDO;
+ /* estilos e treinadores */
+ {const ks=Object.keys(TA.ESTILOS);
+  ok(ks.length>=5&&ks.every(k=>{const e=TA.ESTILOS[k];return e.pres>.5&&e.pres<1.6&&e.linha>=-1&&e.linha<=1&&e.largura>.7&&e.largura<1.3&&e.ritmo>.8&&e.ritmo<1.2}),'estilos com parâmetros em faixas válidas');
+  ok(TA.ESTILOS.retranca.linha<TA.ESTILOS.equilibrado.linha&&TA.ESTILOS.equilibrado.linha<TA.ESTILOS.pressao.linha&&TA.ESTILOS.retranca.pres<TA.ESTILOS.pressao.pres,'retranca é mais baixa e passiva que a pressão');
+  const a=TA.treinador('Flamengo'),b=TA.treinador('Flamengo'),c=TA.treinador('Palmeiras');
+  ok(JSON.stringify(a)==JSON.stringify(b)&&a.ofensivo!=c.ofensivo,'treinador reproduzível pelo nome e diferente entre times');}
+ /* estilo inicial: forte joga por cima, fraco se fecha */
+ {const tec={ofensivo:0},conta=(f,ad)=>{const rs=MT.rng('ei'+f+ad),o={};for(let i=0;i<3000;i++){const k=TA.estiloInicial(f,ad,tec,false,rs);o[k]=(o[k]||0)+1}return o};
+  const forte=conta(85,65),fraco=conta(60,80),igual=conta(70,70);
+  const agr=o=>((o.pressao||0)+(o.ofensivo||0))/3000,def=o=>(o.retranca||0)/3000;
+  ok(agr(forte)>.6&&def(forte)<.02,'time muito mais forte joga por cima ('+(100*agr(forte)).toFixed(0)+'%)');
+  ok(def(fraco)>.5&&agr(fraco)<.05,'time muito mais fraco se fecha ('+(100*def(fraco)).toFixed(0)+'%)');
+  ok(igual.equilibrado>800,'times parecidos jogam equilibrados');
+  const ofen=MT.rng('o'),a1=(()=>{let n=0;for(let i=0;i<3000;i++){const k=TA.estiloInicial(70,70,{ofensivo:.9},true,ofen);if(k=='pressao'||k=='ofensivo')n++}return n/3000})(),a2=(()=>{let n=0;const r2=MT.rng('o2');for(let i=0;i<3000;i++){const k=TA.estiloInicial(70,70,{ofensivo:-.9},true,r2);if(k=='pressao'||k=='ofensivo')n++}return n/3000})();
+  ok(a1>a2+.3,'treinador ofensivo escolhe estilos mais ofensivos');}
+ /* adaptação em jogo */
+ {const tec={adapt:1},rs=MT.rng('ad');
+  const A=(o)=>TA.adapta({min:75,saldo:0,homens:11,homensAdv:11,chave:'equilibrado',...o},tec,rs);
+  const atras=A({saldo:-1}),frente=A({saldo:1,chave:'ofensivo'}),menos=A({homens:10}),mais=A({homensAdv:10});
+  ok(atras&&['ofensivo','desespero'].includes(atras.chave),'perdendo no fim, ataca');
+  ok(frente&&['retranca','equilibrado'].includes(frente.chave),'ganhando no fim, se protege');
+  ok(menos===null||(menos.chave!='pressao'&&menos.chave!='ofensivo'&&menos.chave!='desespero'),'com um a menos não se expõe');
+  ok(mais&&['pressao','desespero'].includes(mais.chave),'com um a mais empurra o adversário');
+  ok(TA.adapta({min:20,saldo:0,homens:11,homensAdv:11,chave:'equilibrado'},tec,rs)===null,'cedo e empatado: mantém o plano');
+  const sonolento={adapt:0},rs2=MT.rng('s');let n=0;for(let i=0;i<2000;i++)if(TA.adapta({min:75,saldo:-1,homens:11,homensAdv:11,chave:'equilibrado'},sonolento,rs2))n++;
+  ok(n<1300,'treinador pouco adaptável reage menos ('+n+'/2000)');}
+ /* substituições */
+ {const xi=(over)=>['GK','CB','CB','FB','FB','DM','CM','CM','W','ST','W'].map((c,i)=>({cls:c,ovr:70,rt:0,am:false,exp:false,gk:i==0,...(over&&over[i]||{})})),
+   banco=['GK','CB','DM','CM','W','ST','ST'].map(c=>({cls:c,ovr:66,gk:c=='GK'})),tec={subs:1};
+  const rs=MT.rng('subs');let tot=0,jogou=0,erros=0;
+  for(let i=0;i<400;i++){const l=TA.subs({min:75,saldo:-1,xi:xi(),banco,feitas:0,janelas:0,ht:false},tec,rs);tot+=l.length;if(l.length)jogou++;
+   const ins=new Set(),outs=new Set();l.forEach(x=>{if(x.out==0||ins.has(x.in)||outs.has(x.out))erros++;ins.add(x.in);outs.add(x.out)})}
+  ok(erros==0,'o goleiro não sai e ninguém entra ou sai duas vezes');ok(tot/400>1&&tot/400<5,'trocas por janela razoáveis ('+(tot/400).toFixed(2)+')');
+  ok(TA.subs({min:80,saldo:0,xi:xi(),banco,feitas:5,janelas:2,ht:false},tec,rs).length==0,'depois de 5 trocas, nenhuma');
+  ok(TA.subs({min:80,saldo:0,xi:xi(),banco,feitas:2,janelas:3,ht:false},tec,rs).length==0,'depois de 3 janelas, nenhuma (intervalo não conta)');
+  ok(TA.subs({min:80,saldo:0,xi:xi(),banco:[],feitas:0,janelas:0,ht:false},tec,rs).length==0,'sem banco, sem troca');
+  let atq=0,tt=0;const rs3=MT.rng('atq');for(let i=0;i<500;i++)TA.subs({min:78,saldo:-1,xi:xi(),banco,feitas:0,janelas:0,ht:false},tec,rs3).forEach(x=>{tt++;if(['ST','W'].includes(banco[x.in].cls))atq++});
+  ok(atq/tt>.4,'perdendo, os que entram são atacantes ('+(100*atq/tt).toFixed(0)+'%)');
+  const rs4=MT.rng('am');let amarelo=0,n2=0;for(let i=0;i<500;i++)TA.subs({min:70,saldo:0,xi:xi({5:{am:true,rt:-.5},6:{rt:.5},7:{rt:.4},8:{rt:.3},9:{rt:.3},10:{rt:.3},1:{rt:.4},2:{rt:.4},3:{rt:.3},4:{rt:.3}}),banco,feitas:0,janelas:0,ht:false},tec,rs4).slice(0,1).forEach(x=>{n2++;if(x.out==5)amarelo++});
+  ok(n2>0&&amarelo/n2>.5,'quem tem amarelo e rende mal é o primeiro a sair');
+  ok(xi({3:{exp:true}}).length==11&&TA.subs({min:80,saldo:-1,xi:xi({3:{exp:true}}),banco,feitas:0,janelas:0,ht:false},tec,MT.rng(1)).every(x=>x.out!=3),'expulso não é substituído');}
+
+ /* times com banco e formação escolhida pela IA */
+ {const A=MT.timeTeste(70,'4-3-3','Casa',11);ok(A.banco.length>=8&&A.banco.some(p=>p.cls=='GK'),'o time tem banco com goleiro reserva');
+  const js=[];const mk=(c,n,o)=>{const pos={GK:'GOL',CB:'ZAG',FB:'ZAG',DM:'VOL',CM:'MEI',AM:'MEI',W:'PNT',ST:'ATA'}[c],fp={GK:'GK',CB:'CB',FB:'LB',DM:'CDM',CM:'CM',AM:'CAM',W:'LW',ST:'ST'}[c];js.push({n,pos,fp,ovr:o,age:26,nat:'Brasil'})};
+  mk('GK','g',70);for(let i=0;i<4;i++)mk('CB','z'+i,70);for(let i=0;i<2;i++)mk('FB','l'+i,70);for(let i=0;i<3;i++)mk('CM','m'+i,70);mk('DM','v',70);mk('ST','s1',85);mk('ST','s2',84);mk('ST','s3',55);mk('W','w1',60);mk('W','w2',58);
+  const t1=MT.timeIA(js,'Time Dois Atacantes');ok(t1.form=='4-4-2'||t1.form=='4-2-3-1'||t1.form=='4-3-3','a IA escolhe uma formação válida');
+  const duas=js.filter(p=>p.n=='s1'||p.n=='s2').map(p=>p.n);
+  ok(duas.every(n=>t1.xi.some(p=>p.n==n)),'dois centroavantes de ponta entram no onze');
+  const t2=MT.timeIA(js,'Time Dois Atacantes'),t3=MT.timeIA(js,'Time Dois Atacantes');ok(t2.form==t3.form,'escolha de formação reproduzível');}
+
+ /* na partida */
+ const par=(fa,fb,seed)=>[MT.timeTeste(fa,'4-3-3','Casa'+seed,seed*2),MT.timeTeste(fb,'4-3-3','Fora'+seed,seed*2+1)];
+ {let bad=[],tot=[0,0],n=0,tats=0,sai=0;const N=RAP?6:30;
+  for(let i=1;i<=N;i++){const [A,B]=par(70,70,i),r=MT.simula(A,B,2000+i),ev=r.log.ev;n++;
+   [0,1].forEach(s=>{const sb=ev.filter(e=>e.k=='substituicao'&&e.s==s);tot[s]+=sb.length;if(sb.length>5)bad.push('mais de 5 trocas');
+     const ts=new Set(sb.filter(e=>e.t>3000).map(e=>Math.round(e.t/60)));if(ts.size>3)bad.push('mais de 3 janelas: '+[...ts]);
+     sb.forEach(e=>{if(e.d.sai===e.d.entra)bad.push('troca do mesmo jogador');if(e.p==0)bad.push('goleiro trocado')});
+     const finais=new Set(r.T[s].xi.map(p=>p.n));sb.forEach(e=>{if(!finais.has(e.d.entra)&&!sb.some(x=>x.d.sai===e.d.entra))bad.push('quem entrou não está em campo no fim')});
+     const nomes=r.T[s].xi.map(p=>p.n);if(new Set(nomes).size!=11)bad.push('jogador repetido em campo')});
+   tats+=ev.filter(e=>e.k=='tatica'&&e.t==0).length;
+   if(ev.some(e=>e.k=='substituicao'&&e.t>5400+800))bad.push('troca depois do fim');
+  }
+  ok(bad.length==0,'substituições coerentes: '+bad.slice(0,3).join('; '));
+  const m=(tot[0]+tot[1])/2/n;ok(m>3.3&&m<=5,'trocas por time ('+m.toFixed(2)+')');ok(tats==2*n,'tática de cada time registrada no apito inicial');}
+ /* adaptação no jogo: quem perde ataca, quem ganha se fecha */
+ {let ruim=[],cnt={atras:0,frente:0};const N=RAP?10:40;
+  for(let i=1;i<=N;i++){const [A,B]=par(70,70,i+50),r=MT.simula(A,B,3000+i);
+   r.log.ev.filter(e=>e.k=='tatica'&&e.d.minuto>0).forEach(e=>{
+    if(e.d.motivo=='atrás no placar'){cnt.atras++;if(!['ofensivo','desespero'].includes(e.d.estilo))ruim.push(e.d.estilo+' atrás')}
+    if(e.d.motivo=='protegendo a vantagem'){cnt.frente++;if(!['equilibrado','retranca'].includes(e.d.estilo))ruim.push(e.d.estilo+' na frente')}
+    if(e.d.motivo=='com um a menos'&&['ofensivo','pressao','desespero'].includes(e.d.estilo))ruim.push('exposto com 10')})}
+  ok(cnt.atras>0&&cnt.frente>0,'o treinador muda de plano durante o jogo ('+cnt.atras+' ataques, '+cnt.frente+' retrancas)');ok(ruim.length==0,'mudanças de estilo coerentes: '+ruim.slice(0,3).join('; '));}
+ /* os estilos mudam o jogo (sem adaptação, mesmos confrontos) */
+ {const N=RAP?8:24,roda=(es)=>{const a={ch:0,chS:0,falt:0,perdS:0};for(let i=1;i<=N;i++){const [A,B]=par(70,70,i+90),r=MT.simula(A,B,4000+i,{fixo:true,estilo:[es,'equilibrado']});
+    a.ch+=r.st[0].chutes/N;a.chS+=r.st[1].chutes/N;a.falt+=r.st[0].faltas/N;a.perdS+=r.st[1].perdas/N}return a};
+  const eq=roda('equilibrado'),pr=roda('pressao'),of=roda('ofensivo');
+  ok(pr.falt>eq.falt*1.25,'pressão alta custa faltas ('+eq.falt.toFixed(1)+' -> '+pr.falt.toFixed(1)+')');
+  ok(pr.perdS>eq.perdS,'pressão alta força mais perdas de bola do adversário ('+eq.perdS.toFixed(1)+' -> '+pr.perdS.toFixed(1)+')');
+  ok(of.ch>eq.ch*1.1,'estilo ofensivo chuta mais ('+eq.ch.toFixed(1)+' -> '+of.ch.toFixed(1)+')');
+  const mesmo=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']}),mesmo2=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']});
+  ok(mesmo.log.digest()===mesmo2.log.digest(),'partida com táticas fixas é reproduzível');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);
