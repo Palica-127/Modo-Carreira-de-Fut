@@ -246,7 +246,7 @@ function squadView(cid){
   const head=`<div class="pn full"><div class="row" style="margin-bottom:8px"><button class="ghost" onclick="voltarElenco()">← Voltar</button><button class="ghost" onclick="sheet('c','${cid}')">Ficha do clube</button></div><div class="offer">${shield(c,'lg')}<div><h3 style="margin:0">${esc(c.n)}</h3><small>${dvName(c)}${L?' · '+L.n:''}${pos?' · '+pos+'º colocado':''}</small></div></div>${kv([['Força',Math.round(c.s)],['Média dos 11',avg(xi)],['Idade média',(sq.reduce((s,x)=>s+x.age,0)/sq.length).toFixed(1)],['Jogadores',sq.length]])}</div>`;
   const groups=SQO.map(p=>{
     const g=sq.filter(x=>x.pos==p).sort((a,b)=>b.ovr-a.ovr);if(!g.length)return '';
-    return `<div class="pn"><h2>${PNQ[p]}s <small class="muted">${g.length}</small></h2><ul class="rank sq">${g.map(x=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.rv?'p':'q'}','${x.id}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':x.rv?'<span class="tag">craque</span>':''}<small>${x.age} anos · ${esc(x.nat)}${x.pot>x.ovr+3&&x.age<24?' · promessa':''}</small></span><span class="pt">${x.ovr}<small>OVR</small></span></li>`).join('')}</ul></div>`}).join('');
+    return `<div class="pn"><h2>${PNQ[p]}s <small class="muted">${g.length}</small></h2><ul class="rank sq">${g.map(x=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.rv?'p':'q'}','${x.id}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':x.rv?'<span class="tag">craque</span>':''}<small>${x.age} anos · ${esc(x.nat)}</small></span><span class="pt">${x.ovr}<small>OVR</small></span></li>`).join('')}</ul></div>`}).join('');
   return head+groups;
 }
 
@@ -389,7 +389,7 @@ function shL(s){
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||+slot>=sqLen(c))return null;
   const x=sqPlayer(c,+slot);
-  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Potencial',x.pot],['Idade',x.age],['Posição',x.pos]]);
+  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Idade',x.age],['Posição',x.pos]]);
   return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};
 }
 /* seleção */

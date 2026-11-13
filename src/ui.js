@@ -72,7 +72,7 @@ function chart(ser){
 }
 const evo=()=>S.sn.length<2?'<p class="note">O gráfico aparece depois da primeira metade da temporada.</p>':chart([{n:'OVR',c:CLR[0],d:S.sn.map(s=>s.o)},...A.map((n,i)=>({n,c:CLR[i+1],d:S.sn.map(s=>s.at[i])}))]);
 function bars(ys,vs){const m=Math.max(1,...vs),w=600/ys.length;return `<svg viewBox="0 0 600 150" style="width:100%">${vs.map((v,i)=>`<rect x="${i*w+3}" y="${120-v/m*100}" width="${Math.max(2,w-6)}" height="${v/m*100}" fill="#00F5A0" rx="3"/><text x="${i*w+w/2}" y="${114-v/m*100}" font-size="11" text-anchor="middle" fill="#F4F7FF">${v}</text><text x="${i*w+w/2}" y="140" font-size="9" text-anchor="middle" fill="#9AA7DB">${String(ys[i]).slice(2)}</text>`).join('')}</svg>`}
-const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b><small>/${Math.round(cap(i))}</small></div>`).join('');
+const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b></div>`).join('');
 
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
@@ -139,7 +139,7 @@ function viewProx(){
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
   h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
     <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
-    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade e é limitada pelo potencial (valor após “/”).</p>${abars()}</div>
+    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade.</p>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
   if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
@@ -184,7 +184,7 @@ function pgPf(){
   let h=pills([['at','Visão geral'],['cards','Cartas'],['hab','Habilidades'],['ctr','Contratos'],['hist','Estatísticas'],['tro','Troféus'],['sel','Seleção'],['conq','Conquistas'],['mail',mailLbl()],['sys','Sistema']],ui.pf,"pfSet",'scroll');
   const t=tot(false);
   if(ui.pf=='at'){
-    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Potencial</small><b>${C(S.p.pot-3,0,99)}–${C(S.p.pot+3,0,99)}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
+    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
     <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${role()}</b><small>Papel</small></div></div>
     <div class="cnt" style="margin-top:12px"><div><b>${t.ap}</b><small>Jogos</small></div><div><b>${t.g}</b><small>Gols</small></div><div><b>${t.a}</b><small>Assist.</small></div><div><b>${S.ti.length}</b><small>Títulos</small></div></div></div>
     <div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div><div class="pn full"><h2>Evolução</h2>${evo()}</div>`;
@@ -235,19 +235,30 @@ function ana(){
 }
 
 /* ---------- início ---------- */
+/* escolha do clube inicial: cada divisão da liga com seus times (sem escolha = sorteio na divisão mais baixa) */
+const INI={lg:0,club:null};
+const iniLg=i=>{INI.lg=i;INI.club=null;keepForm();render(true)};
+const iniClub=n=>{INI.club=INI.club==n?null:n;keepForm();render(true)};
+let FORM=null;
+function keepForm(){FORM={};['fn','fnat','fp','fh','fw'].forEach(k=>{const e=$('#'+k);if(e)FORM[k]=e.value})}
+function iniBlock(){
+  const L=LEAGUES[INI.lg],ch=INI.club?'Você começa no <b>'+esc(INI.club)+'</b>.':'Sem escolha: sorteio entre os times da '+esc(L.dn[L.dn.length-1])+'.';
+  return `<div class="cpick"><small class="muted">Clube inicial — toque num time para começar nele · ${ch}</small>${L.cl.map((str,d)=>`<div class="cdiv"><h3>${esc(L.dn[d])}${d==L.cl.length-1?' <em>(início padrão)</em>':''}</h3><div class="cgrid">${str.split(', ').map(n=>`<button type="button" class="cbtn" aria-pressed="${INI.club==n}" onclick="iniClub('${n.replace(/'/g,"\'")}')">${CREST[n]?`<img src="${CREST[n]}" alt="">`:'<span class="cdot"></span>'}<span>${esc(n)}</span></button>`).join('')}</div></div>`).join('')}</div>`;
+}
 function intro(){
   return `${'<header class="hud"><div class="logo">'+BALL+'<div><div class="eyebrow">Carreira de craque</div><h1>'+GAME_NAME+'</h1></div></div></header>'}
   <div class="pn"><h2>Nova carreira</h2><p class="muted" style="margin-top:0">Comece aos 16 anos na divisão mais baixa do país escolhido e construa uma lenda: 10 ligas, Champions, Libertadores e a disputa pela Bola de Ouro.</p>
   <label>Nome<input id="fn" value="Lucas Silva" maxlength="30"></label>
   <label>Nacionalidade<select id="fnat">${NAT.map(n=>`<option>${n}</option>`).join('')}</select></label>
-  <label>Liga inicial<select id="fl">${LEAGUES.map((l,i)=>`<option value="${i}">${l.n} — começa na ${l.dn[l.dn.length-1]}</option>`).join('')}</select></label>
+  <label>Liga inicial<select id="fl" onchange="iniLg(+this.value)">${LEAGUES.map((l,i)=>`<option value="${i}" ${i==(INI.lg||0)?'selected':''}>${l.n}</option>`).join('')}</select></label>
+  ${iniBlock()}
   <label>Posição<select id="fp">${Object.entries(PN).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
   <div class="row"><label style="flex:1">Altura (cm)<input id="fh" type="number" min="160" max="205" value="180"></label><label style="flex:1">Peso (kg)<input id="fw" type="number" min="55" max="110" value="72"></label></div>
   <button class="play" onclick="start()">Começar carreira</button><button class="ghost" style="margin-top:8px" onclick="ttlOpen()">← Menu inicial</button></div>`;
 }
 function start(){
   const h=C(+$('#fh').value||180,160,205),w=C(+$('#fw').value||72,55,110);
-  newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value});
+  newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value,club:INI.club});INI.club=null;FORM=null;
   ui=UI0();ui.lg=cl(S.club).l;render();
 }
 function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE=null;ui=UI0();render()}}
@@ -278,7 +289,7 @@ function render(keep){
   try{applyTheme()}catch(e){}
   const a=$('#app'),y=window.scrollY;
   document.body.classList.toggle('ttlon',!!TITLE&&!S);
-  if(!S){a.innerHTML=TITLE?titleHtml():intro();return}
+  if(!S){a.innerHTML=TITLE?titleHtml():intro();if(!TITLE&&FORM)Object.keys(FORM).forEach(k=>{const e=$('#'+k);if(e)e.value=FORM[k]});return}
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')+(ui.sheet?sheetHtml():'')}
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);

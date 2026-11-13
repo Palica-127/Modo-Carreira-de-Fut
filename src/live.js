@@ -4,7 +4,7 @@
    A partida já vem simulada em S.last (pm); aqui ela é "transmitida" minuto a minuto.
    ============================================================ */
 let LVT=null;
-const lvMs=[1400,700,300,100];
+const lvMs=[1400,700,300];
 const lvMine=r=>r.h==S.club||r.a==S.club;
 const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
 const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
@@ -269,7 +269,7 @@ function lvHtml(){
   const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
   const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
-  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
+  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
   let body;
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=tv).slice(-9).reverse();

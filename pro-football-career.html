@@ -727,6 +727,12 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 .lvpl em.ast{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;background:var(--acc2,#2fd0c8);color:#08111a;font:800 11px var(--d);font-style:normal;margin-left:4px;vertical-align:middle}
 .pgoal::before{will-change:transform}
 
+.cpick{margin:12px 0 4px}.cdiv h3{font:700 14px var(--d);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px}.cdiv h3 em{font-style:normal;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.cbtn{display:flex;align-items:center;gap:8px;text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--ink);font:600 13px var(--b);cursor:pointer;min-height:40px}
+.cbtn img{width:22px;height:22px;object-fit:contain;flex:none}.cbtn .cdot{width:22px;height:22px;border-radius:50%;background:var(--line);flex:none}
+.cbtn[aria-pressed=true]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:0 0 0 1px var(--acc)}
+
 </style></head>
 <body><div id="app" class="wrap"></div>
 <script>
@@ -783,6 +789,8 @@ const LEAGUES=[
 'Galatasaray, Fenerbahçe, Beşiktaş, Trabzonspor, Amed SFK, Başakşehir, Kasımpaşa, Samsunspor, Konyaspor, Alanyaspor, Rizespor, Kocaelispor, Göztepe, Gaziantep FK, Çorum FK, Eyüpspor, Erzurumspor, Genclerbirligi',
 'Antalyaspor, Sivasspor, Kayserispor, Bodrum FK, Bursaspor, Sakaryaspor, Boluspor, Ümraniyespor, Pendikspor, Manisa FK, Keçiörengücü, Adanaspor, Altay, Giresunspor, Adana Demirspor, Hatayspor, Bandırmaspor, Ankaragücü, Şanlıurfaspor, Vanspor']}
 ];
+/* força inicial dos clubes brasileiros (tools/brasil_forca.py: liga, copas e confronto direto 2021-2025), 0..1 por divisão */
+const BRF={"Chapecoense":0.0,"Remo":0.047,"Coritiba":0.098,"Vitória":0.168,"Santos":0.223,"Mirassol":0.26,"Vasco da Gama":0.304,"Bahia":0.35,"Athletico Paranaense":0.382,"Grêmio":0.422,"Bragantino":0.46,"Cruzeiro":0.493,"Internacional":0.559,"São Paulo":0.598,"Corinthians":0.648,"Atlético Mineiro":0.721,"Botafogo":0.752,"Fluminense":0.79,"Palmeiras":0.934,"Flamengo":1.0,"São Bernardo":0.0,"Náutico":0.038,"Athletic":0.07,"Londrina":0.105,"Ponte Preta":0.143,"Botafogo-SP":0.175,"Sport Recife":0.213,"Operário-PR":0.246,"Avaí":0.283,"Vila Nova":0.318,"CRB":0.35,"Novorizontino":0.384,"Criciúma":0.431,"Goiás":0.505,"Atlético Goianiense":0.541,"Juventude":0.583,"Ceará":0.635,"América Mineiro":0.673,"Cuiabá":0.706,"Fortaleza":1.0,"Anápolis":0.0,"Maranhão":0.032,"Inter de Limeira":0.063,"Caxias":0.095,"Floresta":0.126,"Botafogo-PB":0.158,"Ypiranga":0.189,"Figueirense":0.221,"Santa Cruz":0.253,"Confiança":0.288,"ABC":0.321,"Volta Redonda":0.358,"Ferroviária":0.394,"Tombense":0.428,"CSA":0.466,"Brusque":0.498,"Paysandu":0.533,"Amazonas":0.573,"Guarani":0.625,"América-MG":1.0};
 
 /* Clubes convidados: só disputam Champions (EU) e Libertadores (SA) */
 const EXT_EU=[['Club Brugge',80],['Celtic',78],['Red Bull Salzburg',77],['Olympiacos',76],['Shakhtar Donetsk',75],['Young Boys',74]];
@@ -1670,7 +1678,7 @@ function mkClubs(){
   const cs=[];
   LEAGUES.forEach((L,li)=>L.cl.forEach((str,di)=>{
     const [hi,lo]=divRange(li,di);
-    str.split(', ').forEach((n,i,arr)=>{const s=Math.round((hi-(hi-lo)*i/(arr.length-1)+R(-1,1))*10)/10;
+    str.split(', ').forEach((n,i,arr)=>{const tq=L.k=='BRA'&&BRF[n]!=null?1-BRF[n]:i/(arr.length-1),s=Math.round((hi-(hi-lo)*tq+R(-1,1))*10)/10;
       cs.push({id:cs.length,n,l:li,d:di,s,b:s,hue:hash(n)%360,st:[nm(L.nat),nm(L.nat)]})})}));
   S.ex={eu:[],sa:[]};
   EXT_EU.forEach(([n,s])=>{S.ex.eu.push(cs.length);cs.push({id:cs.length,n,l:-1,d:0,s,b:s,hue:hash(n)%360,st:[nm('Holanda'),nm('Inglaterra')],reg:'EU'})});
@@ -1709,7 +1717,7 @@ function newGame(f){
   S.cs=mkClubs();mkRivals();rcBuild();
   const li=f.lg,L=LEAGUES[li],d=L.dn.length-1;
   const pool=S.cs.filter(c=>c.l==li&&c.d==d).sort((a,b)=>a.s-b.s).slice(0,8);
-  S.club=P(pool).id;S.ct={sal:sal(O(),cl(S.club)),yrs:3,bon:300,cl:2e6};
+  const pk=f.club&&S.cs.find(c=>c.l==li&&c.n==f.club);S.club=pk?pk.id:P(pool).id;S.ct={sal:sal(O(),cl(S.club)),yrs:3,bon:300,cl:2e6};
   qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
@@ -1895,7 +1903,7 @@ function mkStats(r,L,my){
     if(z[4]!==undefined)return;
     if(z[3]==1){z[4]=S.p.name;return}
     const c=lineup(z[1]).filter(p=>p.pos!='GOL'&&!p.me&&p.n!=z[2]);
-    z[4]=c.length&&Math.random()<(z[2]==S.p.name?.5:.72)?c[Math.floor(Math.random()*c.length)].n:'';
+    z[4]=c.length?c[Math.floor(Math.random()*c.length)].n:'';
   });
   const pr=[0,1].map(s=>{
     const c=cl(sd[s]),rows=lineup(s).map(p=>{
@@ -2585,7 +2593,7 @@ function chart(ser){
 }
 const evo=()=>S.sn.length<2?'<p class="note">O gráfico aparece depois da primeira metade da temporada.</p>':chart([{n:'OVR',c:CLR[0],d:S.sn.map(s=>s.o)},...A.map((n,i)=>({n,c:CLR[i+1],d:S.sn.map(s=>s.at[i])}))]);
 function bars(ys,vs){const m=Math.max(1,...vs),w=600/ys.length;return `<svg viewBox="0 0 600 150" style="width:100%">${vs.map((v,i)=>`<rect x="${i*w+3}" y="${120-v/m*100}" width="${Math.max(2,w-6)}" height="${v/m*100}" fill="#00F5A0" rx="3"/><text x="${i*w+w/2}" y="${114-v/m*100}" font-size="11" text-anchor="middle" fill="#F4F7FF">${v}</text><text x="${i*w+w/2}" y="140" font-size="9" text-anchor="middle" fill="#9AA7DB">${String(ys[i]).slice(2)}</text>`).join('')}</svg>`}
-const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b><small>/${Math.round(cap(i))}</small></div>`).join('');
+const abars=()=>A.map((n,i)=>`<div class="ar"><span>${n}</span><div class="bar"><i style="width:${S.at[i]}%"></i></div><b>${Math.floor(S.at[i])}</b></div>`).join('');
 
 /* ---------- estrutura: HUD, navegação, eventos ---------- */
 function hud(){
@@ -2652,7 +2660,7 @@ function viewProx(){
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
   h+=`${planBlock()}<div class="pn"><h2>Treino da semana</h2><div class="sub" style="margin-top:0">Foco</div><div class="pills">${TN.map((n,i)=>`<button class="pill" aria-pressed="${S.tr.a==i}" onclick="setTr(${i},null)">${n}</button>`).join('')}</div>
     <div class="sub">Intensidade</div><div class="pills">${['Leve','Normal','Intensa'].map((n,i)=>`<button class="pill" aria-pressed="${S.tr.i==i}" onclick="setTr(null,${i})">${n}</button>`).join('')}</div>
-    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade e é limitada pelo potencial (valor após “/”).</p>${abars()}</div>
+    <p class="note">Treino intenso evolui mais, mas cansa e aumenta o risco de lesão. Descanso recupera a condição; fisioterapia acelera a recuperação. A evolução cai com a idade.</p>${abars()}</div>
   <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
   if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
@@ -2697,7 +2705,7 @@ function pgPf(){
   let h=pills([['at','Visão geral'],['cards','Cartas'],['hab','Habilidades'],['ctr','Contratos'],['hist','Estatísticas'],['tro','Troféus'],['sel','Seleção'],['conq','Conquistas'],['mail',mailLbl()],['sys','Sistema']],ui.pf,"pfSet",'scroll');
   const t=tot(false);
   if(ui.pf=='at'){
-    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Potencial</small><b>${C(S.p.pot-3,0,99)}–${C(S.p.pot+3,0,99)}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
+    h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
     <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${role()}</b><small>Papel</small></div></div>
     <div class="cnt" style="margin-top:12px"><div><b>${t.ap}</b><small>Jogos</small></div><div><b>${t.g}</b><small>Gols</small></div><div><b>${t.a}</b><small>Assist.</small></div><div><b>${S.ti.length}</b><small>Títulos</small></div></div></div>
     <div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div><div class="pn full"><h2>Evolução</h2>${evo()}</div>`;
@@ -2748,19 +2756,30 @@ function ana(){
 }
 
 /* ---------- início ---------- */
+/* escolha do clube inicial: cada divisão da liga com seus times (sem escolha = sorteio na divisão mais baixa) */
+const INI={lg:0,club:null};
+const iniLg=i=>{INI.lg=i;INI.club=null;keepForm();render(true)};
+const iniClub=n=>{INI.club=INI.club==n?null:n;keepForm();render(true)};
+let FORM=null;
+function keepForm(){FORM={};['fn','fnat','fp','fh','fw'].forEach(k=>{const e=$('#'+k);if(e)FORM[k]=e.value})}
+function iniBlock(){
+  const L=LEAGUES[INI.lg],ch=INI.club?'Você começa no <b>'+esc(INI.club)+'</b>.':'Sem escolha: sorteio entre os times da '+esc(L.dn[L.dn.length-1])+'.';
+  return `<div class="cpick"><small class="muted">Clube inicial — toque num time para começar nele · ${ch}</small>${L.cl.map((str,d)=>`<div class="cdiv"><h3>${esc(L.dn[d])}${d==L.cl.length-1?' <em>(início padrão)</em>':''}</h3><div class="cgrid">${str.split(', ').map(n=>`<button type="button" class="cbtn" aria-pressed="${INI.club==n}" onclick="iniClub('${n.replace(/'/g,"\'")}')">${CREST[n]?`<img src="${CREST[n]}" alt="">`:'<span class="cdot"></span>'}<span>${esc(n)}</span></button>`).join('')}</div></div>`).join('')}</div>`;
+}
 function intro(){
   return `${'<header class="hud"><div class="logo">'+BALL+'<div><div class="eyebrow">Carreira de craque</div><h1>'+GAME_NAME+'</h1></div></div></header>'}
   <div class="pn"><h2>Nova carreira</h2><p class="muted" style="margin-top:0">Comece aos 16 anos na divisão mais baixa do país escolhido e construa uma lenda: 10 ligas, Champions, Libertadores e a disputa pela Bola de Ouro.</p>
   <label>Nome<input id="fn" value="Lucas Silva" maxlength="30"></label>
   <label>Nacionalidade<select id="fnat">${NAT.map(n=>`<option>${n}</option>`).join('')}</select></label>
-  <label>Liga inicial<select id="fl">${LEAGUES.map((l,i)=>`<option value="${i}">${l.n} — começa na ${l.dn[l.dn.length-1]}</option>`).join('')}</select></label>
+  <label>Liga inicial<select id="fl" onchange="iniLg(+this.value)">${LEAGUES.map((l,i)=>`<option value="${i}" ${i==(INI.lg||0)?'selected':''}>${l.n}</option>`).join('')}</select></label>
+  ${iniBlock()}
   <label>Posição<select id="fp">${Object.entries(PN).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
   <div class="row"><label style="flex:1">Altura (cm)<input id="fh" type="number" min="160" max="205" value="180"></label><label style="flex:1">Peso (kg)<input id="fw" type="number" min="55" max="110" value="72"></label></div>
   <button class="play" onclick="start()">Começar carreira</button><button class="ghost" style="margin-top:8px" onclick="ttlOpen()">← Menu inicial</button></div>`;
 }
 function start(){
   const h=C(+$('#fh').value||180,160,205),w=C(+$('#fw').value||72,55,110);
-  newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value});
+  newGame({name:$('#fn').value.trim()||'Novo Craque',nat:$('#fnat').value,h,w,pos:$('#fp').value,lg:+$('#fl').value,club:INI.club});INI.club=null;FORM=null;
   ui=UI0();ui.lg=cl(S.club).l;render();
 }
 function reset(force){if(force||confirm('Apagar a carreira atual e começar outra?')){try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=null;TITLE=null;ui=UI0();render()}}
@@ -2791,7 +2810,7 @@ function render(keep){
   try{applyTheme()}catch(e){}
   const a=$('#app'),y=window.scrollY;
   document.body.classList.toggle('ttlon',!!TITLE&&!S);
-  if(!S){a.innerHTML=TITLE?titleHtml():intro();return}
+  if(!S){a.innerHTML=TITLE?titleHtml():intro();if(!TITLE&&FORM)Object.keys(FORM).forEach(k=>{const e=$('#'+k);if(e)e.value=FORM[k]});return}
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')+(ui.sheet?sheetHtml():'')}
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
@@ -3129,7 +3148,7 @@ function squadView(cid){
   const head=`<div class="pn full"><div class="row" style="margin-bottom:8px"><button class="ghost" onclick="voltarElenco()">← Voltar</button><button class="ghost" onclick="sheet('c','${cid}')">Ficha do clube</button></div><div class="offer">${shield(c,'lg')}<div><h3 style="margin:0">${esc(c.n)}</h3><small>${dvName(c)}${L?' · '+L.n:''}${pos?' · '+pos+'º colocado':''}</small></div></div>${kv([['Força',Math.round(c.s)],['Média dos 11',avg(xi)],['Idade média',(sq.reduce((s,x)=>s+x.age,0)/sq.length).toFixed(1)],['Jogadores',sq.length]])}</div>`;
   const groups=SQO.map(p=>{
     const g=sq.filter(x=>x.pos==p).sort((a,b)=>b.ovr-a.ovr);if(!g.length)return '';
-    return `<div class="pn"><h2>${PNQ[p]}s <small class="muted">${g.length}</small></h2><ul class="rank sq">${g.map(x=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.rv?'p':'q'}','${x.id}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':x.rv?'<span class="tag">craque</span>':''}<small>${x.age} anos · ${esc(x.nat)}${x.pot>x.ovr+3&&x.age<24?' · promessa':''}</small></span><span class="pt">${x.ovr}<small>OVR</small></span></li>`).join('')}</ul></div>`}).join('');
+    return `<div class="pn"><h2>${PNQ[p]}s <small class="muted">${g.length}</small></h2><ul class="rank sq">${g.map(x=>`<li class="${x.me?'me':''}" onclick="sheet('${x.me?'me':x.rv?'p':'q'}','${x.id}')"><span class="pos">${p}</span>${hx(x.ovr)}<span class="nm2">${esc(x.n)}${x.me?'<span class="tag">você</span>':x.rv?'<span class="tag">craque</span>':''}<small>${x.age} anos · ${esc(x.nat)}</small></span><span class="pt">${x.ovr}<small>OVR</small></span></li>`).join('')}</ul></div>`}).join('');
   return head+groups;
 }
 
@@ -3272,7 +3291,7 @@ function shL(s){
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||+slot>=sqLen(c))return null;
   const x=sqPlayer(c,+slot);
-  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Potencial',x.pot],['Idade',x.age],['Posição',x.pos]]);
+  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Idade',x.age],['Posição',x.pos]]);
   return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};
 }
 /* seleção */
@@ -3322,7 +3341,7 @@ function sheetHtml(){
    A partida já vem simulada em S.last (pm); aqui ela é "transmitida" minuto a minuto.
    ============================================================ */
 let LVT=null;
-const lvMs=[1400,700,300,100];
+const lvMs=[1400,700,300];
 const lvMine=r=>r.h==S.club||r.a==S.club;
 const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
 const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
@@ -3587,7 +3606,7 @@ function lvHtml(){
   const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
   const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
-  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x','15x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
+  const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
   let body;
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=tv).slice(-9).reverse();

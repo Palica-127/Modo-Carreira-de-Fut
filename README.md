@@ -19,7 +19,7 @@ Abra `pro-football-career.html` no navegador (celular ou PC). O progresso é sal
 - **10 ligas, 26 divisões, 16 clubes por divisão** com promoção e rebaixamento.
 - Copas nacionais, Champions League, Libertadores, Mundial de Clubes e Copa do Mundo.
 - Bola de Ouro com 96 craques simulados que envelhecem, se aposentam e entram no ranking de lendas.
-- **Calendário com datas + jogo ao vivo**: copas e Mundial no meio da semana, liga no fim de semana; o botão Avançar corre os dias até o dia do jogo, e então você clica em Jogar; a partida do seu clube é transmitida minuto a minuto (pausa, 1x a 15x, pular), com estatísticas ao vivo e, no fim, posse, finalizações, destaques com nota, MVP e gráfico de domínio da partida.
+- **Calendário com datas + jogo ao vivo**: copas e Mundial no meio da semana, liga no fim de semana; o botão Avançar corre os dias até o dia do jogo, e então você clica em Jogar; a partida do seu clube é transmitida minuto a minuto (pausa, 1x, 2x e 5x, pular), com estatísticas ao vivo e, no fim, posse, finalizações, destaques com nota, MVP e gráfico de domínio da partida.
 - **Troféus**: ícones do [game-icons.net](https://game-icons.net) (Lorc e Delapouite, CC BY 3.0); para usar imagens próprias, coloque PNGs em `trofeus/` (veja `trofeus/LEIA-ME.md`).
 - Elencos gerados de forma determinística (não pesam no save).
 - Tema por clube, treino semanal, propostas, agente, eventos e partidas minuto a minuto.

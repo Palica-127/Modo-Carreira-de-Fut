@@ -48,7 +48,7 @@ function mkClubs(){
   const cs=[];
   LEAGUES.forEach((L,li)=>L.cl.forEach((str,di)=>{
     const [hi,lo]=divRange(li,di);
-    str.split(', ').forEach((n,i,arr)=>{const s=Math.round((hi-(hi-lo)*i/(arr.length-1)+R(-1,1))*10)/10;
+    str.split(', ').forEach((n,i,arr)=>{const tq=L.k=='BRA'&&BRF[n]!=null?1-BRF[n]:i/(arr.length-1),s=Math.round((hi-(hi-lo)*tq+R(-1,1))*10)/10;
       cs.push({id:cs.length,n,l:li,d:di,s,b:s,hue:hash(n)%360,st:[nm(L.nat),nm(L.nat)]})})}));
   S.ex={eu:[],sa:[]};
   EXT_EU.forEach(([n,s])=>{S.ex.eu.push(cs.length);cs.push({id:cs.length,n,l:-1,d:0,s,b:s,hue:hash(n)%360,st:[nm('Holanda'),nm('Inglaterra')],reg:'EU'})});
@@ -87,7 +87,7 @@ function newGame(f){
   S.cs=mkClubs();mkRivals();rcBuild();
   const li=f.lg,L=LEAGUES[li],d=L.dn.length-1;
   const pool=S.cs.filter(c=>c.l==li&&c.d==d).sort((a,b)=>a.s-b.s).slice(0,8);
-  S.club=P(pool).id;S.ct={sal:sal(O(),cl(S.club)),yrs:3,bon:300,cl:2e6};
+  const pk=f.club&&S.cs.find(c=>c.l==li&&c.n==f.club);S.club=pk?pk.id:P(pool).id;S.ct={sal:sal(O(),cl(S.club)),yrs:3,bon:300,cl:2e6};
   qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
@@ -273,7 +273,7 @@ function mkStats(r,L,my){
     if(z[4]!==undefined)return;
     if(z[3]==1){z[4]=S.p.name;return}
     const c=lineup(z[1]).filter(p=>p.pos!='GOL'&&!p.me&&p.n!=z[2]);
-    z[4]=c.length&&Math.random()<(z[2]==S.p.name?.5:.72)?c[Math.floor(Math.random()*c.length)].n:'';
+    z[4]=c.length?c[Math.floor(Math.random()*c.length)].n:'';
   });
   const pr=[0,1].map(s=>{
     const c=cl(sd[s]),rows=lineup(s).map(p=>{

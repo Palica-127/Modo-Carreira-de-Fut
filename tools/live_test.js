@@ -15,7 +15,7 @@ for(let wk=0;wk<14&&games<8;wk++){
   const has=ev(`!!ui.lv`);
   if(!has){ev(`S.ev=null;while(S.ph=='season'&&S.week<${wk+3}){step()}`);continue}
   games++;
-  ev(`ui.lv.sp=${games%4};lvTimer()`);
+  ev(`ui.lv.sp=${games%3};lvTimer()`);
   if(games==3)ev(`lvSkip()`);
   if(games==5){ev(`lvSim()`);if(ev(`ui.lv.t`)!=90)errors.push('simular tudo falhou')}
   /* roda quadros de 16 ms e ticks de minuto como o navegador faria */
