@@ -44,7 +44,7 @@ function card(o){
   return `<div class="fut ${cls} ${o.sz||''} ${o.me?'me':''} ${o.inj?'inj':''}" ${o.on?`onclick="${o.on}"`:''}><b class="fo">${o.ovr}</b><i class="fr">${o.pos}</i><i class="fn">${o.nat}</i><span class="fs">${shield(o.club,'xs')}</span><span class="fa">${bust(o.club.hue,o.club)}</span><span class="fnm">${esc(o.name)}</span><span class="fst">${o.st.map(([l,v])=>`<span><b>${v}</b><small>${l}</small></span>`).join('')}</span>${o.tag?`<i class="ft">${esc(o.tag)}</i>`:''}</div>`;
 }
 const myCard=(sz='',extra={})=>card({on:"sheet('me','me')",ovr:O(),pos:S.p.pos,nat:natCode(S.p.nat),name:short(S.p.name),club:cl(S.club),st:myStats(),sz,me:1,inj:S.inj>0,tag:S.y+' · '+PN[S.p.pos],...extra});
-const cardOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${encodeURIComponent(x.n)}')`:'';
+const cardOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${encodeURIComponent(x.n)}')`:'';
 const entryCard=(x,sz,extra={})=>card({on:cardOn(x),ovr:x.ovr,pos:x.pos,nat:natCode(x.nat),name:short(x.n),club:cl(x.club),st:x.me?myStats():pst(x.ovr,x.pos,x.id),sz,me:x.me,...extra});
 const hx=(v,sz='')=>`<span class="hx t${tierOf(v)} ${sz}">${v}</span>`;
 const tn=(c,cls='')=>`<span class="tn lnk ${cls}" onclick="event.stopPropagation();sheet('c','${c.id}')">${shield(c,'sm')}<span>${esc(c.n)}</span></span>`;
@@ -122,6 +122,12 @@ function offBlock(){
 function apurBlock(){
   return `<div class="pn apur"><div class="banner"><small>Fim da temporada ${S.y}</small><b>Apuração da Bola de Ouro</b></div><p class="note">Os jogos acabaram. Ao apurar, o jogo soma as conquistas coletivas (liga, copas, Champions, Libertadores e Mundial), o desempenho individual (nota média, gols e assistências), o OVR, o prestígio e a força da liga de cada candidato. Depois divulga o top 10 do ano e o vencedor da Bola de Ouro.</p><button class="play" onclick="apurar()">🏆 Apurar Bola de Ouro ${S.y}</button></div>`;
 }
+/* medidores do momento do jogador (substituem os seis quadrados repetidos) */
+const mtr=(l,v,txt,inv)=>{const p=Math.max(0,Math.min(100,v)),c=(inv?100-p:p)>=66?'ok':(inv?100-p:p)>=40?'md':'bd';return `<div class="mtr ${c}"><span>${l}</span><div class="bar"><u style="width:${p}%"></u></div><b>${txt}</b></div>`};
+function momento(btn){
+  return `<div class="pn stp"><h2>Seu momento</h2><div class="mts">${mtr('Condição',S.cond,Math.round(S.cond)+'%')}${mtr('Moral',S.mor,Math.round(S.mor))}${mtr('Forma',S.form*10,S.form.toFixed(1))}</div>
+  <div class="chips2"><span><small>Reputação</small><b>${Math.round(S.rep)}</b></span><span><small>Popularidade</small><b>${Math.round(S.pop)}</b></span><span><small>Patrimônio</small><b>${F(S.money)}</b></span></div>${btn?`<button class="ghost" onclick="ui.pf='at';go('jog')">Abrir carreira</button>`:''}</div>`;
+}
 function viewProx(){
   let h='';
   if(S.ph=='off')h+=offBlock();
@@ -134,11 +140,9 @@ function viewProx(){
     ${playBlock()}${lvLast()>=0?`<div class="row" style="margin:0"><button class="ghost" onclick="liveOpen(lvLast(),1)">📊 Estatísticas do último jogo</button></div>`:''}</div>`;
     h+=upcoming();
   }
-  {const c=cl(S.club);h+=`<div class="pn hero2"><div class="hexb">${hx(O(),'lg')}</div><div class="h2i"><h3>${esc(S.p.name)}</h3><p>${S.p.pos} · ${esc(c.n)} · ${role().toLowerCase()} · nível ${S.pc?S.pc.lv:1} · confiança ${S.pc?Math.round(S.pc.tr):55}% · energia ${Math.round(S.cond)}</p><button class="ghost" onclick="ui.pf='at';go('jog')">Abrir carreira</button></div></div>`}
-  h+=`<div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${F(S.money)}</b><small>Patrimônio</small></div></div>`;
+  h+=momento(1);
   if(S.last.length&&S.ph=='season')h+=`<div class="pn"><h2>Última rodada</h2>${S.last.map(mini).join('')}<p class="note">Veja o lance a lance na aba Resultados.</p></div>`;
-  h+=`${trainBlock()}<div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div>
-  <div class="pn"><h2>Notícias</h2>${S.nw.slice(0,8).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
+  h+=`<div class="pn"><h2>Notícias</h2>${S.nw.slice(0,6).map(n=>`<div class="nw"><small>${n.y} S${n.w}</small><span>${n.t}</span></div>`).join('')}</div>`;
   if(S.p.age>=34&&O()<70)h+=`<div class="msg full">Seu rendimento caiu: considere se aposentar (aba Jogador → Sistema).</div>`;
   return h;
 }
@@ -179,13 +183,15 @@ function podiumOf(list){
 /* ---------- Perfil ---------- */
 const KL={bo:'Bola de Ouro',tit:'Campeão continental',art:'Artilheiro',top:'Top 10 Bola de Ouro'};
 function pgPf(){
-  let h=pills([['at','Visão geral'],['cards','Cartas'],['hab','Habilidades'],['ctr','Contratos'],['hist','Estatísticas'],['tro','Troféus'],['sel','Seleção'],['conq','Conquistas'],['mail',mailLbl()],['sys','Sistema']],ui.pf,"pfSet",'scroll');
+  let h=pills([['at','👤 Visão geral'],['tr','🏋️ Treino'],['hab','🌳 Habilidades'],['hist','📊 Estatísticas'],['ctr','📝 Contratos']],ui.pf,"pfSet",'pfm')+pills([['cards','Cartas'],['tro','Troféus'],['sel','Seleção'],['conq','Conquistas'],['mail','✉ '+mailLbl()],['sys','Sistema']],ui.pf,"pfSet",'pfm pfm2');
   const t=tot(false);
   if(ui.pf=='at'){
     h+=`<div class="pn"><h2>${esc(S.p.name)}</h2><div class="heroc">${myCard('big')}<div class="info"><div class="kv"><div><small>Posição</small><b>${PN[S.p.pos]}</b></div><div><small>Nacionalidade</small><b>${S.p.nat}</b></div><div><small>Idade</small><b>${S.p.age} anos</b></div><div><small>Altura / peso</small><b>${S.p.h} cm · ${S.p.w} kg</b></div><div><small>Clube</small><b>${esc(cl(S.club).n)}</b></div><div><small>Nível</small><b>${S.pc.lv}${S.pc.lv>=PCLV?' (máx.)':''}</b></div><div><small>Valor</small><b>${F(val())}</b></div></div></div></div>
-    <div class="cab"><div><b>${Math.round(S.cond)}%</b><small>Condição</small></div><div><b>${Math.round(S.mor)}</b><small>Moral</small></div><div><b>${S.form.toFixed(1)}</b><small>Forma</small></div><div><b>${Math.round(S.rep)}</b><small>Reputação</small></div><div><b>${Math.round(S.pop)}</b><small>Popularidade</small></div><div><b>${role()}</b><small>Papel</small></div></div>
+    <div class="mts" style="display:grid;gap:10px;margin:12px 0">${mtr('Condição',S.cond,Math.round(S.cond)+'%')}${mtr('Moral',S.mor,Math.round(S.mor))}${mtr('Forma',S.form*10,S.form.toFixed(1))}${mtr('Reputação',S.rep,Math.round(S.rep))}${mtr('Popularidade',S.pop,Math.round(S.pop))}</div>
     <div class="cnt" style="margin-top:12px"><div><b>${t.ap}</b><small>Jogos</small></div><div><b>${t.g}</b><small>Gols</small></div><div><b>${t.a}</b><small>Assist.</small></div><div><b>${S.ti.length}</b><small>Títulos</small></div></div></div>
     <div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div><div class="pn full"><h2>Evolução</h2>${evo()}</div>`;
+  }else if(ui.pf=='tr'){
+    h+=trainBlock()+`<div class="pn"><h2>Atributos (OVR ${O()})</h2>${abars()}</div>`;
   }else if(ui.pf=='cards'){
     h+=`<div class="pn full"><h2>Minhas cartas</h2><p class="note" style="margin-top:0">Uma carta por temporada. Prêmios e títulos viram edições especiais.</p><div class="futr">${S.cards.length?S.cards.slice().reverse().map(c=>card({ovr:c.ovr,pos:c.pos,nat:natCode(S.p.nat),name:short(S.p.name),club:cl(c.club),st:myStats(c.at),kind:c.kind,sz:'sm',me:c.kind=='bo',tag:c.y+(c.kind?' · '+KL[c.kind]:'')})).join(''):'<p class="empty">Sua primeira carta sai ao fim da temporada.</p>'}</div></div>
     <div class="pn full"><h2>Carta atual</h2><div class="futr">${myCard('big')}</div></div>`;
@@ -283,8 +289,15 @@ function applyTheme(){
   r.setProperty('--on-acc','#0A0A0A');r.setProperty('--muted',`hsl(${h} ${ss?8:0}% 64%)`);
 }
 function hueOf(x){const n=parseInt(x.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=Math.max(R,G,B),d=mx-Math.min(R,G,B);if(!d)return 220;let h=mx==R?60*(((G-B)/d)%6):mx==G?60*((B-R)/d+2):60*((R-G)/d+4);return(h+360)%360}
+/* semana sem jogo do seu clube (rodada de folga, copa sem confronto): passa sozinha, sem botão */
+function pulaSemJogo(){
+  if(!S||ADV)return;let n=0;
+  while(S.ph=='season'&&!S.ev&&!S.apur&&n++<40){const g=wkPlan()[0];if(!g||g.h!=null)break;if(g.ph=='mid')stepMid();else stepEnd()}
+  if(n>1)save();
+}
 function render(keep){
   try{applyTheme()}catch(e){}
+  try{pulaSemJogo()}catch(e){console.error(e)}
   const a=$('#app'),y=window.scrollY;
   document.body.classList.toggle('ttlon',!!TITLE&&!S);
   if(!S){a.innerHTML=TITLE?titleHtml():intro();if(!TITLE&&FORM)Object.keys(FORM).forEach(k=>{const e=$('#'+k);if(e)e.value=FORM[k]});return}
@@ -310,7 +323,7 @@ function pgSel(){
 const PLANS=[['l','Leve',null,0],['n','Normal',null,1],['i','Intenso',null,2],['d','Folga',7,0]];
 function setPlan(k){const p=PLANS.find(x=>x[0]==k);if(p[2]!=null)S.tr.a=p[2];else if(S.tr.a==7)S.tr.a=1;S.tr.i=p[3];save();render(true)}
 function planInfo(a,i){const im=[.6,1,1.6][i],en=18+(a==7?16:0)-6*im*(a==7?.2:1)+(S.at[5]-60)/20,xp=Math.round(40*[.8,1,1.3][i]*(a==7?.3:1)*(1+pfx('xpw'))),tr=a==7?0:[.1,.25,.5][i];return{en:Math.round(en*10)/10,xp,tr,risk:a==7?'nenhum':i==2?'alto':i==1?'baixo':'mínimo'}}
-const FOC=[0,1,2,3,4,5,6,8,9],FOCN={8:'Tático',9:'Fisioterapia'};
+const FOC=[0,1,2,3,4,5],FOCN={};
 const PROGD={l:'Poupa energia: pouco XP e quase nenhum risco.',n:'Equilíbrio entre XP e desgaste.',i:'Rende mais XP e evolução, mas cansa e pode lesionar.',d:'Dia de folga: recupera bastante energia, quase sem XP.'};
 function trFoc(a){if(S.tr.a==7)S.tr.i=1;S.tr.a=a;save();render(true)}
 function restToday(){const k=S.y*100+S.week;if(S.restW==k)return;S.restW=k;S.cond=Math.min(100,S.cond+25);save();render(true)}

@@ -18,7 +18,7 @@
     imp:{perdeu:.05,falso:.01},                   // erro do assistente: não marca impedimento / marca sem existir
     falta:{tackle:.68,drib:.78,cond:.3,aereo:.04,recep:.05},   // chance-base de a disputa virar falta
     amarelo:{base:.09,agr:.1,tatica:.2,area:.05,contra:.06},
-    vermelho:{violento:.0012,dogsoFora:.17,dogsoArea:.06,agr:.006},
+    vermelho:{violento:.0012,dogsoFora:.3,dogsoArea:.035,agr:.006},
     pen:{base:.76,pen:250,cmp:500,gk:400,erra:.08,rebote:.1},
     tempo:{falta:6,cartao:30,gol:45,var:90,lesao:60,sub:30,pen:40}, // segundos perdidos por ocorrência (viram acréscimo)
     acr:{min:1,max:8}

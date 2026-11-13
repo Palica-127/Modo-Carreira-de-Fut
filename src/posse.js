@@ -28,9 +28,9 @@
     cond:{zonaArea:.4,zonaTerco:.75,hab:36,esc:20,pres:1.7,passo:[6,13]},
     drib:{zonaArea:.55,zonaTerco:.85,esc:18,ganho:.08},
     desarme:{prob:.28,esc:20,raio:3.2},
-    chute:{minXg:.025,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
+    chute:{janelaAss:20,minXg:.055,zonaAtras:.78,penAtras:.12,instinto:.15,esc:20,gk:16,maxDist:34,onTgt:.25,bloq:.12,impulso:.3,caixa:.98,cabeca:.2},
     decisao:{tau0:.05,tauDec:.14,ruido:.12},
-    pos:{compacto:.82,largura:.85,maxU:.84},
+    pos:{compacto:.82,largura:.85,maxU:.84,ponta:.45,chegada:.09},
     valor:{keep:.15,gol:3}      // valor de ter a bola e de um gol, na mesma unidade da ameaça (th)
   };
 
@@ -126,6 +126,10 @@
           u=clamp(.5+(u-.5)*PAR.pos.compacto*(1+(E.compacto-1)*.35),.06,PAR.pos.maxU);
           /* sem a bola, a defesa fecha o lado e a zona onde a bola está */
           v=clamp(.5+(p.v0-.5)*larg*PAR.pos.largura+(vb-.5)*(atk?.2:.3),.04,.96);
+          /* ataque no último terço: ponta fecha por dentro (chuta de frente) e meia chega na área */
+          if(atk&&ub>.6){const k=clamp((ub-.6)/.25,0,1);
+            if(p.slotCls=='W')v=.5+(v-.5)*(1-PAR.pos.ponta*k);
+            else if(p.slotCls=='CM'||p.slotCls=='AM')u=Math.min(PAR.pos.maxU,u+PAR.pos.chegada*k)}
         }
         /* pressão: sem a bola, quem pressiona se aproxima de quem está com ela (e quem recua, se afasta) */
         if(!atk&&p.slotCls!='GK'&&E.pres!=1){const px=toX(s,u),py=toY(s,v),dd=dm([px,py],bp),k=(E.pres-1)*.8*Math.exp(-dd/22);u=clamp(toU(s,px+(bp[0]-px)*k),.04,.95);v=clamp(toV(s,py+(bp[1]-py)*k),.03,.97)}
@@ -219,7 +223,8 @@
         const qd=e.q*(1-e.risk*clamp(.2+.7*a.vis/100,0,.95));
         const vert=T[s].est.risco*.05*clamp(e.ru-ub,-.3,.4);
         const ev=vert+qd*(vOwn(e.ru,e.rv)+(cruz?xgPos(e.ru,e.rv,true)*.5*V.gol:0))+(1-qd)*vOpp(e.ru,e.rv);
-        ops.push({t:cruz?'cruz':'passe',e,u:ev+RD.gauss(0,ruido)});
+        const atras=ub>PAR.chute.zonaAtras&&e.ru<ub-.04&&!cruz;   /* na frente do gol quase ninguém devolve a bola para trás */
+        ops.push({t:cruz?'cruz':'passe',e,u:ev-(atras?PAR.chute.penAtras:0)+RD.gauss(0,ruido)});
       }
       /* condução */
       {const dist=RM.range(PAR.cond.passo[0],PAR.cond.passo[1]),nu=clamp(ub+dist/PW,0,.93),dv=(.5-vb)*.18,nv=clamp(vb+dv,.05,.95),np=[toX(s,nu),toY(s,nv)];
@@ -233,11 +238,11 @@
         ops.push({t:'drib',m:m.i,pd,nu,nv,u:pd*(vOwn(nu,nv)+PAR.drib.ganho)+(1-pd)*vOpp(ub,vb)+(a.dri-60)/450+RD.gauss(0,ruido)})}}
       /* chute */
       {const c=avalChute(s,h,P,false);
-       if(c){const ev=c.xg*V.gol+(1-c.xg)*(-(V.keep+.02))+(a.agr>70?.01:0)+(100-a.dec)/100*.03*(c.d<26?1:.5);ops.push({t:'chute',c,u:ev+RD.gauss(0,ruido*.4)})}}
+       if(c){const ev=c.xg*V.gol+(1-c.xg)*(-(V.keep+.02))+(c.xg>.1?PAR.chute.instinto*Math.min(1,c.xg/.3):0)+(a.agr>70?.01:0)+(100-a.dec)/100*.03*(c.d<26?1:.5);ops.push({t:'chute',c,u:ev+RD.gauss(0,ruido*.4)})}}
       if(!ops.length)return null;
       /* impulso: quem é agressivo ou atrevido bate de longe mesmo sem ser a melhor opção */
       const sh=ops.find(o=>o.t=='chute');
-      if(sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.35*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
+      if(sh&&sh.c.xg>PAR.chute.minXg&&RD.chance(PAR.chute.impulso*(1+.7*T[s].est.risco)*(.5+a.agr/100*.8+(100-a.dec)/100*.8)))return sh;
       const mx=Math.max(...ops.map(o=>o.u));
       let tot=0;const w=ops.map(o=>{const v=Math.exp((o.u-mx)/tau);tot+=v;return v});
       let r=RD.f()*tot;for(let i=0;i<ops.length;i++){r-=w[i];if(r<=0)return ops[i]}
@@ -264,7 +269,7 @@
       evento('chute',{...base,d:{xg:+R.xg.toFixed(3),dist:+c.d.toFixed(1),tipo:c.tipo,origem:c.origem,pe:c.tipo=='cabeca'?'cabeca':fraco?(p.foot=='D'?'E':'D'):(p.foot=='A'?'D':p.foot),fraco,grande:R.big,ass:c.ass?c.ass.i:null}});
       if(R.res=='gol'){
         G[s]++;golMoral(s);st[s].alvo++;st[s].gols++;if(R.big)st[s].grandesGol++;
-        const ass=c.ass&&t-c.ass.t<9?c.ass:null;
+        const ass=c.ass&&t-c.ass.t<PAR.chute.janelaAss?c.ass:null;
         const ge=evento('gol',{...base,q:ass?ass.i:undefined});
         if(varGol(s,ge)){if(R.big)st[s].grandesGol--;gasta(s,10);return}
         if(ass)evento('assistencia',{s,p:ass.i,q:sh});
@@ -413,7 +418,7 @@
         recupera(df,k,pt,'falta não marcada');faltaPerd={df,vs,t,pt};return true;
       }
       st[df].faltas++;st[vs].faltasSof++;perdido+=RG.tempo.falta;
-      const dog=tipo!='recep'&&tipo!='aereo'&&ub>.75&&Math.abs(vb-.5)<.22&&maisPerto(df,pt,3,true).filter(o=>o.i!=k&&o.d<10).length<1?(area?'area':'fora'):null;
+      const dog=tipo!='recep'&&tipo!='aereo'&&ub>.8&&Math.abs(vb-.5)<.2&&maisPerto(df,pt,3,true).filter(o=>o.i!=k&&o.d<13).length<1?(area?'area':'fora'):null;
       const tat=!area&&!dog&&ub>.35&&ub<.85&&tipo!='aereo'&&RF.chance(.25);
       let car=MT.regras.cartao({agr:a.agr,tatica:tat,dogso:dog,area,amarelos:am[df][k]||0,rig:REF.rig*(casaOn&&df==0?CD.casa.cartao:1)},RF);
       const vOk=!area&&mantem&&!vant&&tipo!='aereo'&&!car.segundo&&car.c!='vermelho'&&RF.chance(clamp(th(ub,vb)*1.6+.1,0,.6));
@@ -598,7 +603,9 @@
           if(op.t=='cruz'&&rx<.5){if(rx<.42)canto(s);else tiroMeta(opp(s));continue}
           if(op.t!='cruz'&&e.ru>.93&&rx<.35){tiroMeta(opp(s));continue}
           if(op.t!='cruz'&&rx<(e.rv<.1||e.rv>.9?.7:.36)){lateral(opp(s),[e.tgt[0],e.tgt[1]<.5?0:1]);continue}
-          const k=maisPerto(opp(s),e.tgt,1,false)[0];recupera(opp(s),k.i,e.tgt,'erro');
+          /* quem fica com a bola é o adversário mais próximo e ele a domina onde está (não "teleportado" para o ponto do passe) */
+          const k=maisPerto(opp(s),e.tgt,1,false)[0],pk=pos[opp(s)][k.i],dk=dm(pk,e.tgt),f=dk>4?(dk-3)/dk:0;
+          recupera(opp(s),k.i,[e.tgt[0]+(pk[0]-e.tgt[0])*f,e.tgt[1]+(pk[1]-e.tgt[1])*f],'erro');
         }
       }else if(op.t=='cond'){
         gasta(s,PAR.dur.cond+op.dist*PAR.dur.condM);gastaEn(s,h,op.dist*.03);

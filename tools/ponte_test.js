@@ -7,7 +7,7 @@ let pre=src.slice(a,b).replace('const code=','global.__code=');
 pre=pre.replace(/S\.y<2026\+24/,'S.y<2026+'+T);
 eval(pre);
 const rd=m=>fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'');
-const mods=['motor','atrib','chute','regras','tatica','cond','arbitro','narra','posse','ponte'].map((m,i)=>rd(m)).join('\n');
+const mods=['squads','motor','atrib','chute','regras','tatica','cond','arbitro','narra','posse','ponte'].map((m,i)=>rd(m)).join('\n');
 const erros=[];const ce=console.error;console.error=(...x)=>{erros.push(x.join(' '));};
 vm.runInThisContext(mods+'\n'+global.__code+`
 let nM=0,nF=0;const _pm=pmMotor;pmMotor=function(r,x){const q=_pm(r,x);q?nM++:nF++;return q};
@@ -16,7 +16,7 @@ const must=(c,m)=>{if(!c){console.log('FALHOU:',m);process.exitCode=1}};
 const rs=S.hist?S.hist:[];
 console.log("motor novo:",nM,"fallback:",nF);console.log('temporadas',res.rows.length,'ms',res.ms);
 /* jogos do usuário na última temporada guardados em S.last só existem durante a temporada; conferimos o acumulado */
-console.log('ultimo ano: ap',S.sum.ap,'g',S.sum.g,'a',S.sum.a,'media',S.sum.avg.toFixed(2));
+console.log('save KB',Math.round(JSON.stringify(S).length/1024),'pq',Object.keys(S.pq||{}).length,'rivais gerados',S.rv.filter(r=>!r.real).length);console.log('ultimo ano: ap',S.sum.ap,'g',S.sum.g,'a',S.sum.a,'media',S.sum.avg.toFixed(2));
 must(res.rows.length>=${T}-1,'careira roda as temporadas');
 `);
 console.error=ce;

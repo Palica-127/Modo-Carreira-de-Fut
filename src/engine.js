@@ -29,7 +29,9 @@ const sal=(o,c)=>Math.max(250,Math.round(Math.pow(Math.max(o-40,1),3)*.9*DM[c.d]
 const val=()=>Math.max(5e4,Math.pow(Math.max(O()-40,1),3)*700*(S.p.age<23?1+(S.p.pot-O())/50:S.p.age>31?.6:1)*(1+S.rep/200));
 const news=t=>{S.nw.unshift({y:S.y,w:S.week,t});S.nw=S.nw.slice(0,40)};
 const snap=l=>{S.sn.push({l,at:[...S.at],o:O()});S.peak=Math.max(S.peak,O())};
-const rcBuild=()=>{RC={};S.rv.forEach(r=>(RC[r.club]=RC[r.club]||[]).push(r))};
+let RVN={};
+const rcBuild=()=>{RC={};RVN={};S.rv.forEach(r=>{(RC[r.club]=RC[r.club]||[]).push(r);RVN[r.n]=r})};
+const rvByName=n=>{const r=S.rv.find(x=>x.n==n)||S.hof.find(x=>x.n==n);return r?r.id:null};
 const cmpT=(a,b)=>{const x=S.tb[a.id],y=S.tb[b.id];return y.Pt-x.Pt||(y.F-y.A)-(x.F-x.A)||y.F-x.F};
 const stand=(l,d)=>S.cs.filter(c=>c.l==l&&c.d==d).sort(cmpT);
 
@@ -69,10 +71,29 @@ function pickClub(r){
   let x=Math.random()*tot;for(let i=0;i<tops.length;i++){x-=w[i];if(x<=0)return tops[i].id}
   return tops[0].id;
 }
+/* craques reais: saem dos elencos reais (src/squads.js). Os títulos de antes de 2026 vêm de STARS/BDO_REAL; dali em diante vale o jogo */
+function realCands(){
+  const o=[],seen={};
+  if(typeof SQ==='undefined')return o;
+  S.cs.forEach(c=>{if(c.l>=0&&SQ[c.n])sqReal(c).forEach(x=>{
+    const st=typeof STAR_BY!=='undefined'&&STAR_BY[x.n];
+    /* a base tem notas erradas para nomes comuns (ex.: 'Gabriel'): quem não é estrela precisa de nota coerente com o clube */
+    if(!st&&(x.ovr>c.s+12||x.ovr<76||c.d>0))return;
+    const k=x.n,prev=seen[k];if(prev&&prev.cs>=c.s)return;seen[k]={...x,cs:c.s}
+  })});
+  return Object.values(seen);
+}
+function mkRealRv(x){
+  const pre=typeof honorsOf==='function'?honorsOf(x.n):[],st=typeof STAR_BY!=='undefined'&&STAR_BY[x.n],car=newCar();
+  pre.forEach(h=>{const k=h.k=='lig'?'lg':h.k;if(car[k]!=null)car[k]++});
+  car.pod=0;if(st){car.g=st.g;car.ap=st.ap}car.pk=Math.round(x.ovr);
+  return{id:'r'+(++RVID),n:x.n,nat:x.nat,pos:x.pos,age:x.age,ovr:x.ovr,pot:Math.max(x.pot||x.ovr,x.ovr),club:x.club,ad:[0,0,0,0,0,0].map(()=>RI(-3,3)),inj:0,cur:{ap:0,g:0,a:0,rs:0,lg:0},car,h:[],pre,real:1};
+}
 function mkRivals(){
-  const rv=[];
-  for(let i=0;i<96;i++){const age=C(Math.round(17+R(0,9)+R(0,9)),17,36);rv.push(mkRv(age))}
-  S.rv=rv;rv.forEach(r=>r.club=pickClub(r));
+  const rv=[],ca=realCands().sort((a,b)=>((typeof STAR_BY!=='undefined'&&STAR_BY[b.n]?1000:0)+b.ovr)-((typeof STAR_BY!=='undefined'&&STAR_BY[a.n]?1000:0)+a.ovr));
+  ca.slice(0,96).forEach(x=>rv.push(mkRealRv(x)));
+  for(let i=rv.length;i<96;i++){const age=C(Math.round(17+R(0,9)+R(0,9)),17,36);const r=mkRv(age);r.club=pickClub(r);rv.push(r)}
+  S.rv=rv;
 }
 /* estatísticas da carta (VEL FIN PAS DRI DEF FIS) de um rival */
 const rvStats=r=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.round(r.ovr+PROF[r.pos][i]+r.ad[i]),25,99)]);
@@ -88,7 +109,7 @@ function newGame(f){
   const li=f.lg,L=LEAGUES[li],d=L.dn.length-1;
   const pool=S.cs.filter(c=>c.l==li&&c.d==d).sort((a,b)=>a.s-b.s).slice(0,8);
   const pk=f.club&&S.cs.find(c=>c.l==li&&c.n==f.club);S.club=pk?pk.id:P(pool).id;S.ct={sal:sal(O(),cl(S.club)),yrs:3,bon:300,cl:2e6};
-  qualifyByStrength();setupSeason();snap('Início');
+  pcEnsure();qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
 function afterLoad(){FXC={};rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
@@ -541,9 +562,14 @@ function evolveRivals(){
     const ret=a>=37||(a>=34&&Math.random()<.35)||(a>=31&&r.ovr<66&&Math.random()<.5);
     if(!ret)keep.push(r);else hofAdd(r);
   });
-  while(keep.length<96)keep.push(mkRv(RI(17,19)));
+  /* reposição: os melhores jovens reais que ainda não são craques; sem sobrar nenhum, nasce um gerado */
+  if(keep.length<96){
+    const nomes=new Set(keep.map(r=>r.n)),pool=realCands().filter(x=>!nomes.has(x.n)&&x.age<=24).sort((a,b)=>b.pot-a.pot);
+    while(keep.length<96&&pool.length)keep.push(mkRealRv(pool.shift()));
+  }
+  while(keep.length<96){const r=mkRv(RI(17,19));r.club=pickClub(r);keep.push(r)}
   S.rv=keep;
-  S.rv.forEach(r=>{if(!r.club||Math.random()<(r.age<=20?.3:.2))r.club=pickClub(r)});
+  S.rv.forEach(r=>{if(!r.club||Math.random()<(r.age<=20?.3:.2)*(r.real?.5:1))r.club=pickClub(r)});
   rcBuild();
 }
 
@@ -571,7 +597,7 @@ function end(){
   const lst=bdoList(true),idx=lst.findIndex(x=>x.me),rk=idx<0?0:idx+1;
   const topTen=lst.slice(0,10).map((x,i)=>({...x,rank:i+1,prev:S.bdoPrev[x.id]||0}));
   S.bdo.push({y:S.y,top:topTen,me:rk});
-  rvSeason(champ,topTen);
+  rvSeason(champ,topTen);try{sqSeason(champ)}catch(e){console.error(e)}
   S.wcR=null;S.wcMe=0;
   S.bdoPrev={};lst.slice(0,30).forEach((x,i)=>S.bdoPrev[x.id]=i+1);
   if(rk==1){aw.push('🌟 BOLA DE OURO — Melhor Jogador do Mundo');S.rep=C(S.rep+10,0,100);S.pop=C(S.pop+12,0,100)}
@@ -766,6 +792,21 @@ function histSeason(fin){
   const kd={};S.dc.forEach(k=>Object.assign(kd,reachOf(k)));
   S.fin.push({y:S.y,p:fin,k:{u:reachOf(S.ucl),b:reachOf(S.lib),d:kd}});
 }
+/* histórico dos jogadores de elenco (quem não é craque do mundo): uma linha por temporada, só para quem tem nota 70+ */
+const pqKey=x=>x.n+'|'+x.nat;
+function sqSeason(champ){
+  if(typeof SQ==='undefined')return;
+  S.pq=S.pq||{};
+  S.cs.forEach(c=>{
+    if(c.l<0||!SQ[c.n])return;const L=LEAGUES[c.l],t=[];
+    if(c.d==0&&champ.lg[L.k]==c.id)t.push('l');if(champ.dom[L.k]==c.id)t.push('d');
+    if(champ.ucl.c==c.id)t.push('u');if(champ.lib.c==c.id)t.push('b');if(champ.mc==c.id)t.push('m');
+    sqReal(c).forEach(x=>{
+      if(x.ovr<70||(RVN[x.n]&&RVN[x.n].real))return;
+      const k=pqKey(x),e=S.pq[k]||(S.pq[k]=[]);e.push([S.y,c.id,x.ovr,t.join('')]);
+    });
+  });
+}
 /* carreira dos rivais: títulos (l liga, d copa, u champions, b libertadores, m mundial, w copa do mundo, o bola de ouro) */
 function rvSeason(champ,topTen){
   const wcY=S.y%4==2&&S.wc.length?S.wc[S.wc.length-1]:null;
@@ -798,7 +839,7 @@ function myLeg(){
     ex:S.aw.filter(x=>x.t.startsWith('Bola de Ouro: pódio')).length,me:1};
 }
 function legList(){
-  const l=[...LEG.map(x=>({...x,st:'lenda'})),...S.hof.map(x=>({...legOf(x),st:'ret'})),...S.rv.map(r=>({...legOf(r),st:'ativo'})),{...myLeg(),st:'me'}];
+  const ativos=new Set(S.rv.map(r=>r.n)),l=[...LEG.filter(x=>!ativos.has(x.n)).map(x=>({...x,st:'lenda'})),...S.hof.map(x=>({...legOf(x),st:'ret'})),...S.rv.map(r=>({...legOf(r),st:'ativo'})),{...myLeg(),st:'me'}];
   l.forEach(x=>{x.pts=legPts(x)});
   return l.sort((a,b)=>b.pts-a.pts);
 }
@@ -810,7 +851,7 @@ function rvAny(id){
   return{id:h.id,n:h.n,nat:h.nat,pos:h.pos,age:h.age,ovr:h.pk,pot:h.pk,club:last?last[1]:0,car:h.car,h:h.h,cur:{ap:0,g:0,a:0,rs:0,lg:0},ad:[0,0,0,0,0,0],ret:h.ret};
 }
 const TKEY={l:'lig',d:'dom',u:'ucl',b:'lib',m:'mc',w:'wc',o:'bo'};
-const rvTitles=r=>{const o=[];(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0]})})});return o};
+const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0]})})});return o};
 
 /* todos os vencedores da Bola de Ouro: histórico real + simulados */
 function bdoAll(){
@@ -899,7 +940,11 @@ function squadOf(cid){
   const c=S.cs[cid],real=typeof SQ!=='undefined'&&SQ[c.n],base=(real?sqReal(c).map(x=>({...x})):SQP.map((p,i)=>sqPlayer(c,i))),put=[];
   (RC[cid]||[]).forEach(r=>put.push({id:r.id,n:r.n,nat:r.nat,pos:r.pos,age:r.age,ovr:Math.round(r.ovr),pot:r.pot,club:cid,rv:1}));
   if(cid==S.club)put.push({id:'me',n:S.p.name,nat:S.p.nat,pos:S.p.pos,age:S.p.age,ovr:O(),pot:S.p.pot,club:cid,me:1});
+  /* craque real: ocupa o lugar dele mesmo no elenco (pelo nome); quem trocou de clube sai do elenco antigo */
+  put.forEach(x=>{if(!x.rv)return;const j=base.findIndex(b=>b.n==x.n&&!b.taken);if(j>=0){base[j]={...base[j],...x,fp:base[j].fp,taken:1};x.done=1}});
+  for(let j=base.length-1;j>=0;j--){const b=base[j];if(!b.taken&&RVN[b.n]&&RVN[b.n].real&&RVN[b.n].club!=cid)base.splice(j,1)}
   put.forEach(x=>{
+    if(x.done)return;
     let k=-1;
     if(real){base.forEach((b,j)=>{if(!b.taken&&b.pos==x.pos&&(k<0||b.ovr<base[k].ovr))k=j});if(k<0)base.forEach((b,j)=>{if(!b.taken&&b.pos!='GOL'&&(k<0||b.ovr<base[k].ovr))k=j})}
     else{k=base.findIndex(b=>b.pos==x.pos&&!b.taken);if(k<0)k=base.findIndex(b=>!b.taken&&b.pos!='GOL')}

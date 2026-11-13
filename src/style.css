@@ -742,3 +742,20 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 .pnode.can{filter:drop-shadow(0 0 7px #ffd54a)}.pnode.own .hexn{background:#14513a}.pnode.own{filter:drop-shadow(0 0 7px #5be3a0)}.pnode.sel .hexn{background:#2b5aa8}.pnode.sel{filter:drop-shadow(0 0 9px #66b4ff)}
 .pdet{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:12px;margin:6px auto 0;max-width:560px}
 .pdet .hexn.big{width:58px;height:66px;font-size:26px;flex:none}.pdet b{display:block;font-size:16px}.pdet small{display:block;opacity:.7;font-size:12px}.pdet p{margin:6px 0 10px}.pdet .play{width:100%}.pmsg{margin-top:6px;color:var(--acc)}
+
+/* menu Jogador: abas em grade, sem rolagem lateral */
+.pills.pfm{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.pills.pfm .pill{flex:1 1 auto;text-align:center;white-space:nowrap}
+.pills.pfm2{margin-bottom:14px}.pills.pfm2 .pill{flex:0 0 auto;font-size:.82em;opacity:.78;padding:5px 11px}
+.pills.pfm2 .pill[aria-pressed=true]{opacity:1}
+/* medidores do momento do jogador */
+.stp .mts{display:grid;gap:10px;margin:4px 0 12px}
+.mtr{display:grid;grid-template-columns:78px 1fr 46px;align-items:center;gap:10px;font-size:.88em}
+.mtr span{color:var(--muted);font-weight:600}.mtr b{text-align:right;font-variant-numeric:tabular-nums}
+.mtr .bar{height:9px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.mtr .bar u{display:block;height:100%;border-radius:9px;background:var(--acc)}
+.mtr.ok .bar u{background:#35c76f}.mtr.md .bar u{background:#e8b83a}.mtr.bd .bar u{background:#e5484d}
+.chips2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chips2 span{flex:1 1 90px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:rgba(255,255,255,.03)}
+.chips2 small{display:block;color:var(--muted);font-size:.72em;text-transform:uppercase;letter-spacing:.06em}
+.chips2 b{font-size:1.05em}

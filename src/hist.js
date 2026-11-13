@@ -260,3 +260,36 @@ const SELC={'Hungria':'HUN','Tchecoslováquia':'TCH'};
 
 /* Bola de Ouro 2025 (votação oficial da France Football): nome | país | clube | posição | idade | pontos */
 const BDO_TOP={2025:[['Ousmane Dembélé','FRA','Paris Saint-Germain','PNT',28,1380],['Lamine Yamal','ESP','Barcelona','PNT',18,1059],['Vitinha','POR','Paris Saint-Germain','MEI',25,703],['Mohamed Salah','EGY','Liverpool','PNT',33,657],['Raphinha','BRA','Barcelona','PNT',28,620],['Achraf Hakimi','MAR','Paris Saint-Germain','ZAG',27,484],['Kylian Mbappé','FRA','Real Madrid','ATA',26,378],['Cole Palmer','ENG','Chelsea','MEI',23,211],['Gianluigi Donnarumma','ITA','Manchester City','GOL',26,172],['Nuno Mendes','POR','Paris Saint-Germain','ZAG',23,171]]};
+
+/* ============================================================
+   CRAQUES REAIS ATIVOS — histórico de conquistas até 2025 (aproximado).
+   [nome, títulos da Champions (anos), Copas do Mundo, Libertadores, Mundiais de clubes, ligas nacionais, gols, jogos]
+   A Bola de Ouro vem da tabela BDO_REAL. Quem não está aqui começa sem títulos e acumula daqui para frente.
+   ============================================================ */
+const STARS=[
+['Kylian Mbappé',[],[2018],[],[],6,350,560],['Mohamed Salah',[2019],[],[],[2019],2,330,700],['Erling Haaland',[2023],[],[],[2023],4,290,380],
+['Virgil van Dijk',[2019],[],[],[2019],3,35,600],['Jude Bellingham',[2024],[],[],[2024],1,70,270],['Rodri',[2023],[],[],[2023],4,45,560],
+['Ousmane Dembélé',[2025],[2018],[],[],4,120,500],['Alisson Becker',[2019],[],[],[2019],2,0,600],['Gianluigi Donnarumma',[2025],[],[],[],3,0,500],
+['Florian Wirtz',[],[],[],[],1,60,210],['Thibaut Courtois',[2022,2024],[],[],[2018,2023],7,0,650],['Federico Valverde',[2022,2024],[],[],[2023],3,45,400],
+['Pedri',[],[],[],[],2,35,260],['Raphinha',[],[],[],[],1,110,500],['Lamine Yamal',[],[],[],[],1,35,130],['Joshua Kimmich',[2020],[],[],[2020],10,70,600],
+['Harry Kane',[],[],[],[],1,450,700],['Achraf Hakimi',[2025],[],[],[2017],5,60,420],['Vitinha',[2025],[],[],[],3,40,280],['Lautaro Martínez',[],[2022],[],[],2,200,420],
+['Jamal Musiala',[],[],[],[],4,70,230],['Alexis Mac Allister',[],[2022],[],[],1,50,330],['Frenkie de Jong',[],[],[],[],4,30,430],['Julián Álvarez',[2023],[2022],[],[2023],3,120,280],
+['Alessandro Bastoni',[],[],[],[],2,20,340],['Nicolò Barella',[],[],[],[],2,50,390],['Mike Maignan',[],[],[],[],2,0,330],['Kevin De Bruyne',[2023],[],[],[2023],6,150,650],
+['Marquinhos',[2025],[],[],[],10,35,600],['Khvicha Kvaratskhelia',[2025],[],[],[],2,50,230],['Victor Osimhen',[],[],[],[],2,130,310],['Rúben Dias',[2023],[],[],[2023],5,15,420],
+['Antonio Rüdiger',[2021,2022,2024],[],[],[2022,2023],2,25,550],['Trent Alexander-Arnold',[2019],[],[],[2019],2,25,380],['Paulo Dybala',[],[2022],[],[],5,150,480],
+['Phil Foden',[2023],[],[],[2023],6,90,350],['Ryan Gravenberch',[],[],[],[],3,20,220],['Emiliano Martínez',[],[2022],[],[],0,0,400],['Rodrygo',[2022,2024],[],[],[2023],2,80,330],
+['Dani Carvajal',[2014,2016,2017,2018,2022,2024],[],[],[2014,2016,2017,2018,2023],4,25,500],['David de Gea',[],[],[],[],2,0,600],['Luis Díaz',[],[],[],[],3,110,400],
+['Ederson',[2023],[],[],[2023],7,0,500],["N'Golo Kanté",[2021],[2018],[],[2022],3,15,500],['Désiré Doué',[2025],[],[],[],1,15,70],['João Neves',[2025],[],[],[],2,10,90],
+['Marc-André ter Stegen',[2015],[],[],[],10,0,450],['Éder Militão',[2022,2024],[],[],[2023],2,15,320],['Aurélien Tchouaméni',[2022,2024],[],[],[2023],3,10,300],
+['Bernardo Silva',[2023],[],[],[2023],8,90,550],['João Cancelo',[2023],[],[],[2023],8,30,430],['Cole Palmer',[2023],[],[],[2023,2025],1,60,150],['Declan Rice',[],[],[],[],0,40,420],
+['Martin Ødegaard',[],[],[],[],0,60,430],['Bukayo Saka',[],[],[],[],0,70,350],['Moisés Caicedo',[],[],[],[2025],0,15,260],['Enzo Fernández',[],[2022],[],[2025],1,30,240],
+['Marcus Thuram',[],[],[],[],2,100,350],['Jules Koundé',[],[],[],[],2,15,360],['Gregor Kobel',[],[],[],[],0,0,300],['Harry Maguire',[],[],[],[],0,10,400]
+].map(([n,ucl,wc,lib,mc,lg,g,ap])=>({n,ucl,wc,lib,mc,lg,g,ap}));
+const STAR_BY=(()=>{const m={};STARS.forEach(s=>{m[s.n]=s});return m})();
+/* conquistas reais de um jogador pelo nome: [{k,y}] com Bola de Ouro (BDO_REAL) + tabela acima */
+function honorsOf(n){
+  const o=[],s=STAR_BY[n];
+  BDO_REAL.forEach(z=>{if(z.n==n)o.push({k:'bo',y:z.y})});
+  if(s){['ucl','wc','lib','mc'].forEach(k=>s[k].forEach(y=>o.push({k,y})));for(let i=0;i<s.lg;i++)o.push({k:'lig',y:''})}
+  return o;
+}

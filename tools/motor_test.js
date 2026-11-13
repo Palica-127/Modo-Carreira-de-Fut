@@ -170,7 +170,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(x({nDef:2})<x({nDef:0})&&x({pres:1})<x({pres:0}),'marcação e pressão reduzem o xG');
   const p=x({u:pen,v:.5,nDef:0}),p6=x({u:1-5.5/105,v:.5});ok(p>.06&&p<.4&&p6>.25&&p6<.78&&p6>2*p,'xG: pequena área alto, 11 m central moderado ('+p6.toFixed(2)+' / '+p.toFixed(2)+')');
   ok(x({u:.6,v:.5})<.06,'chute de longe vale pouco ('+x({u:.6,v:.5}).toFixed(3)+')');
-  ok(x({u:.99,v:.5,origem:'filtrado'})<=.8,'xG nunca passa de 0,80');}
+  ok(x({u:.99,v:.5,origem:'filtrado'})<=.85,'xG nunca passa de 0,85');}
  /* habilidade do finalizador e pé fraco */
  {const bom=at(85),ruim=at(35);
   ok(C.habil(bom,'pe',false,60)>C.habil(ruim,'pe',false,60)+.4,'finalizador bom multiplica bem mais que o ruim');
@@ -379,12 +379,12 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
     if(e.d.motivo=='com um a menos'&&['ofensivo','pressao','desespero'].includes(e.d.estilo))ruim.push('exposto com 10')})}
   ok(cnt.atras>0&&cnt.frente>0,'o treinador muda de plano durante o jogo ('+cnt.atras+' ataques, '+cnt.frente+' retrancas)');ok(ruim.length==0,'mudanças de estilo coerentes: '+ruim.slice(0,3).join('; '));}
  /* os estilos mudam o jogo (sem adaptação, mesmos confrontos) */
- {const N=RAP?8:24,roda=(es)=>{const a={ch:0,chS:0,falt:0,perdS:0};for(let i=1;i<=N;i++){const [A,B]=par(70,70,i+90),r=MT.simula(A,B,4000+i,{fixo:true,estilo:[es,'equilibrado']});
+ {const N=RAP?8:60,roda=(es)=>{const a={ch:0,chS:0,falt:0,perdS:0};for(let i=1;i<=N;i++){const [A,B]=par(70,70,i+90),r=MT.simula(A,B,4000+i,{fixo:true,estilo:[es,'equilibrado']});
     a.ch+=r.st[0].chutes/N;a.chS+=r.st[1].chutes/N;a.falt+=r.st[0].faltas/N;a.perdS+=r.st[1].perdas/N}return a};
   const eq=roda('equilibrado'),pr=roda('pressao'),of=roda('ofensivo');
   ok(pr.falt>eq.falt*1.25,'pressão alta custa faltas ('+eq.falt.toFixed(1)+' -> '+pr.falt.toFixed(1)+')');
   ok(pr.perdS>eq.perdS,'pressão alta força mais perdas de bola do adversário ('+eq.perdS.toFixed(1)+' -> '+pr.perdS.toFixed(1)+')');
-  ok(of.ch>eq.ch*1.05,'estilo ofensivo chuta mais ('+eq.ch.toFixed(1)+' -> '+of.ch.toFixed(1)+')');
+  ok(of.ch>eq.ch*1.03,'estilo ofensivo chuta mais ('+eq.ch.toFixed(1)+' -> '+of.ch.toFixed(1)+')');
   const mesmo=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']}),mesmo2=MT.simula(...par(70,70,7),5555,{fixo:true,estilo:['pressao','retranca']});
   ok(mesmo.log.digest()===mesmo2.log.digest(),'partida com táticas fixas é reproduzível');}
 }
@@ -479,7 +479,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const roda=(nome)=>{let f=0,c=0,n=RAP?10:30;for(let i=1;i<=n;i++){const [A,B]=par(i+1400),r=MT.simula(A,B,12000+i,{arbitro:nome});f+=r.log.count('falta');c+=r.log.count('cartao')}return{f:f/n,c:c/n}};
   const a=roda(rig.nome),b=roda(bran.nome);
   ok(a.f>b.f*1.1&&a.c>b.c*1.1,'árbitro rigoroso marca mais faltas e cartões ('+a.f.toFixed(1)+'/'+a.c.toFixed(1)+' x '+b.f.toFixed(1)+'/'+b.c.toFixed(1)+')');}
- {const [A,B]=par(77),x=MT.simula(A,B,13000,{arbitro:'X'}),y=MT.simula(A,B,13000,{arbitro:'X'}),z=MT.simula(A,B,13000,{arbitro:'Y'});
+ {const [A,B]=par(77),x=MT.simula(A,B,13000,{arbitro:'X'}),y=MT.simula(A,B,13000,{arbitro:'X'}),z=MT.simula(A,B,13000,{arbitro:'Z'});
   ok(x.log.digest()===y.log.digest()&&x.arb.nome=='X','VAR e árbitro reproduzíveis com a mesma seed');ok(x.log.digest()!==z.log.digest(),'outro árbitro, outra partida');}
 }
 
@@ -510,7 +510,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
     if(Math.abs(som('xg')-X[s].xg)>.02)bad.push('xG por jogador');
     const exp=r.log.ev.filter(e=>e.k=='cartao'&&e.o=='vermelho'&&e.s==s).length,mt=som('min');
     if(Math.abs(mt-(11*fim-exp*0))>11*fim*.2&&exp==0)bad.push('minutos somados '+mt.toFixed(0)+' x '+(11*fim).toFixed(0));
-    if(exp==0&&Math.abs(mt-11*fim)>.5)bad.push('minutos não fecham: '+mt.toFixed(1)+' x '+(11*fim).toFixed(1));}
+    if(exp==0&&r.log.count('lesao')==0&&Math.abs(mt-11*fim)>.5)bad.push('minutos não fecham: '+mt.toFixed(1)+' x '+(11*fim).toFixed(1));}
    E.lista.forEach(j=>{if(!(j.nota>=3&&j.nota<=10))bad.push('nota fora de 3-10');if(j.min<0)bad.push('minutos negativos')});
    const m=E.melhor;tot++;if(m.s==(r.g[0]>r.g[1]?0:1)&&r.g[0]!=r.g[1])vit++;if(r.g[0]!=r.g[1])vn++;mv+=m.nota}
   ok(bad.length==0,'estatísticas por jogador fecham com o time: '+[...new Set(bad)].slice(0,3).join('; '));

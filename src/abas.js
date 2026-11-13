@@ -119,7 +119,7 @@ function bdoTop(){
   else{list=BDO_TOP[sel].map((z,i)=>({n:z[0],nat:z[1],cn:z[2],club:cn2id(z[2]),pos:z[3],age:z[4],pts:z[5],rank:i+1,real:1}));note='Votação oficial da France Football (pontos reais). A Bola de Ouro do jogo é apurada ao fim de cada temporada.'}
   return pills(ys.map(y=>[y,y]),sel,'bySet','scroll')+bdoTen(list,sel,note);
 }
-function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:''}
+function bdoWho(x){return x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:LEG.some(z=>z.n==x.n)?`sheet('l','${ek(x.n)}')`:''}
 const bdoAv=(x,c='lgav')=>legImg(x.n,c)||`<span class="${c} ph">${esc(String(x.n)[0])}</span>`;
 function bdoHero(){
   const all=bdoAll().filter(x=>x.n!='—').sort((a,b)=>b.y-a.y),w=all[0];if(!w)return '';
@@ -164,7 +164,7 @@ function pgLend(){
   const v={jog:lendJog,wc:lendWc,ucl:()=>lendCont('ucl'),lib:()=>lendCont('lib'),clb:lendClb,sel:lendSel}[ui.ld]||lendJog;
   return pills(LD_TABS,ui.ld,'ldSet','scroll')+v();
 }
-const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:`sheet('l','${ek(x.n)}')`;
+const lgOn=x=>x.me?"sheet('me','me')":x.id?`sheet('p','${x.id}')`:rvByName(x.n)?`sheet('p','${rvByName(x.n)}')`:`sheet('l','${ek(x.n)}')`;
 const lgTag=x=>x.me?'<span class="tag">você</span>':x.st=='ativo'?'<span class="tag">ativo</span>':x.st=='ret'?'<span class="tag">aposentado</span>':'';
 /* ---------- Lendas: layout em painéis (pódio, recordes, histórico por ano) ---------- */
 const flg=(k,c='')=>{
@@ -388,9 +388,16 @@ function shL(s){
 /* jogador de elenco (gerado): sem histórico detalhado */
 function shQ(s){
   const [cid,slot]=String(s.id).split('.'),c=S.cs[+cid];if(!c||+slot>=sqLen(c))return null;
-  const x=sqPlayer(c,+slot);
-  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,['<b>ELENCO</b> jogador de apoio'],[['OVR',x.ovr],['Idade',x.age],['Posição',x.pos]]);
-  return {title:x.n,hero:1,body:`${hero}<div class="shg"><div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div></div><div><div class="pn"><h2>Histórico</h2><p class="note" style="margin:0">Jogador de elenco: o jogo guarda o histórico completo (títulos e temporadas) dos 96 craques do mundo e do seu jogador.</p><button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div></div></div>`};
+  const x=sqPlayer(c,+slot),pq=(S.pq||{})[pqKey(x)]||[],real=typeof honorsOf==='function'?honorsOf(x.n):[];
+  const gan=[];pq.forEach(e=>String(e[3]||'').split('').forEach(k=>{if(TKEY[k])gan.push({k:TKEY[k],y:e[0]})}));
+  const titles=[...real,...gan],cnt=k=>titles.filter(z=>z.k==k).length;
+  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,[x.q?'<b>ELENCO</b> jogador do clube':'<b>ELENCO</b>'],
+    [['OVR',x.ovr],['Idade',x.age],['Posição',PNQ[x.pos]||x.pos],['Champions',cnt('ucl')],['Libertadores',cnt('lib')],['Ligas',cnt('lig')],['Copas nac.',cnt('dom')]]);
+  const rows=pq.slice().reverse().map(e=>({c:[e[0],tn(cl(e[1])),e[2],esc(String(e[3]||'').split('').map(k=>TL[k]).filter(Boolean).join(', '))||'—']}));
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfRows(titles)}</div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div>`;
+  const right=`<div class="pn"><h2>Clube</h2>${kv([['Clube atual',esc(c.n)],['Força do clube',Math.round(c.s)],['Títulos de antes de 2026',real.length||'—']])}<button class="ghost" onclick="sheet('c','${c.id}')">Ver ficha do ${esc(c.n)}</button></div>`;
+  const tmp=`<div class="pn full"><h2>Temporadas no jogo</h2>${rows.length?tbl(['Ano','Time','OVR','Títulos'],rows):'<p class="empty">O histórico de temporadas começa a ser registrado a partir da primeira temporada fechada (jogadores com nota 70 ou mais).</p>'}</div>`;
+  return {title:x.n,hero:1,body:`${hero}<div class="shg"><div>${left}</div><div>${right}</div></div>${tmp}`};
 }
 /* seleção */
 /* elenco de uma seleção: melhores jogadores da nacionalidade entre todos os clubes do jogo */
