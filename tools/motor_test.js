@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','chute','regras','tatica','cond','arbitro','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','regras','tatica','cond','arbitro','narra','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -481,6 +481,72 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   ok(a.f>b.f*1.1&&a.c>b.c*1.1,'árbitro rigoroso marca mais faltas e cartões ('+a.f.toFixed(1)+'/'+a.c.toFixed(1)+' x '+b.f.toFixed(1)+'/'+b.c.toFixed(1)+')');}
  {const [A,B]=par(77),x=MT.simula(A,B,13000,{arbitro:'X'}),y=MT.simula(A,B,13000,{arbitro:'X'}),z=MT.simula(A,B,13000,{arbitro:'Y'});
   ok(x.log.digest()===y.log.digest()&&x.arb.nome=='X','VAR e árbitro reproduzíveis com a mesma seed');ok(x.log.digest()!==z.log.digest(),'outro árbitro, outra partida');}
+}
+
+/* ===== módulo 8: estatísticas e narração (lidas do registro) ===== */
+{
+ const RAP=!!process.env.RAPIDO,NJ=RAP?8:40,jg=[];
+ for(let i=1;i<=NJ;i++){const A=MT.timeTeste(72,'4-3-3','Azul'+i,i*2+1500),B=MT.timeTeste(68,'4-4-2','Rubro'+i,i*2+1501);jg.push(MT.simula(A,B,14000+i,i%7==0?{mataMata:true}:{}))}
+ /* o placar de minutos */
+ {const r=jg[0],M=MT.minutos(r);
+  ok(M.fmt(0)=="1'"&&M.fmt(59)=="1'"&&M.fmt(60)=="2'"&&M.fmt(2699)=="45'"&&/^45\+\d+'$/.test(M.fmt(r.log.by('fim_tempo')[0].t-1)),'minutagem do 1º tempo e acréscimos');
+  const t1=r.log.by('fim_tempo')[0].t;ok(M.fmt(t1)=="46'"&&/^90\+\d+'$/.test(M.fmt(r.log.ev[r.log.ev.length-1].t-1)),'minutagem do 2º tempo e acréscimos');}
+ /* estatística por time lida do registro bate com o que o motor contou */
+ {let bad=[],dpos=0;
+  for(const r of jg){const X=MT.estat(r);
+   for(const s of [0,1]){const a=X[s],b=r.st[s];
+    for(const [k,kb] of [['gols','gols'],['chutes','chutes'],['alvo','alvo'],['faltas','faltas'],['amarelos','amarelos'],['vermelhos','vermelhos'],['imped','imped'],['escanteios','escanteios'],['laterais','laterais'],['penaltis','penaltis'],['defesas','defesas'],['bloq','bloq'],['inter','inter'],['pas','pas'],['pasOk','pasOk']])
+     if(a[k]!==b[kb])bad.push(k+': registro '+a[k]+' x motor '+b[kb]);
+    if(Math.abs(a.xg-b.xg)>.02)bad.push('xg');if(a.gols!==r.g[s])bad.push('gols x placar');}
+   dpos=Math.max(dpos,Math.abs(X[0].posseP-100*r.st[0].posse/(r.st[0].posse+r.st[1].posse)));
+   if(Math.abs(X[0].posseP+X[1].posseP-100)>1e-6)bad.push('posse não soma 100');}
+  ok(bad.length==0,'estatísticas do registro = contadores do motor: '+[...new Set(bad)].slice(0,4).join('; '));ok(dpos<5,'posse lida do registro difere menos de 5 pontos da contada ('+dpos.toFixed(1)+')');}
+ /* por jogador */
+ {let bad=[],mv=0,tot=0,vit=0,vn=0;
+  for(const r of jg){const E=MT.estatJog(r),X=MT.estat(r),fim=r.log.ev[r.log.ev.length-1].t/60;
+   for(const s of [0,1]){const js=E.lista.filter(j=>j.s==s),som=k=>js.reduce((a,j)=>a+j[k],0);
+    if(som('gols')!==X[s].gols)bad.push('gols por jogador');if(som('chutes')!==X[s].chutes)bad.push('chutes por jogador');
+    if(som('assist')>X[s].gols)bad.push('mais assistências que gols');
+    if(Math.abs(som('xg')-X[s].xg)>.02)bad.push('xG por jogador');
+    const exp=r.log.ev.filter(e=>e.k=='cartao'&&e.o=='vermelho'&&e.s==s).length,mt=som('min');
+    if(Math.abs(mt-(11*fim-exp*0))>11*fim*.2&&exp==0)bad.push('minutos somados '+mt.toFixed(0)+' x '+(11*fim).toFixed(0));
+    if(exp==0&&Math.abs(mt-11*fim)>.5)bad.push('minutos não fecham: '+mt.toFixed(1)+' x '+(11*fim).toFixed(1));}
+   E.lista.forEach(j=>{if(!(j.nota>=3&&j.nota<=10))bad.push('nota fora de 3-10');if(j.min<0)bad.push('minutos negativos')});
+   const m=E.melhor;tot++;if(m.s==(r.g[0]>r.g[1]?0:1)&&r.g[0]!=r.g[1])vit++;if(r.g[0]!=r.g[1])vn++;mv+=m.nota}
+  ok(bad.length==0,'estatísticas por jogador fecham com o time: '+[...new Set(bad)].slice(0,3).join('; '));
+  ok(vn>3&&vit/vn>.55,'o melhor em campo costuma ser do time vencedor ('+vit+'/'+vn+')');}
+ {const r=jg.find(x=>x.g[0]+x.g[1]>=3)||jg[0],E=MT.estatJog(r),art=E.lista.filter(j=>j.gols>0).sort((a,b)=>b.gols-a.gols)[0];
+  if(art){const media=E.lista.reduce((a,j)=>a+j.nota,0)/E.lista.length;ok(art.nota>media,'quem faz gol tem nota acima da média');}
+  const subs=E.lista.filter(j=>j.min<89);ok(r.log.count('substituicao')==0||subs.length>0,'jogadores que entram/saem têm minutos parciais');
+  const gk=E.lista.find(j=>j.cls=='GK'&&j.s==0);ok(gk&&gk.nota>=3,'goleiro tem nota');}
+ /* mapa de calor */
+ {const r=jg[1],E=MT.estatJog(r),j=E.lista.filter(x=>x.s==0).sort((a,b)=>b.pas-a.pas)[0],h=MT.calor(r,0,j.nome);
+  const soma=h.grade.reduce((a,l)=>a+l.reduce((x,y)=>x+y,0),0);ok(h.grade.length==8&&h.grade[0].length==12&&soma==h.n&&h.n>5,'mapa de calor 12x8 soma as ações do jogador ('+h.n+')');
+  const zag=E.lista.filter(x=>x.s==0&&x.cls=='CB')[0],ata=E.lista.filter(x=>x.s==0&&x.cls=='ST')[0];
+  const cx=(g)=>{let a=0,n=0;g.grade.forEach(l=>l.forEach((v,u)=>{a+=u*v;n+=v}));return n?a/n:0};
+  ok(cx(MT.calor(r,0,ata.nome))>cx(MT.calor(r,0,zag.nome)),'o atacante atua mais à frente que o zagueiro no mapa');}
+ /* narração */
+ {let bad=[],gols=0,golsTxt=0,varN=0,varTxt=0,cart=0,cartTxt=0,subs=0,subsTxt=0;const modelos=new Set();
+  for(const r of jg){const N=MT.narra(r),ev=r.log.ev,E=MT.estat(r);
+   const txt=N.map(x=>x.txt).join('\n');
+   if(/undefined|NaN|\[object|null/.test(txt))bad.push('texto com lixo');
+   if(N.some((x,i)=>i&&x.t<N[i-1].t))bad.push('narração fora de ordem');
+   if(!/Rola a bola|Começa o jogo|Apita/.test(N[0].txt)||!/^Fim de jogo/.test(N[N.length-1].txt))bad.push('abertura ou fecho');
+   const gv=ev.filter(e=>e.k=='gol'&&!(e.d&&e.d.anulado));gols+=gv.length;
+   const gl=N.filter(x=>x.k=='gol'&&!/será revisado/.test(x.txt));golsTxt+=gl.length;
+   gl.forEach((x,i)=>{const gE=gv[i];const j=MT.jogadores(r),nome=j.quem(gE.s,gE.p,gE.t);if(!x.txt.includes(nome))bad.push('gol sem o nome do autor');
+     const m=x.txt.match(/(\d+) a (\d+) /);if(!m)bad.push('gol sem placar');else{const g0=gv.slice(0,i+1).filter(e=>e.s==0).length,g1=i+1-g0;if(+m[1]!=g0||+m[2]!=g1)bad.push('placar errado na narração do gol');}
+     modelos.add(x.txt.replace(/[A-ZÁÉÍÓÚ][^ ,.!]*( \S+)?/g,'N').slice(0,18));});
+   const vv=ev.filter(e=>e.k=='var').length;varN+=vv;varTxt+=N.filter(x=>x.k=='var').length;
+   cart+=ev.filter(e=>e.k=='cartao').length;cartTxt+=N.filter(x=>x.k=='cartao').length;
+   subs+=ev.filter(e=>e.k=='substituicao').length;subsTxt+=N.filter(x=>x.k=='substituicao').length;
+   N.filter(x=>x.k=='gol'||x.k=='cartao').forEach(x=>{if(!/^\d+(\+\d+)?'$/.test(x.min))bad.push('minuto mal formatado: '+x.min)});
+   const fimTxt=N[N.length-1].txt,mm=fimTxt.match(/(\d+) a (\d+)/);if(!mm||+mm[1]!=r.g[0]||+mm[2]!=r.g[1])bad.push('placar final da narração');
+   const r2=MT.narra(r);if(JSON.stringify(r2)!=JSON.stringify(N))bad.push('narração não reproduzível');}
+  ok(bad.length==0,'narração coerente: '+[...new Set(bad)].slice(0,3).join('; '));
+  ok(gols==golsTxt,'todo gol válido é narrado ('+golsTxt+'/'+gols+')');ok(cart==cartTxt&&subs==subsTxt&&varN==varTxt,'cartões, trocas e revisões do VAR são narrados');
+  ok(modelos.size>=3,'a narração varia as frases ('+modelos.size+' modelos)');}
+ {const r=jg.find(x=>x.pen)||null;if(r){const N=MT.narra(r);ok(N.some(x=>x.k=='penaltis')&&/pênaltis/.test(N[N.length-1].txt),'disputa de pênaltis narrada e no resultado final')}else ok(true,'(sem disputa na amostra)');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);

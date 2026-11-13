@@ -2884,7 +2884,7 @@ const MT=(()=>{
     let t=0,ps=0,h=0,bx=.5,by=.5,ult=null;
     const exp=[new Set(),new Set()],am=[{},{}],RG=MT.REGRAS,TA=MT.tatica,subsN=[0,0],jan=[0,0],subT=[{},{}];let t2=null,chk=false;
     /* condições: energia, lesões, moral e mando de campo (módulo 6) */
-    const RL=rg.fork('condicao'),CO=MT.cond,CD=MT.CONDICAO,casaOn=!(opt&&opt.neutro);
+    const ini=T.map(tm=>tm.xi.map(x=>({n:x.n,cls:x.slotCls}))),RL=rg.fork('condicao'),CO=MT.cond,CD=MT.CONDICAO,casaOn=!(opt&&opt.neutro);
     const en=T.map(tm=>tm.xi.map(()=>100)),les=[{},{}],lesoes=[0,0];
     const mo=[((opt&&opt.moral&&opt.moral[0])||0)+(casaOn?CD.moral.casa:0),(opt&&opt.moral&&opt.moral[1])||0];
     let tDr=0,tRef=0;
@@ -3415,7 +3415,7 @@ const MT=(()=>{
       if(G[0]==G[1]&&!(opt&&opt.semPenaltis))pen=disputa();
     }
     evento('fim',{});
-    return{log,g:G,st,T,t,pen,arb:ARB,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
+    return{log,g:G,st,T,t,pen,arb:ARB,ini,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
   }
 
   /* o treinador-IA escolhe a formação que melhor aproveita o elenco (nota dos 11, com desconto por jogador fora de função) */
