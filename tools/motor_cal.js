@@ -2,7 +2,7 @@
    Uso (na raiz): node tools/motor_cal.js [N] [forçaCasa] [forçaFora] [formaçãoCasa] [formaçãoFora] */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-const mods=['motor','atrib','chute','regras','tatica','cond','posse'];
+const mods=['motor','atrib','chute','regras','tatica','cond','arbitro','posse'];
 for(const m of mods)vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 /* PAR='{"desarme":{"prob":.1}}' sobrescreve constantes sem editar o código */
@@ -32,3 +32,5 @@ console.log('posse casa',m('posse_c').toFixed(1)+'%',' lances no registro',m('ev
 
 console.log('faltas/time',m('faltas').toFixed(1),' amarelos/jogo',(2*m('am')).toFixed(2),' vermelhos/jogo',(2*m('vm')).toFixed(2),' impedimentos/time',m('imp').toFixed(1),' escanteios/time',m('esc').toFixed(1),' laterais/time',m('lat').toFixed(1),' pênaltis/jogo',(2*m('pen')).toFixed(2),' tiros livres/time',m('tl').toFixed(1),' gols de falta/jogo',(2*m('tlg')).toFixed(2),' cabeceios/time',m('cab').toFixed(1));
 console.log('lesões/time',m('les').toFixed(2),' energia final média casa/fora',m('enC').toFixed(0),'/',m('enF').toFixed(0),' trocas/time',m('subs').toFixed(2));
+const vs=MT.lote((seed)=>{const r=MT.simula(MT.timeTeste(fa,ff,'Casa',seed*2),MT.timeTeste(fb,fg,'Fora',seed*2+1),seed),c={};r.log.ev.filter(e=>e.k=='var').forEach(e=>{const k=e.d.tipo+':'+e.d.resultado;c[k]=(c[k]||0)+1});c.total=r.log.count('var');c.anul=r.log.ev.filter(e=>e.k=='gol'&&e.d&&e.d.anulado).length;return c},Math.min(N,150),1);
+console.log('VAR por jogo: total',vs.mean('total').toFixed(2),' gols anulados',vs.mean('anul').toFixed(2),' pênalti anulado',(vs.n('penalti:anulado')/Math.min(N,150)).toFixed(2),' pênalti concedido',(vs.n('penalti:concedido')/Math.min(N,150)).toFixed(2),' vermelho revertido',(vs.n('vermelho:revertido')/Math.min(N,150)).toFixed(2),' vermelho concedido',(vs.n('vermelho:concedido')/Math.min(N,150)).toFixed(2));

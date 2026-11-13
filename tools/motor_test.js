@@ -2,7 +2,7 @@
    Cada módulo novo do motor acrescenta seus testes aqui. */
 const fs=require('fs'),vm=require('vm');
 const ctx={};vm.createContext(ctx);
-for(const m of ['motor','atrib','chute','regras','tatica','cond','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
+for(const m of ['motor','atrib','chute','regras','tatica','cond','arbitro','posse'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+m+'.js','utf8').replace(/^'use strict';/,'')+(m=='motor'?';this.MT=MT':''),ctx);
 const MT=ctx.MT;
 let falhas=0,total=0;
 const ok=(c,m)=>{total++;if(!c){falhas++;console.log('FALHOU:',m)}};
@@ -110,7 +110,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const ev=r1.log.ev;ok(ev[0].k=='inicio'&&ev[ev.length-1].k=='fim','começa em inicio e termina em fim');
   ok(ev.every((e,i)=>i==0||e.t>=ev[i-1].t)&&ev[ev.length-1].t<=5400+900,'tempo crescente e dentro dos 90 minutos mais acréscimos');
   ok(ev.filter(e=>e.k=='fim_tempo').length==1,'um intervalo');
-  ok(r1.g[0]+r1.g[1]==ev.filter(e=>e.k=='gol').length,'placar bate com os gols do registro');}
+  ok(r1.g[0]+r1.g[1]==ev.filter(e=>e.k=='gol'&&!(e.d&&e.d.anulado)).length,'placar bate com os gols do registro');}
  /* auditoria: toda ação com a bola é feita por quem a tem; chute só de quem recebeu ou conquistou; gol só após chute; assistência só de passe */
  {let bad=[],n=0;
   for(let sd=1;sd<=(RAPIDO?3:10);sd++){const [A,B]=par(70,70,sd),r=MT.simula(A,B,sd+500),ev=r.log.ev;let hold=null,last=null;
@@ -262,7 +262,7 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
    ev.forEach((e,i)=>{
     if(e.k=='impedimento'){const nx=ev[i+1];if(!nx||nx.k!='tiro_livre'||nx.s==e.s||nx.d.origem!='impedimento')bad.push('impedimento sem tiro livre do adversário')}
     if(e.k=='penalti'){const nx=ev[i+1];if(!nx||nx.k!='chute'||nx.d.tipo!='penalti'||nx.p!=e.p)bad.push('pênalti sem chute do cobrador');if(Math.abs(Math.abs(e.x-.5)-(.5-11/105))>.01)bad.push('pênalti fora da marca')}
-    if(e.k=='falta'&&!e.d.vantagem){let j=i+1;while(ev[j]&&['cartao','lesao','substituicao'].includes(ev[j].k))j++;const nx=ev[j];if(!nx||(nx.k!='tiro_livre'&&nx.k!='penalti'))bad.push('falta sem reposição ('+(nx&&nx.k)+')');
+    if(e.k=='falta'&&!e.d.vantagem){let j=i+1;while(ev[j]&&['cartao','lesao','substituicao','var'].includes(ev[j].k))j++;const nx=ev[j];if(!(e.d.simulacao&&nx&&nx.k=='recuperou')&&(!nx||(nx.k!='tiro_livre'&&nx.k!='penalti')))bad.push('falta sem reposição ('+(nx&&nx.k)+')');
      if(nx&&nx.k=='tiro_livre'&&nx.s==e.s)bad.push('tiro livre dado ao time que cometeu a falta');if(nx&&nx.k=='penalti'&&!e.d.area)bad.push('pênalti fora da área')}
     if(e.k=='falta'&&e.d.area&&e.s!==undefined){const at_=e.x;if((e.s==0&&at_<.5)||(e.s==1&&at_>.5)){} }
     if(e.k=='cartao'&&e.o=='vermelho'&&e.d.segundo){const pr=ev[i-1];if(!pr||pr.k!='cartao'||pr.o!='amarelo'||pr.p!=e.p)bad.push('segundo amarelo sem amarelo antes')}
@@ -445,6 +445,42 @@ const perto=(a,b,tol,m)=>ok(Math.abs(a-b)<=tol,m+' (obtido '+a.toFixed(4)+', esp
   const nf=(opt)=>{let f=0;for(let i=1;i<=(RAP?10:30);i++){const [A,B]=par(70,70,i+400),r=MT.simula(A,B,8500+i,opt);f+=r.st[0].faltas-r.st[1].faltas}return f};
   ok(nf({})<nf({neutro:true})+8,'mandante não sofre mais faltas que o visitante por causa do mando');}
  {const [A,B]=par(70,70,9),x=MT.simula(A,B,9999),y=MT.simula(A,B,9999);ok(x.log.digest()===y.log.digest()&&JSON.stringify(x.en)===JSON.stringify(y.en),'condições reproduzíveis com a mesma seed');}
+}
+
+/* ===== módulo 7: arbitragem e VAR ===== */
+{
+ const RAP=!!process.env.RAPIDO,V=MT.VAR;
+ {const a=MT.arbitro('Fulano'),b=MT.arbitro('Fulano'),c=MT.arbitro('Beltrano');
+  ok(JSON.stringify(a)==JSON.stringify(b)&&a.rig!=c.rig,'árbitro reproduzível pelo nome e diferente entre nomes');
+  let ok1=true,rg=[];for(let i=0;i<300;i++){const x=MT.arbitro('a'+i);rg.push(x.rig);if(x.rig<.8||x.rig>1.25||x.erro<.02||x.erro>.07||x.vant<.7||x.vant>1.3)ok1=false}
+  ok(ok1&&Math.max(...rg)-Math.min(...rg)>.3,'perfis dentro das faixas e com variedade');
+  ok(V.det>.7&&V.det<1&&V.tempo.min>=30&&V.tempo.max>V.tempo.min,'VAR corrige erro claro na maior parte das vezes e gasta tempo');}
+ const par=(seed)=>[MT.timeTeste(70,'4-3-3','Casa'+seed,seed*2),MT.timeTeste(70,'4-3-3','Fora'+seed,seed*2+1)];
+ const NJ=RAP?20:80,jg=[];for(let i=1;i<=NJ;i++){const [A,B]=par(i+1200);jg.push(MT.simula(A,B,11000+i))}
+ {let n=0,bad=[];const cont={};
+  for(const r of jg){const ev=r.log.ev;
+   ev.forEach((e,i)=>{if(e.k!='var')return;n++;const k=e.d.tipo+':'+e.d.resultado;cont[k]=(cont[k]||0)+1;
+    if(!['gol','penalti','vermelho'].includes(e.d.tipo))bad.push('tipo de revisão inválido');
+    const ant=ev[i-1],prox=ev[i+1];
+    if(k=='gol:anulado'){if(!ant||ant.k!='gol'||!ant.d||!ant.d.anulado)bad.push('gol anulado sem marca no gol');if(!prox||prox.k!='tiro_livre'||prox.s==e.s)bad.push('gol anulado sem tiro livre do adversário')}
+    if(k=='penalti:concedido'){if(!prox||prox.k!='penalti'||prox.s!=e.s)bad.push('pênalti concedido sem cobrança')}
+    if(k=='penalti:anulado'){const c=ev[i+1];if(!c||c.k!='cartao'||c.o!='amarelo'||c.s!=e.s)bad.push('simulação sem amarelo para o simulador');if(!ant||ant.k!='falta'||!ant.d.simulacao)bad.push('pênalti anulado sem falta de simulação antes')}
+    if(k=='vermelho:revertido'){const c=ev[i+1];if(!c||c.k!='cartao'||c.o!='amarelo'||c.p!=e.p)bad.push('vermelho revertido sem amarelo');
+      if(ev.slice(i).some(x=>x.k=='cartao'&&x.o=='vermelho'&&x.s==e.s&&x.p==e.p&&x.t-e.t<1))bad.push('vermelho revertido ainda aplicado')}
+    if(k=='vermelho:concedido'){const c=ev.slice(i+1,i+4).find(x=>x.k=='cartao'&&x.o=='vermelho'&&x.s==e.s&&x.p==e.p);if(!c)bad.push('vermelho concedido sem cartão')}
+    if(i+1<ev.length&&ev[i+1].t-e.t>200)bad.push('revisão sem passagem de tempo coerente')});
+   ev.filter(e=>e.k=='gol'&&e.d&&e.d.anulado).forEach(g=>{const nx=ev[g.i+1];if(nx&&nx.k=='assistencia')bad.push('assistência em gol anulado')});
+   const validos=ev.filter(e=>e.k=='gol'&&!(e.d&&e.d.anulado)).length;if(validos!=r.g[0]+r.g[1])bad.push('placar não bate com gols válidos');
+   const tem=r.log.ev.some(e=>e.k=='var');if(tem)ok(r.log.ev.filter(e=>e.k=='var').every(e=>e.t>0),'var com tempo');}
+  const m=n/NJ;ok(m>.03&&m<.8,'intervenções do VAR por jogo entre 0,03 e 0,8 ('+m.toFixed(2)+')');
+  ok(bad.length==0,'revisões coerentes: '+bad.slice(0,3).join('; ')+' '+JSON.stringify(cont));}
+ /* árbitro rigoroso x brando: mais faltas e cartões */
+ {let rig=null,bran=null;for(let i=0;i<200;i++){const x=MT.arbitro('r'+i);if(!rig||x.rig>rig.rig)rig=x;if(!bran||x.rig<bran.rig)bran=x}
+  const roda=(nome)=>{let f=0,c=0,n=RAP?10:30;for(let i=1;i<=n;i++){const [A,B]=par(i+1400),r=MT.simula(A,B,12000+i,{arbitro:nome});f+=r.log.count('falta');c+=r.log.count('cartao')}return{f:f/n,c:c/n}};
+  const a=roda(rig.nome),b=roda(bran.nome);
+  ok(a.f>b.f*1.1&&a.c>b.c*1.1,'árbitro rigoroso marca mais faltas e cartões ('+a.f.toFixed(1)+'/'+a.c.toFixed(1)+' x '+b.f.toFixed(1)+'/'+b.c.toFixed(1)+')');}
+ {const [A,B]=par(77),x=MT.simula(A,B,13000,{arbitro:'X'}),y=MT.simula(A,B,13000,{arbitro:'X'}),z=MT.simula(A,B,13000,{arbitro:'Y'});
+  ok(x.log.digest()===y.log.digest()&&x.arb.nome=='X','VAR e árbitro reproduzíveis com a mesma seed');ok(x.log.digest()!==z.log.digest(),'outro árbitro, outra partida');}
 }
 
 console.log(falhas?`${falhas} FALHA(S) de ${total}`:`motor: ${total} verificações, todas passaram`);

@@ -3036,6 +3036,7 @@ const MT=(()=>{
     const gasta=(s,sec)=>{sec/=T[s].est.ritmo;t+=sec;st[s].posse+=sec};
 
     function recupera(s2,i,pt,k,extra){
+      if(impPerd&&s2!=impPerd.s)impPerd=null;if(faltaPerd&&s2==faltaPerd.vs)faltaPerd=null;
       if(vant){const v=vant;vant=null;if(s2!=v.s&&t-v.t<6){volta(v);return}}
       ps=s2;h=i;bx=pt[0];by=pt[1];ult=null;
       evento('recuperou',{s:s2,p:i,x:+bx.toFixed(3),y:+by.toFixed(3),d:{como:k,...(extra||{})}});
@@ -3052,7 +3053,9 @@ const MT=(()=>{
       if(R.res=='gol'){
         G[s]++;golMoral(s);st[s].alvo++;st[s].gols++;if(R.big)st[s].grandesGol++;
         const ass=c.ass&&t-c.ass.t<9?c.ass:null;
-        evento('gol',{...base,q:ass?ass.i:undefined});if(ass)evento('assistencia',{s,p:ass.i,q:sh});
+        const ge=evento('gol',{...base,q:ass?ass.i:undefined});
+        if(varGol(s,ge)){if(R.big)st[s].grandesGol--;gasta(s,10);return}
+        if(ass)evento('assistencia',{s,p:ass.i,q:sh});
         /* recomeço no meio: quem sofreu o gol */
         saidaGol(adv);gasta(s,45);perdido+=RG.tempo.gol;return;
       }
@@ -3094,7 +3097,8 @@ const MT=(()=>{
     }
 
     /* ---------- regras: reposições, faltas, cartões, pênalti (módulo 4) ---------- */
-    const REF={rig:1},rigZ=(vs,pt)=>REF.rig*(MT.regras.dentroArea(toU(vs,pt[0]),toV(vs,pt[1]))?.08:1)*(casaOn&&vs==1?CD.casa.falta:1);
+    const ARB=MT.arbitro((opt&&opt.arbitro)||('arb'+seed)),VR=rg.fork('var'),VAR=MT.VAR;let impPerd=null,faltaPerd=null;
+    const REF={rig:ARB.rig},rigZ=(vs,pt)=>REF.rig*(MT.regras.dentroArea(toU(vs,pt[0]),toV(vs,pt[1]))?.08:1)*(casaOn&&vs==1?CD.casa.falta:1);
     const pickMeio=s=>{const k=T[s].xi.findIndex((p,i)=>vivo(s,i)&&(p.slotCls=='CM'||p.slotCls=='DM'||p.slotCls=='AM'));return k<0?T[s].xi.findIndex((p,i)=>i>0&&vivo(s,i)):k};
     const melhor=(s,f)=>{let b=-1,bv=-1;T[s].xi.forEach((p,i)=>{if(i==0||!vivo(s,i))return;const v=f(p.a);if(v>bv){bv=v;b=i}});return b};
     const fx=v=>+v.toFixed(3);
@@ -3155,10 +3159,25 @@ const MT=(()=>{
       else{const k=maisPerto(opp(s),pt,1,true)[0];recupera(opp(s),k.i,pt,'lateral perdido')}
     }
     /* cartões */
+    /* o árbitro de vídeo intervém: registra, gasta tempo */
+    function varEv(s,tipo,res,motivo,p){evento('var',{s,p,d:{tipo,resultado:res,motivo}});perdido+=RG.tempo.var;t+=VR.range(VAR.tempo.min,VAR.tempo.max)}
+    /* gol: se veio de impedimento ou falta não marcados, o VAR pode anular */
+    function varGol(s,ge){
+      let mot=null,pt=null,orig='falta';
+      if(impPerd&&impPerd.s==s&&t-impPerd.t<VAR.janela){mot='impedimento';pt=impPerd.pt;orig='impedimento'}
+      else if(faltaPerd&&faltaPerd.df==s&&t-faltaPerd.t<VAR.janela){mot='falta no lance';pt=faltaPerd.pt}
+      impPerd=null;faltaPerd=null;
+      if(!mot||!VR.chance(VAR.det))return false;
+      varEv(s,'gol','anulado',mot,ge.p);
+      ge.d={...(ge.d||{}),anulado:true,motivo:mot};
+      G[s]--;st[s].gols--;mo[s]=clamp(mo[s]-CD.moral.gol,-1,1);mo[1-s]=clamp(mo[1-s]+CD.moral.sofre,-1,1);refresh();
+      tiroLivre(1-s,pt,orig);return true;
+    }
     function cartaoEv(df,k,car,pt){
       const b={s:df,p:k,x:fx(pt[0]),y:fx(pt[1])};
       if(car.c=='amarelo'){am[df][k]=1;st[df].amarelos++;evento('cartao',{...b,o:'amarelo',d:{motivo:car.motivo}})}
       else if(car.c=='vermelho'){
+        if(!car.segundo&&RF.chance(ARB.erro*VAR.erroExcessivo)&&VR.chance(VAR.det)){varEv(df,'vermelho','revertido','cartão excessivo',k);cartaoEv(df,k,{c:'amarelo',motivo:'falta imprudente'},pt);return}
         if(car.segundo){am[df][k]=2;st[df].amarelos++;evento('cartao',{...b,o:'amarelo',d:{motivo:'segundo amarelo',n:2}})}
         st[df].vermelhos++;mo[df]=clamp(mo[df]-CD.moral.vermelho,-1,1);evento('cartao',{...b,o:'vermelho',d:{motivo:car.motivo,segundo:!!car.segundo}});if(k>0)exp[df].add(k);
       }
@@ -3167,12 +3186,27 @@ const MT=(()=>{
     /* uma disputa virou falta de df/k sobre vs/vi em pt. Devolve true se o jogo parou, false se a vantagem foi dada */
     function faltaEm(df,k,vs,vi,tipo,pt,mantem){
       const ub=toU(vs,pt[0]),vb=toV(vs,pt[1]),area=MT.regras.dentroArea(ub,vb),a=I(df,k).a;
+      const px={x:fx(pt[0]),y:fx(pt[1])};
+      /* simulação na área: o árbitro pode cair; o VAR revisa */
+      if(area&&tipo!='aereo'&&RF.chance(VAR.simulacao)){
+        if(!RF.chance(ARB.erro*VAR.erroSimula))return false;
+        st[df].faltas++;st[vs].faltasSof++;perdido+=RG.tempo.falta;
+        evento('falta',{s:df,p:k,q:vi,...px,d:{tipo,area:true,vantagem:false,simulacao:true}});
+        if(VR.chance(VAR.det)){varEv(vs,'penalti','anulado','simulação',vi);cartaoEv(vs,vi,{c:'amarelo',motivo:'simulação'},pt);const m=maisPerto(df,pt,1,true)[0];recupera(df,m.i,pt,'bola ao árbitro');return true}
+        penaltiLance(vs,vi);return true;
+      }
+      /* falta que o árbitro não viu: na área o VAR pode dar o pênalti; fora dela, o time do infrator fica com a bola */
+      if(RF.chance(ARB.erro*VAR.erroApita)){
+        if(area&&VR.chance(VAR.det)){varEv(vs,'penalti','concedido','falta na área não marcada',vi);penaltiLance(vs,vi);return true}
+        recupera(df,k,pt,'falta não marcada');faltaPerd={df,vs,t,pt};return true;
+      }
       st[df].faltas++;st[vs].faltasSof++;perdido+=RG.tempo.falta;
       const dog=tipo!='recep'&&tipo!='aereo'&&ub>.75&&Math.abs(vb-.5)<.22&&maisPerto(df,pt,3,true).filter(o=>o.i!=k&&o.d<10).length<1?(area?'area':'fora'):null;
       const tat=!area&&!dog&&ub>.35&&ub<.85&&tipo!='aereo'&&RF.chance(.25);
-      const car=MT.regras.cartao({agr:a.agr,tatica:tat,dogso:dog,area,amarelos:am[df][k]||0,rig:REF.rig*(casaOn&&df==0?CD.casa.cartao:1)},RF);
+      let car=MT.regras.cartao({agr:a.agr,tatica:tat,dogso:dog,area,amarelos:am[df][k]||0,rig:REF.rig*(casaOn&&df==0?CD.casa.cartao:1)},RF);
       const vOk=!area&&mantem&&!vant&&tipo!='aereo'&&!car.segundo&&car.c!='vermelho'&&RF.chance(clamp(th(ub,vb)*1.6+.1,0,.6));
       evento('falta',{s:df,p:k,q:vi,x:fx(pt[0]),y:fx(pt[1]),d:{tipo,area,vantagem:vOk,dogso:dog}});
+      if(dog&&!vOk&&car.c!='vermelho'&&RF.chance(ARB.erro*VAR.erroDogso)&&VR.chance(VAR.det)){varEv(df,'vermelho','concedido','anular chance clara de gol',k);car={c:'vermelho',segundo:false,motivo:'anular chance clara de gol'}}
       if(car.c)cartaoEv(df,k,car,pt);
       if(!vOk&&RL.chance(CD.lesao.contato*(1+CD.lesao.contatoAgr*a.agr/100)*(tipo=='tackle'?1.3:tipo=='recep'?.6:1)))lesiona(vs,vi,'contato');
       if(vOk){evento('vantagem',{s:vs,p:vi,x:fx(pt[0]),y:fx(pt[1])});vant={s:vs,t,pt,area,k,vi};return false}
@@ -3320,7 +3354,8 @@ const MT=(()=>{
         if(RU.chance(e.q0)){
           /* impedimento: posição real do recebedor na hora do passe (Lei 11) */
           if(!sem){
-            const rU=toU(s,pos[s][e.j][0])+RF.gauss(.005,.014),io=MT.regras.impedimento(rU,toU(s,bx),advUs(s)),chama=io.imp?!RF.chance(RG.imp.perdeu):RF.chance(RG.imp.falso);
+            const rU=toU(s,pos[s][e.j][0])+RF.gauss(.005,.014),io=MT.regras.impedimento(rU,toU(s,bx),advUs(s)),chama=io.imp?!RF.chance((io.margem*PW<1.2?.35:.03)*ARB.erro/.04):RF.chance(RG.imp.falso);
+            if(io.imp&&!chama)impPerd={s,t,pt:e.tgt};
             if(chama){
               evento('impedimento',{s,p:e.j,q:h,x:+e.tgt[0].toFixed(3),y:+e.tgt[1].toFixed(3),d:{margem:+(io.margem*PW).toFixed(2),errado:!io.imp}});
               st[s].imped++;st[s].perdas++;perdido+=3;gasta(s,dur*.5);tiroLivre(opp(s),e.tgt,'impedimento');continue;
@@ -3380,7 +3415,7 @@ const MT=(()=>{
       if(G[0]==G[1]&&!(opt&&opt.semPenaltis))pen=disputa();
     }
     evento('fim',{});
-    return{log,g:G,st,T,t,pen,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
+    return{log,g:G,st,T,t,pen,arb:ARB,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length};
   }
 
   /* o treinador-IA escolhe a formação que melhor aproveita o elenco (nota dos 11, com desconto por jogador fora de função) */
