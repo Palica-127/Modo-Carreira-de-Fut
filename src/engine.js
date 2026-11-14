@@ -20,7 +20,9 @@ let FXC={};          // cache dos calendários (derivado de S.dv[..].ord)
 let RC={};           // cache: id do clube -> rivais que jogam nele
 
 /* ---------- acesso ---------- */
-const cl=i=>S.cs[i];
+const WCB=100000;let WCCL=null;
+function wcCl(i){if(!WCCL)WCCL=WCN.map(([n,c,s],k)=>({id:WCB+k,n,hue:hash(n)%360,s,b:s,l:-1,d:0,st:[],nat:1,code:c}));return WCCL[i-WCB]}
+const cl=i=>i>=WCB?wcCl(i):S.cs[i];
 const lg=c=>LEAGUES[c.l];                                   // liga do clube (undefined p/ convidados)
 const dvName=c=>c.l<0?'Convidado':LEAGUES[c.l].dn[c.d];
 const O=(a=S.at,p=S.p.pos)=>Math.round(a.reduce((s,v,i)=>s+v*PW[p][i],0));
@@ -132,6 +134,27 @@ function qualify(){
   S.qU=u;S.qL=b;
 }
 function mkComp(n,al,rn,wk,k,li,legs){return{n,al:[...al],rd:0,rn,wk,legs:legs||rn.map(()=>1),w2:wk.map((x,i)=>legs&&legs[i]==2?x+1:0),ch:null,ru:null,pl:al.includes(S.club),log:[],k,li}}
+/* n primeiras rodadas do método do círculo: cada clube joga uma vez por rodada contra adversários diferentes */
+function rrRounds(ids,n){
+  const t=Sh(ids.slice()),m=t.length,R=[];
+  for(let r=0;r<n;r++){
+    const p=[];for(let i=0;i<m/2;i++){const a=t[i],b=t[m-1-i];p.push((i+r)%2?[a,b]:[b,a])}
+    R.push(p);t.splice(1,0,t.pop());
+  }
+  return R;
+}
+const initTb=(k,gr)=>{k.tb={};k.al.forEach(id=>{k.tb[id]={P:0,W:0,D:0,L:0,F:0,A:0,Pt:0,f:''}});if(k.gr)k.gr.forEach((g,i)=>g.forEach(id=>{k.tb[id].g=i}))};
+/* grupos de 4: um clube de cada pote por grupo; ida e volta (6 rodadas) */
+function grpSetup(k){
+  const o=k.al.slice().sort((a,b)=>cl(b).s-cl(a).s),G=Math.floor(o.length/4),gr=[];
+  for(let g=0;g<G;g++)gr.push([]);
+  for(let p=0;p<4;p++)Sh(o.slice(p*G,p*G+G)).forEach((id,g)=>gr[g].push(id));
+  k.gr=gr;k.sch=[];
+  const pat=[[[0,3],[1,2]],[[3,2],[0,1]],[[1,3],[2,0]]];
+  for(let h=0;h<2;h++)for(let r=0;r<3;r++)k.sch.push(gr.flatMap(g=>pat[r].map(([a,b])=>h?[g[b],g[a]]:[g[a],g[b]])));
+}
+const upk=(k,h,a,g)=>[[h,0,1],[a,1,0]].forEach(([id,i,j])=>{const t=k.tb[id];t.P++;t.F+=g[i];t.A+=g[j];t.f=((t.f||'')+(g[i]>g[j]?'V':g[i]==g[j]?'E':'D')).slice(-5);if(g[i]>g[j]){t.W++;t.Pt+=3}else if(g[i]==g[j]){t.D++;t.Pt++}else t.L++});
+const kSort=(k,ids)=>ids.slice().sort((a,b)=>{const x=k.tb[a],y=k.tb[b];return y.Pt-x.Pt||(y.F-y.A)-(x.F-x.A)||y.F-x.F||cl(b).s-cl(a).s});
 function buildComps(){
   S.dc=LEAGUES.map((L,li)=>{
     const by=d=>Sh(S.cs.filter(c=>c.l==li&&c.d==d));
@@ -140,10 +163,13 @@ function buildComps(){
     for(const x of [...top.slice(10),...mid.slice(4)]){if(al.length>=16)break;al.push(x)}
     al=al.map(c=>c.id);
     const my=S.club;if(cl(my).l==li&&!al.includes(my))al[al.length-1]=my;
-    return mkComp(L.cup,al,['Oitavas','Quartas','Semifinal','Final'],[5,12,19,26].map(wsc),'dom',li,L.k=='BRA'?[2,2,2,1]:['ESP','ITA','POR'].includes(L.k)?[1,1,2,1]:[1,1,1,1]);
+    return mkComp(L.cup,al,['Oitavas','Quartas','Semifinal','Final'],[5,12,19,26].map(wsc),'dom',li,L.k=='BRA'?[2,2,2,2]:['ESP','ITA','POR'].includes(L.k)?[1,1,2,1]:[1,1,1,1]);
   });
-  S.ucl=mkComp('Liga dos Campeões',[...S.qU,...S.ex.eu],['Fase de 32','Oitavas','Quartas','Semifinal','Final'],[3,9,15,22,29].map(wsc),'ucl',undefined,[2,2,2,2,1]);
-  S.lib=mkComp('Libertadores',[...S.qL,...S.ex.sa],['Oitavas','Quartas','Semifinal','Final'],[6,13,20,27].map(wsc),'lib',undefined,[2,2,2,1]);
+  /* Champions: fase de liga única (8 jogos por clube), playoff para 9º-24º, depois mata-mata. Libertadores: grupos de 4 e mata-mata */
+  S.ucl=mkComp('Liga dos Campeões',[...S.qU,...S.ex.eu],[1,2,3,4,5,6,7,8].map(i=>'Rodada '+i).concat(['Playoff','Oitavas','Quartas','Semifinal','Final']),[7,9,12,14,17,19,25,26,31,34,37,41,44],'ucl',undefined,[1,1,1,1,1,1,1,1,2,2,2,2,1]);
+  S.ucl.nl=8;S.ucl.fmt='liga';S.ucl.n0=S.ucl.al.length;S.ucl.sch=rrRounds(S.ucl.al,8);initTb(S.ucl);
+  S.lib=mkComp('Libertadores',[...S.qL,...S.ex.sa],[1,2,3,4,5,6].map(i=>'Rodada '+i).concat(['Quartas','Semifinal','Final']),[5,7,10,12,14,16,22,32,43],'lib',undefined,[1,1,1,1,1,1,2,2,1]);
+  S.lib.nl=6;S.lib.fmt='grp';S.lib.n0=S.lib.al.length;grpSetup(S.lib);initTb(S.lib);
   S.mc=null;[...S.dc,S.ucl,S.lib].forEach(drawK);
 }
 function setupSeason(){
@@ -185,8 +211,10 @@ function rateClub(cid,gf,ga){
 }
 
 /* ---------- partidas ---------- */
-const pen=(h,a)=>Math.random()<.5+(cl(h).s-cl(a).s)/150?h:a;
-const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s,k=RNDK();return[pois(1.4*Math.pow(x/y,2.2*k)*1.1),pois(1.2*Math.pow(y/x,2.2*k))]};
+const pen=(h,a)=>Math.random()<.5+(cl(h).s-cl(a).s)/110?h:a;
+/* força relativa -> gols esperados. Expoente alto (4,8) para o mais forte vencer de verdade, com teto para não dar goleadas absurdas (menos zebra) */
+const LAM=(x,y,k=1)=>Math.min(3.2,Math.max(.31,Math.pow(x/y,4.8*k)));
+const aiM=(h,a)=>{const x=cl(h).s,y=cl(a).s,k=RNDK();return[pois(1.4*1.1*LAM(x,y,k)),pois(1.2*LAM(y,x,k))]};
 function lnp(){
   if(S.inj>0)return null;
   const d=O()-cl(S.club).s+(pcEnsure(),(S.pc.tr-50)/8)+(S.mor-50)/12+(S.form-6.5)*2+(S.cond<45?-8:0)+R(-3,3)+(S.loan?4:0);
@@ -202,7 +230,7 @@ function pm(h,a,label,knock,kind,ag){
   const on=m=>lu&&m>=inn&&m<=out,e=(m,t,c='')=>r.ev.push({m,t,c});
   const pf=.7+S.cond/200+(S.form-6.5)/20;
   const sm=mc.s+(lu?(ov-mc.s)*.12*(out-inn+1)/90*pf:0),sh=my?o.s:sm,sa=my?sm:o.s;
-  const L=[1.4*Math.pow(sh/sa,2.2*RNDK())*1.1,1.2*Math.pow(sa/sh,2.2*RNDK())];
+  const L=[1.4*1.1*LAM(sh,sa,RNDK()),1.2*LAM(sa,sh,RNDK())];
   const ycm=lu&&Math.random()<(pos=='ZAG'||pos=='VOL'?.2:.1)?RI(inn,out):0;
   const rcm=lu&&Math.random()<.012?RI(inn,out):0;
   const jm=lu&&Math.random()<.014*(1+(100-S.cond)/60)*(1.4-S.at[5]/140)*(1-Math.min(.6,pfx('inj')))*(out-inn+1)/90?RI(inn,out):0;
@@ -346,9 +374,41 @@ function trophy(k,label){
   S.rep=C(S.rep+b[0],0,100);S.pop=C(S.pop+b[1],0,100);news('🏆 Campeão: '+(label||k.n)+'!');
 }
 /* sorteio: feito assim que a fase anterior termina (a primeira, ao montar a temporada) */
+function seedPairs(k){
+  const s=Sh(k.seed.s.slice());let u=k.seed.u.slice();
+  if(k.fmt=='grp')for(let t=0;t<80;t++){u=Sh(k.seed.u.slice());if(u.every((y,i)=>k.tb[y].g!=k.tb[s[i]].g))break}
+  return s.map((x,i)=>[u[i],x]);
+}
+/* fim da fase de liga/grupos: define quem vai à próxima fase */
+function kSeed(k){
+  const had=k.al.includes(S.club);
+  if(k.fmt=='liga'){
+    const o=kSort(k,k.al),n=o.length,d=n>>2,p=n>>1,mid=o.slice(d,d+p),sd=mid.slice(0,p>>1),un=mid.slice(p>>1).reverse(),pr=[];
+    for(let j=0;j<(p>>2);j++){const u=Sh([un[2*j],un[2*j+1]]);pr.push([u[0],sd[2*j]],[u[1],sd[2*j+1]])}
+    k.rk=o;k.dir=o.slice(0,d);k.al=[...k.dir,...mid];k.dr=pr;
+    news('Fase de liga da Champions encerrada: '+k.dir.map(i=>cl(i).n).slice(0,3).join(', ')+' e mais '+(d-3)+' vão direto às oitavas.');
+  }else{
+    const w1=[],w2=[];k.gr.forEach(g=>{const o=kSort(k,g);w1.push(o[0]);w2.push(o[1])});
+    k.al=[...w1,...w2];k.seed={s:w1,u:w2};drawK(k);
+  }
+  if(had&&!k.al.includes(S.club))news('❌ Seu clube foi eliminado na fase de '+(k.fmt=='liga'?'liga':'grupos')+' da '+k.n+'.');
+  else if(had&&k.fmt=='liga'&&k.dir.includes(S.club))news('✅ Seu clube garantiu vaga direta nas oitavas da '+k.n+'!');
+  else if(had&&k.fmt=='liga')news('Seu clube vai ao playoff da '+k.n+'.');
+  else if(had)news('✅ Seu clube avançou da fase de grupos da '+k.n+'!');
+}
+function koL(k,w){
+  (k.dr||[]).forEach(([x,y])=>{const r=fx(x,y,k.n+' — '+k.rn[k.rd],0,k.k);upk(k,x,y,r.g);k.log.push([k.rd,x,y,r.g[0],r.g[1],r.win==null?null:r.win,0,0])});
+  k.rd++;
+  if(k.rd<k.nl)k.dr=k.sch[k.rd];else kSeed(k);
+}
 function drawK(k){
   k.dr=[];if(k.ch!=null||k.rd>=k.rn.length||k.al.length<2)return;
-  const a=Sh(k.al);for(let i=0;i+1<a.length;i+=2)k.dr.push([a[i],a[i+1]]);
+  if(k.nl&&k.rd<k.nl){k.dr=k.sch[k.rd]||[];return}
+  if(k.seed){k.dr=seedPairs(k);k.seed=null}
+  else{
+    /* só a 1ª fase é sorteada; depois os vencedores de dois confrontos vizinhos da chave se enfrentam */
+    const a=k.rd==(k.nl||0)?Sh(k.al):k.al;for(let i=0;i+1<a.length;i+=2)k.dr.push([a[i],a[i+1]]);
+  }
   const m=k.dr.find(p=>p.includes(S.club));
   if(m&&typeof news=='function')news('🎲 Sorteio — '+k.n+' ('+k.rn[k.rd]+'): '+cl(m[0]).n+' x '+cl(m[1]).n+'.');
 }
@@ -358,6 +418,7 @@ const kDue=(k,w)=>k.ch==null&&k.rd<k.rn.length&&(kTwo(k)?(k.l1?k.w2[k.rd]==w:k.w
 const kLegTxt=k=>kTwo(k)?(k.l1?' (volta)':' (ida)'):'';
 const kPair=k=>{const m=(k.dr||[]).find(p=>p.includes(S.club));return m?(kTwo(k)&&k.l1?[m[1],m[0]]:m):null};
 function ko(k,w){
+  if(k.nl&&k.rd<k.nl){if(!k.dr||!k.dr.length)drawK(k);return koL(k,w)}
   if(!k.dr||!k.dr.length)drawK(k);
   const D=k.dr,win=[],last=D.length==1,two=kTwo(k);
   if(two&&!k.l1){      // jogos de ida: o sorteado primeiro joga em casa
@@ -377,7 +438,8 @@ function ko(k,w){
       if(last)k.ru=r.win==x?y:x;
     }
   });
-  k.al=win;k.rd++;k.l1=null;
+  if(k.fmt=='liga'&&k.rd==k.nl&&k.dir){k.seed={s:k.dir,u:win};k.al=[...k.dir,...win];k.dir=null}else k.al=win;
+  k.rd++;k.l1=null;
   if(win.length==1){k.ch=win[0];k.dr=[];if(win[0]==S.club)trophy(k)}else drawK(k);
 }
 const KB={bo:['Bola de Ouro','#ffd54a'],lg:['Liga','#3aa0ff'],dom:['Copa','#4cd08a'],ucl:['Champions','#8a8cff'],lib:['Libertadores','#f0a43a'],mc:['Mundial','#e6c25a']};
@@ -415,7 +477,7 @@ const kDay=k=>k=='ucl'?1:k=='lib'?3:2;
 function wkPlan(){
   const w=S.week,c=cl(S.club),g=[];
   if(S.wmid!=w){
-    const k=allComps().find(k=>kDue(k,w)&&k.al.includes(S.club));
+    const k=allComps().find(k=>kDue(k,w)&&k.al.includes(S.club)&&kPair(k));
     if(k){const m=kPair(k);g.push({d:kDay(k.k),ph:'mid',n:k.n+' — '+k.rn[k.rd]+kLegTxt(k),h:m?m[0]:null,a:m?m[1]:null,kk:k.k})}
     else if(w==SEASON&&!S.mc&&S.ucl.ch!=null&&S.lib.ch!=null&&(S.ucl.ch==S.club||S.lib.ch==S.club))g.push({d:2,ph:'mid',n:'Mundial de Clubes — Final',h:S.ucl.ch,a:S.lib.ch,kk:'mc'});
   }
@@ -454,7 +516,7 @@ function stepEnd(){
   return true;
 }
 /* fim da temporada: a Bola de Ouro é apurada num passo do calendário (soma de títulos e desempenho individual) */
-function apurar(){if(!S.apur)return;S.apur=0;end();ui.pg='bdo';ui.bk='bdo';ui.by=null;save();sfx('cup');render()}
+function apurar(){if(!S.apur)return;if(poGate())return;if(S.y%4==2&&wcGate())return;S.apur=0;end();ui.pg='bdo';ui.bk='bdo';ui.by=null;save();sfx('cup');render()}
 const step=()=>stepEnd();
 function adv(){if(step()){save();render()}}
 /* simula várias semanas; para em evento, janela de transferências ou fim da temporada */
@@ -587,7 +649,7 @@ function end(){
   qualify();                                     // vagas do ano seguinte
   const fin={};LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{fin[li+'-'+di]=stand(li,di).map(c=>c.id)}));
   /* acessos, rebaixamentos e jogos extras (mata-matas, quadrangulares, repescagens) conforme src/formatos.js */
-  const MV=fmMoves(fin);S.po={y:S.y,lg:MV.lg,ch:MV.champ};
+  const MV=poMoves(fin);S.po={y:S.y,lg:MV.lg,ch:MV.champ};
   const finH={...fin};Object.keys(MV.champ).forEach(k=>{finH[k]=[MV.champ[k],...fin[k].filter(i=>i!=MV.champ[k])]});
   histSeason(finH);
   /* 2) estatísticas do usuário */
@@ -604,6 +666,7 @@ function end(){
   /* 3) Bola de Ouro */
   const lst=bdoList(true),idx=lst.findIndex(x=>x.me),rk=idx<0?0:idx+1;
   const topTen=lst.slice(0,10).map((x,i)=>({...x,rank:i+1,prev:S.bdoPrev[x.id]||0}));
+  topTen.slice(0,3).forEach(x=>{try{x.ach=bdoSimAch(x)}catch(e){x.ach=[]}});
   S.bdo.push({y:S.y,top:topTen,me:rk});
   rvSeason(champ,topTen);try{sqSeason(champ)}catch(e){console.error(e)}
   S.wcR=null;S.wcMe=0;
@@ -742,37 +805,164 @@ function testEv(){
     ['Pedir dicas ao assistente',{tr:1,xp:40,mor:2},'Você aprendeu com a comissão técnica.']]];
 }
 const wcNeed=nat=>{const t=WCN.find(x=>x[0]==nat);return t?55+(t[2]-70)*1.1:60};
-function worldCup(){
-  pcEnsure();const mine=S.p.nat,pos=S.p.pos,aw=[];
-  const T=WCN.map(([n,c,s])=>({n,c,s:s+R(-3,3),pt:0,gf:0,ga:0})),my=T.find(t=>t.n==mine);
-  const need=wcNeed(mine)+R(-3,3),called=!!my&&S.p.age>=18&&O()>=need-2&&S.inj<=6,starter=called&&O()>=need+3;
-  if(called){my.s+=(O()-need)*.4;mail('Federação','Convocação para a Copa do Mundo',(starter?'Você está entre os titulares':'Você foi convocado como opção do banco')+' da seleção '+mine+' para a Copa de '+S.y+'.')}
-  const me={called,starter,g:0,a:0,ap:0,stage:0};
-  const ps={ATA:.30,PNT:.20,MEI:.11,VOL:.04,ZAG:.03}[pos]*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('gl')),as={ATA:.12,PNT:.18,MEI:.26,VOL:.08,ZAG:.03}[pos]*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('ast'));
-  const play=(a,b,ko)=>{
-    const ga=pois(1.25*Math.pow(a.s/b.s,2.4)),gb=pois(1.25*Math.pow(b.s/a.s,2.4));let w=null;
-    if(ko&&ga==gb)w=Math.random()<.5+(a.s-b.s)/160?a:b;else w=ga>gb?a:gb>ga?b:null;
-    if(called&&(a==my||b==my)){me.ap++;const tg=a==my?ga:gb;for(let i=0;i<tg;i++){const x=Math.random();if(x<Math.min(.6,ps))me.g++;else if(x<Math.min(.6,ps)+Math.min(.4,as))me.a++}}
-    return{ga,gb,w};
-  };
-  /* sorteio: 4 potes de 8 por força */
-  const srt=[...T].sort((x,y)=>y.s-x.s),G=[0,1,2,3,4,5,6,7].map(()=>[]);
-  for(let p=0;p<4;p++){const pot=Sh(srt.slice(p*8,p*8+8));pot.forEach((t,i)=>G[i].push(t))}
-  G.forEach(g=>{for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const a=g[i],b=g[j],r=play(a,b,false);a.gf+=r.ga;a.ga+=r.gb;b.gf+=r.gb;b.ga+=r.ga;if(r.w===a)a.pt+=3;else if(r.w===b)b.pt+=3;else{a.pt++;b.pt++}}});
-  const rk=g=>[...g].sort((x,y)=>y.pt-x.pt||(y.gf-y.ga)-(x.gf-x.ga)||y.gf-x.gf||Math.random()-.5);
-  const Q=G.map(rk);let cur=[[0,1],[2,3],[4,5],[6,7],[1,0],[3,2],[5,4],[7,6]].map(([i,j])=>[Q[i][0],Q[j][1]]);
-  let rnd=0,myStage=Q.some(g=>g[0]===my||g[1]===my)?1:0,champ=null,ru=null;const sfL=[];
-  while(cur.length){
-    const nx=[];cur.forEach(([a,b])=>{const r=play(a,b,true);nx.push(r.w);const l=r.w===a?b:a;
-      if(cur.length==2)sfL.push(l);
-      if(cur.length==1){champ=r.w;ru=l}
-      if(r.w===my)myStage=Math.max(myStage,rnd+2);
-    });
-    rnd++;cur=[];for(let i=0;i<nx.length;i+=2)cur.push([nx[i],nx[i+1]]);
-    if(nx.length==1)break;
+
+/* ============================================================
+   FASES DE ACESSO JOGÁVEIS (mata-matas de acesso, quadrangulares, repescagens)
+   fmMoves roda com sorteio de semente fixa: assim ele pode ser repetido e para (exceção) no jogo do seu clube até você jogá-lo.
+   Os resultados do usuário ficam em S.pu.res; ao final, end() repete a mesma simulação com esses placares.
+   ============================================================ */
+let FMN=0,FMU=null,POLIVE=0;
+function fmG(a,b,ctx){
+  const n=FMN++;
+  if(FMU&&(a==S.club||b==S.club)){
+    const r=FMU.res[n];
+    if(r)return r.g;
+    if(FMU.auto){const g=fmGame(a,b);FMU.res[n]={g};return g}
+    throw{po:{n,a,b,...ctx}};
   }
-  const stage=myStage;
-  me.stage=stage;
+  return fmGame(a,b);
+}
+const poFin=()=>{const fin={};LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{fin[li+'-'+di]=stand(li,di).map(c=>c.id)}));return fin};
+function poRun(auto,fin){
+  const P=S.pu,old=Math.random;let s=P.seed>>>0;
+  Math.random=()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+  FMN=0;FMU={res:P.res,auto};
+  try{return{mv:fmMoves(fin||poFin())}}catch(e){if(e&&e.po)return{pend:e.po};throw e}
+  finally{Math.random=old;FMU=null}
+}
+function poMoves(fin){
+  if(S.pu&&S.pu.y==S.y&&S.pu.n){const r=poRun(true,fin);S.pu=null;return r.mv}
+  S.pu=null;return fmMoves(fin);
+}
+const poOk=()=>MOTOR_ON&&typeof MT!=='undefined'&&!!MT.partida;
+function poGate(){
+  const P=S.pu&&S.pu.y==S.y?S.pu:(S.pu={y:S.y,seed:Math.floor(Math.random()*2147483000),res:{},n:0,list:[],ack:0,pend:null});
+  if(P.ack)return false;
+  const r=poRun(false);
+  if(r.pend){P.pend=r.pend;save();poDraw();return true}
+  P.pend=null;
+  if(P.n){poDraw(r.mv);return true}
+  return false;
+}
+function poStore(f,r){
+  const P=S.pu;P.res[f.n]={g:r.g.slice(),w:r.pen?r.win:null};P.n++;P.pend=null;
+  P.list.push(f.n2+': '+cl(f.a).n+' '+r.g[0]+' x '+r.g[1]+' '+cl(f.b).n+(r.pen?' (pên.)':''));
+}
+function poLabel(f){return f.nm+(f.leg==1?' (ida)':f.leg==2?' (volta)':'')}
+function poViva(f){
+  if(!poOk())return null;
+  try{
+    const lu=lnp(),inn=lu&&!lu.s?RI(52,78):1,my=f.a==S.club?0:1,knock=f.leg==2?1:0;
+    const x={h:f.a,a:f.b,my,lu,inn,knock,ag:f.ag||null,kind:'dom',isLg:false,label:poLabel(f)},q=montaMotor(x);
+    q.opt.vivo={s:my,nome:S.p.name,cd:170};
+    const seed=Math.floor(Math.random()*2147483000),p=MT.partida(q.T[0],q.T[1],seed,q.opt);
+    return{p,x,js:q.js,seed,lu,inn,dec:[],w:S.week,ph:'po',r:{comp:poLabel(f),kind:'dom',h:f.a,a:f.b,ev:[],sc:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0,vivo:1},min:0};
+  }catch(e){console.error('jogo de acesso ao vivo falhou:',e);return null}
+}
+function poFecha(V){
+  const f=S.pu.pend;
+  PRE={h:V.x.h,a:V.x.a,w:S.week,lu:V.lu,inn:V.inn,m:V.p.resultado(),js:V.js};
+  let r;try{r=pm(V.x.h,V.x.a,V.x.label,V.x.knock,'dom',V.x.ag)}finally{PRE=null}
+  f.n2=poLabel(f);poStore(f,r);save();return r;
+}
+function poSimOne(){
+  const P=S.pu,f=P&&P.pend;if(!f)return;
+  const r=pm(f.a,f.b,poLabel(f),f.leg==2?1:0,'dom',f.ag||null);f.n2=poLabel(f);poStore(f,r);save();poGate();
+}
+function poPlay(){
+  const P=S.pu,f=P&&P.pend;if(!f)return;
+  const V=poViva(f);if(!V){poSimOne();return}
+  POLIVE=1;liveV(V);
+}
+function poStepUi(){poGate()}
+function poSimAll(){
+  const P=S.pu;if(!P)return;const r=poRun(true);
+  P.pend=null;P.n=Math.max(P.n,1);save();poDraw(r.mv);
+}
+function poClose(){const o=document.getElementById('poo');if(o)o.remove();if(S.pu)S.pu.ack=1;save();apurar()}
+function poDraw(mv){
+  const P=S.pu;let o=document.getElementById('poo');
+  if(!P){if(o)o.remove();return}
+  if(!o){o=document.createElement('div');o.id='poo';o.className='ov fp lvo';o.style.zIndex=55;document.body.appendChild(o)}
+  const c=cl(S.club),f=P.pend;
+  let body;
+  if(f){
+    body=`<p class="note" style="margin:0 0 10px">Seu clube disputa uma <b>fase de acesso</b> da temporada ${S.y}: <b>${esc(f.nm)}</b>.</p>
+    <div class="m mine"><div class="mt"><div class="tn">${shield(cl(f.a),'sm')}<span>${esc(cl(f.a).n)}</span></div><div class="sc"><i>x</i></div><div class="tn b">${shield(cl(f.b),'sm')}<span>${esc(cl(f.b).n)}</span></div></div><div class="mi"><span>${esc(poLabel(f))}</span></div></div>
+    <div class="row lvctl" style="margin-top:12px"><button class="play" style="flex:1" onclick="poPlay()">⚽ Jogar ao vivo</button><button class="ghost" onclick="poSimOne()">Simular este jogo</button><button class="ghost" onclick="poSimAll()">⏩ Simular o restante</button></div>`;
+  }else{
+    const up=mv&&mv.up.includes(S.club),dn=mv&&mv.dn.includes(S.club);
+    const src={y:S.y,lg:(mv&&mv.lg)||{}};
+    body=`<p class="note" style="margin:0 0 10px">${up?'🎉 <b>Acesso conquistado!</b> Seu clube sobe de divisão.':dn?'📉 <b>Rebaixamento.</b> Seu clube cai de divisão.':'Seu clube <b>permanece</b> na divisão.'}</p>${c.l>=0?poPanel(c.l,c.d,src)+(c.d>0?poPanel(c.l,c.d-1,src):''):''}<div class="row lvctl" style="margin-top:12px"><button class="play" style="flex:1" onclick="poClose()">Continuar</button></div>`;
+  }
+  o.innerHTML=`<div class="pn sheet fp lvsh"><div class="shtop"><small class="muted">🏟️ Fases de acesso · ${esc(c.n)}</small></div><div class="pn"><h2>Jogos de acesso</h2>${body}${P.list.length?`<h3 style="margin-top:16px">Seus jogos</h3><ul class="pol">${P.list.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div></div>`;
+}
+
+/* ============================================================
+   COPA DO MUNDO JOGÁVEL
+   As seleções entram no motor ao vivo como "times" de id alto (WCB+índice). O torneio fica em S.wcl (só índices, salva e recarrega).
+   Antes da apuração da Bola de Ouro de um ano de Copa, se você foi convocado, abre a tela da Copa e cada jogo da sua seleção é transmitido ao vivo.
+   ============================================================ */
+const WC_KR=['Oitavas','Quartas','Semifinais','Final'];
+const WC_MD=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+const wcOk=()=>MOTOR_ON&&typeof MT!=='undefined'&&!!MT.partida;
+function wcInit(){
+  pcEnsure();const mine=S.p.nat,pos=S.p.pos;
+  const T=WCN.map(([n,c,s])=>({n,c,s:s+R(-3,3),pt:0,gf:0,ga:0,j:0})),my=T.findIndex(t=>t.n==mine);
+  const need=wcNeed(mine)+R(-3,3),called=my>=0&&S.p.age>=18&&O()>=need-2&&S.inj<=6,starter=called&&O()>=need+3;
+  if(called){T[my].s+=(O()-need)*.4;mail('Federação','Convocação para a Copa do Mundo',(starter?'Você está entre os titulares':'Você foi convocado como opção do banco')+' da seleção '+mine+' para a Copa de '+S.y+'.')}
+  T.forEach((t,i)=>{wcCl(WCB+i).s=t.s});
+  const ps=({ATA:.30,PNT:.20,MEI:.11,VOL:.04,ZAG:.03}[pos]||.02)*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('gl')),as=({ATA:.12,PNT:.18,MEI:.26,VOL:.08,ZAG:.03}[pos]||.02)*Math.pow(O()/76,2)*(starter?1:.35)*(1+pfx('ast'));
+  const srt=T.map((t,i)=>i).sort((x,y)=>T[y].s-T[x].s),G=[0,1,2,3,4,5,6,7].map(()=>[]);
+  for(let p=0;p<4;p++){const pot=Sh(srt.slice(p*8,p*8+8));pot.forEach((t,i)=>G[i].push(t))}
+  return{y:S.y,T,G,my,called,starter,ps,as,me:{called,starter,g:0,a:0,ap:0,stage:0},ph:'g',md:0,rnd:0,rs:{},cur:[],ko:[],sfl:[],champ:-1,ru:-1,myStage:my>=0&&G.some(g=>g.includes(my))?1:0,pend:null,done:0};
+}
+const wcKey=(W,a,b)=>(W.ph=='g'?'g':'k'+W.rnd)+'|'+a+'-'+b;
+function wcSim(W,a,b,ko){
+  const A=W.T[a],B=W.T[b],ga=pois(1.25*LAM(A.s,B.s,RNDK())),gb=pois(1.25*LAM(B.s,A.s,RNDK()));let w=null,pen=0;
+  if(ko&&ga==gb){w=Math.random()<.5+(A.s-B.s)/110?a:b;pen=1}else w=ga>gb?a:gb>ga?b:null;
+  if(W.called&&(a==W.my||b==W.my)){W.me.ap++;const tg=a==W.my?ga:gb;for(let i=0;i<tg;i++){const x=Math.random();if(x<Math.min(.6,W.ps))W.me.g++;else if(x<Math.min(.6,W.ps)+Math.min(.4,W.as))W.me.a++}}
+  return{ga,gb,w,pen};
+}
+function wcRec(W,a,b,r,ko){
+  if(!ko){const A=W.T[a],B=W.T[b];A.j++;B.j++;A.gf+=r.ga;A.ga+=r.gb;B.gf+=r.gb;B.ga+=r.ga;if(r.w===a)A.pt+=3;else if(r.w===b)B.pt+=3;else{A.pt++;B.pt++}}
+  W.rs[wcKey(W,a,b)]=r;
+}
+/* avança o torneio; para na partida do usuário (devolve-a) a menos que auto=true; devolve null quando tudo foi decidido */
+function wcAdvance(W,auto){
+  W.pend=null;
+  for(let g=0;g<40&&!W.done;g++){
+    if(W.ph=='g'){
+      const L=[];W.G.forEach((gr,gi)=>WC_MD[W.md].forEach(([i,j])=>L.push({a:gr[i],b:gr[j],gi})));
+      for(const f of L){
+        if(W.rs[wcKey(W,f.a,f.b)])continue;
+        if(!auto&&wcOk()&&W.called&&(f.a==W.my||f.b==W.my)){W.pend={a:f.a,b:f.b,ko:0,label:'Copa do Mundo '+W.y+' — Grupo '+'ABCDEFGH'[f.gi]+' (rodada '+(W.md+1)+')'};return W.pend}
+        wcRec(W,f.a,f.b,wcSim(W,f.a,f.b,0),0);
+      }
+      W.md++;
+      if(W.md>=3){
+        const Q=W.G.map(gr=>gr.slice().sort((x,y)=>{const X=W.T[x],Y=W.T[y];return Y.pt-X.pt||(Y.gf-Y.ga)-(X.gf-X.ga)||Y.gf-X.gf||Math.random()-.5}));
+        W.cur=[[0,1],[2,3],[4,5],[6,7],[1,0],[3,2],[5,4],[7,6]].map(([i,j])=>[Q[i][0],Q[j][1]]);
+        W.myStage=Q.some(gr=>gr[0]==W.my||gr[1]==W.my)?1:0;W.ph='k';W.rnd=0;
+      }
+    }else{
+      for(const [a,b] of W.cur){
+        if(W.rs[wcKey(W,a,b)])continue;
+        if(!auto&&wcOk()&&W.called&&(a==W.my||b==W.my)){W.pend={a,b,ko:1,label:'Copa do Mundo '+W.y+' — '+WC_KR[W.rnd]};return W.pend}
+        wcRec(W,a,b,wcSim(W,a,b,1),1);
+      }
+      const nx=[];
+      W.ko.push({n:WC_KR[W.rnd],ties:W.cur.map(([a,b])=>({a,b,...W.rs[wcKey(W,a,b)]}))});
+      W.cur.forEach(([a,b])=>{const r=W.rs[wcKey(W,a,b)],l=r.w===a?b:a;nx.push(r.w);if(r.w===W.my)W.myStage=Math.max(W.myStage,W.rnd+2);if(W.cur.length==2)W.sfl.push(l);if(W.cur.length==1){W.champ=r.w;W.ru=l}});
+      if(nx.length==1){W.done=1;W.cur=[];break}
+      W.cur=[];for(let i=0;i<nx.length;i+=2)W.cur.push([nx[i],nx[i+1]]);W.rnd++;
+    }
+  }
+  return null;
+}
+function wcFinish(W){
+  const aw=[],mine=S.p.nat,me=W.me,T=W.T,stage=W.myStage,called=W.called;me.stage=stage;
+  const champ=T[W.champ],ru=T[W.ru],sfL=W.sfl.map(i=>T[i]);
   S.wcR={};S.wcR[champ.n]=7;S.wcR[ru.n]=4;sfL.forEach(t=>S.wcR[t.n]=2);
   S.wcMe=called?(S.wcR[mine]||0)+me.g*.6+me.a*.3:0;
   S.wc.push({y:S.y,champ:champ.n,ru:ru.n,sf:sfL.map(t=>t.n),me,nat:mine});
@@ -782,8 +972,85 @@ function worldCup(){
     else aw.push('Copa do Mundo: '+STG[stage]+' com '+mine);
     if(me.g>=3)aw.push('Destaque da Copa ('+me.g+' gols)');
     mail('Federação','Copa do Mundo '+S.y+': '+STG[stage],'A seleção '+mine+' terminou como '+STG[stage].toLowerCase()+'. Você disputou '+me.ap+' jogo(s), com '+me.g+' gol(s) e '+me.a+' assistência(s). Campeã: '+champ.n+'.');
-  }else news('Copa do Mundo '+S.y+': '+champ.n+' é campeã. '+(my?'Você não foi convocado.':''));
+  }else news('Copa do Mundo '+S.y+': '+champ.n+' é campeã. '+(W.my>=0?'Você não foi convocado.':''));
   return aw;
+}
+function worldCup(){
+  const W=S.wcl||wcInit();wcAdvance(W,true);
+  const aw=wcFinish(W);S.wcl=null;WCME=null;const o=document.getElementById('wco');if(o)o.remove();
+  return aw;
+}
+/* elenco da seleção para o motor: melhores jogadores da nacionalidade nos clubes do jogo (+ você), completando posições que faltarem */
+function wcElenco(cid,lu){
+  const c=cl(cid),nat=c.n;
+  const sq=selSquad(nat).filter(x=>!x.me).slice(0,26).map(x=>({...x})),have=p=>sq.filter(x=>x.pos==p).length;
+  const mk=(pos,k)=>({n:nat+' '+pos+' '+k,pos,ovr:Math.round(c.s-6-k*2),age:26,nat});
+  Object.entries({GOL:2,ZAG:4,VOL:2,MEI:3,PNT:2,ATA:2}).forEach(([p,n])=>{for(let k=have(p);k<n;k++)sq.push(mk(p,k+1))});
+  const top=sq.slice().sort((a,b)=>b.ovr-a.ovr).slice(0,14),med=top.reduce((s,x)=>s+x.ovr,0)/Math.max(1,top.length),d=FK_EF(c.s)-med;
+  const js=sq.map(x=>({n:x.n,pos:x.pos,fp:x.fp,ovr:Math.round(C(x.ovr+d,30,97)),age:x.age||26,nat:x.nat||nat,rv:x.rv?1:0}));
+  if(lu){
+    const f=MT.atribUser(S.at,{n:S.p.name,pos:S.p.pos,ovr:O(),age:S.p.age,nat:S.p.nat});
+    js.push({n:S.p.name,pos:S.p.pos,ovr:O(),age:S.p.age,nat:S.p.nat,a:f.a,foot:f.foot,pf:f.pf,cls:f.cls,me:1,forcado:!!lu.s,soBanco:!lu.s});
+  }
+  return js;
+}
+function wcViva(W,f){
+  if(!wcOk())return null;
+  try{
+    WCME=WCB+W.my;
+    const lu=W.starter?{s:1}:{s:0},inn=W.starter?1:RI(55,78),h=WCB+f.a,a=WCB+f.b,my=f.a==W.my?0:1;
+    const x={h,a,my,lu,inn,knock:f.ko?1:0,ag:null,kind:'wc',isLg:false,label:f.label},q=montaMotor(x);
+    q.opt.vivo={s:my,nome:S.p.name,cd:170};
+    const seed=Math.floor(Math.random()*2147483000),p=MT.partida(q.T[0],q.T[1],seed,q.opt);
+    return{p,x,js:q.js,seed,lu,inn,dec:[],w:S.week,ph:'wc',r:{comp:f.label,kind:'wc',h,a,ev:[],sc:[],g:[0,0],pl:!!lu,gl:0,as:0,yc:0,rc:0,inj:0,mn:0,vivo:1},min:0};
+  }catch(e){console.error('partida da Copa falhou:',e);WCME=null;return null}
+}
+/* fim de um jogo ao vivo da Copa: lança o placar no torneio */
+function wcFecha(V){
+  const W=S.wcl,f=W.pend,m=V.p.resultado(),r={...V.r,ev:[],sc:[]};
+  adaptaResultado(r,m,{...V.x},V.js);
+  const res={ga:r.g[0],gb:r.g[1],w:null,pen:r.pen?1:0};
+  if(f.ko)res.w=r.win-WCB;else res.w=res.ga>res.gb?f.a:res.gb>res.ga?f.b:null;
+  wcRec(W,f.a,f.b,res,f.ko);W.me.g+=r.gl;W.me.a+=r.as;if(r.pl)W.me.ap++;
+  W.pend=null;save();return r;
+}
+function wcStepUi(){const W=S&&S.wcl;if(!W)return;wcAdvance(W,!wcOk());save();wcDraw()}
+function wcPlay(){
+  const W=S.wcl,f=W&&W.pend;if(!f)return;
+  const V=wcViva(W,f);
+  if(!V){const r=wcSim(W,f.a,f.b,f.ko);wcRec(W,f.a,f.b,r,f.ko);wcStepUi();return}
+  liveV(V);
+}
+function wcSimRest(){const W=S.wcl;if(!W)return;wcAdvance(W,true);save();wcDraw()}
+function wcClose(){const o=document.getElementById('wco');if(o)o.remove();apurar()}
+/* antes da apuração: se você foi convocado, joga a Copa. Devolve true enquanto a tela da Copa estiver aberta */
+function wcGate(){
+  if(!S.wcl)S.wcl=wcInit();
+  const W=S.wcl;if(!W.called)return false;
+  if(!W.done){wcAdvance(W,!wcOk());save();wcDraw();return true}
+  return false;
+}
+function wcResume(){const W=S&&S.wcl;if(!W||!W.called||!S.apur)return;wcAdvance(W,!wcOk());wcDraw()}
+function wcDraw(){
+  let o=document.getElementById('wco');const W=S&&S.wcl;
+  if(!W||!W.called){if(o)o.remove();return}
+  if(!o){o=document.createElement('div');o.id='wco';o.className='ov fp lvo';o.style.zIndex=55;document.body.appendChild(o)}
+  const nm=i=>flg(W.T[i].n)+'<span>'+esc(W.T[i].n)+'</span>',tm=(i,s,w,l)=>({h:nm(i),s,w,l,me:i==W.my});
+  const tie=(a,b,r,pend)=>({pend:pend&&!r,mine:a==W.my||b==W.my,t:[tm(a,r?r.ga:null,r&&r.w===a,r&&r.w===b),tm(b,r?r.gb:null,r&&r.w===b,r&&r.w===a)],note:r&&r.pen?'decidido nos pênaltis':''});
+  const cols=W.ko.map(c=>({n:c.n,ties:c.ties.map(t=>tie(t.a,t.b,t,0))}));
+  if(W.ph=='k'&&!W.done)cols.push({n:WC_KR[W.rnd],ties:W.cur.map(([a,b])=>tie(a,b,W.rs[wcKey(W,a,b)],1))});
+  const mg=W.G.findIndex(g=>g.includes(W.my)),grp=gi=>{
+    const rows=W.G[gi].slice().sort((x,y)=>{const X=W.T[x],Y=W.T[y];return Y.pt-X.pt||(Y.gf-Y.ga)-(X.gf-X.ga)||Y.gf-X.gf}).map((i,k)=>{const t=W.T[i];return '<tr class="'+(i==W.my?'mine':'')+'"><td>'+(k+1)+'</td><td class="bkn">'+nm(i)+'</td><td>'+t.j+'</td><td>'+(t.gf-t.ga>0?'+':'')+(t.gf-t.ga)+'</td><td><b>'+t.pt+'</b></td></tr>'}).join('');
+    return '<div class="pn"><h2>Grupo '+'ABCDEFGH'[gi]+'</h2><table class="wcg"><thead><tr><th></th><th>Seleção</th><th>J</th><th>SG</th><th>Pts</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  };
+  const st=W.done?'Fim da Copa. Campeã: <b style="color:var(--gold)">'+esc(W.T[W.champ].n)+'</b> · sua seleção: <b>'+STG[W.myStage]+'</b>':W.ph=='g'?'Fase de grupos · rodada '+Math.min(3,W.md+1)+' de 3':'Mata-mata · '+WC_KR[W.rnd];
+  const me=W.me,pend=W.pend;
+  const btn=W.done?'<button class="play" style="flex:1" onclick="wcClose()">Continuar</button>':pend?'<button class="play" style="flex:1" onclick="wcPlay()">⚽ Jogar ao vivo: '+esc(W.T[pend.a].n)+' x '+esc(W.T[pend.b].n)+'</button><button class="ghost" onclick="wcSimRest()">⏩ Simular o restante</button>':'<button class="play" style="flex:1" onclick="wcSimRest()">⏩ Ver o resto da Copa</button>';
+  o.innerHTML='<div class="pn sheet fp lvsh"><div class="shtop"><small class="muted">🌍 Copa do Mundo '+W.y+' · '+esc(S.p.nat)+(W.starter?' · titular':' · no banco')+'</small></div>'
+    +'<div class="pn"><h2>'+esc(S.p.nat)+' na Copa</h2><p class="note" style="margin:0 0 8px">'+st+'</p><div class="chips"><span><b>'+me.ap+'</b> jogos</span><span><b>'+me.g+'</b> gols</span><span><b>'+me.a+'</b> assistências</span></div><div class="row lvctl" style="margin-top:12px">'+btn+'</div></div>'
+    +(W.ko.length||W.ph=='k'?'<div class="pn full"><h2>Mata-mata</h2>'+bracketHtml(cols,W.done?flg(W.T[W.champ].n)+'<b>'+esc(W.T[W.champ].n)+'</b>':'')+'</div>':'')
+    +'<div class="shg">'+(mg>=0?grp(mg):'')+'</div>'
+    +'<details class="pn det"><summary>Todos os grupos</summary><div class="shg">'+W.G.map((_,i)=>i!=mg?grp(i):'').join('')+'</div></details></div>';
 }
 
 /* ============================================================
@@ -795,10 +1062,10 @@ function hxEnsure(){
   S.rv.forEach(r=>{if(!r.car)r.car=newCar();if(!r.h)r.h=[]});
 }
 /* até onde cada clube foi numa copa (nº de fases disputadas) */
-const reachOf=k=>{const m={};k.log.forEach(x=>{[x[1],x[2]].forEach(id=>{m[id]=Math.max(m[id]||0,x[0]+1)})});return m};
+const reachOf=k=>{const m={};if(k.nl&&k.tb)Object.keys(k.tb).forEach(id=>{m[id]=1});k.log.forEach(x=>{if(k.nl&&x[0]<k.nl)return;[x[1],x[2]].forEach(id=>{m[id]=Math.max(m[id]||0,k.nl?x[0]-k.nl+2:x[0]+1)})});return m};
 function histSeason(fin){
   const kd={};S.dc.forEach(k=>Object.assign(kd,reachOf(k)));
-  S.fin.push({y:S.y,p:fin,k:{u:reachOf(S.ucl),b:reachOf(S.lib),d:kd}});
+  S.fin.push({y:S.y,p:fin,v:2,k:{u:reachOf(S.ucl),b:reachOf(S.lib),d:kd}});
 }
 /* histórico dos jogadores de elenco (quem não é craque do mundo): uma linha por temporada, só para quem tem nota 70+ */
 const pqKey=x=>x.n+'|'+x.nat;
@@ -859,12 +1126,40 @@ function rvAny(id){
   return{id:h.id,n:h.n,nat:h.nat,pos:h.pos,age:h.age,ovr:h.pk,pot:h.pk,club:last?last[1]:0,car:h.car,h:h.h,cur:{ap:0,g:0,a:0,rs:0,lg:0},ad:[0,0,0,0,0,0],ret:h.ret};
 }
 const TKEY={l:'lig',d:'dom',u:'ucl',b:'lib',m:'mc',w:'wc',o:'bo'};
-const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0]})})});return o};
+const ligTxt=(cid,k)=>{try{const c=cl(cid),L=c&&c.l>=0?LEAGUES[c.l]:null;if(!L)return '';return k=='dom'?'Copa · '+L.k:(L.dn[c.d]||L.n)}catch(e){return ''}};
+const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0],c:e[1],t:ligTxt(e[1],TKEY[k])})})});return o};
 
 /* todos os vencedores da Bola de Ouro: histórico real + simulados */
+/* conquistas do ano de um candidato (apuração do jogo): títulos do clube na temporada, gols e assistências */
+function bdoSimAch(x){
+  const o=[],c=S.cs[x.club];
+  if(c&&c.l>=0&&champOf(c.l,c.d)==x.club)o.push(c.d==0?'Campeão da liga':'Campeão da divisão '+(c.d+1));
+  if(S.dc.some(k=>k.ch==x.club))o.push('Campeão da copa nacional');
+  if(S.ucl.ch==x.club)o.push('Campeão da Champions');else if(S.ucl.ru==x.club)o.push('Vice da Champions');
+  if(S.lib.ch==x.club)o.push('Campeão da Libertadores');else if(S.lib.ru==x.club)o.push('Vice da Libertadores');
+  if(S.mc&&S.mc.ch==x.club)o.push('Campeão do Mundial de Clubes');
+  const w=(S.wc||[])[(S.wc||[]).length-1];
+  if(S.y%4==2&&w&&w.y==S.y&&w.champ==x.nat)o.push('Campeão da Copa do Mundo');
+  if(x.g)o.push(Math.round(x.g)+' gols');if(x.a)o.push(Math.round(x.a)+' assistências');
+  return o;
+}
+const BDO_KL={ucl:'Campeão da Champions',lib:'Campeão da Libertadores',mc:'Campeão do Mundial de Clubes',wc:'Campeão da Copa do Mundo'};
+function bdoAch(w){
+  if(w.ach&&w.ach.length)return w.ach;
+  if(w.g&&!w.real&&w.pts&&!BDO_REAL.some(z=>z.y==w.y&&z.n==w.n))return [];
+  const o=[],y=+w.y;
+  try{
+    if(UCL_H.some(x=>x.y==y&&x.c==w.c))o.push('Campeão da Champions');else if(UCL_H.some(x=>x.y==y&&x.r==w.c))o.push('Vice da Champions');
+    if(LIB_H.some(x=>x.y==y&&x.c==w.c))o.push('Campeão da Libertadores');
+    const nt=WCN.find(x=>x[1]==w.nat),wc=WC_H.find(x=>x.y==y);
+    if(nt&&wc){if(wc.c==nt[0])o.push('Campeão da Copa do Mundo');else if(wc.r==nt[0])o.push('Vice da Copa do Mundo')}
+    honorsOf(w.n).forEach(z=>{if(z.k=='mc'&&String(z.y)==String(y))o.push(BDO_KL.mc)});
+  }catch(e){}
+  return o;
+}
 function bdoAll(){
   const out=BDO_REAL.map(x=>({...x}));
-  S.bdo.forEach(b=>{const w=b.top[0];if(w)out.push({y:b.y,n:w.n,nat:natCode(w.nat),c:cl(w.club).n,pos:w.pos,g:1,me:w.me,id:w.id,pts:w.pts})});
+  S.bdo.forEach(b=>{const w=b.top[0];if(w)out.push({y:b.y,n:w.n,nat:natCode(w.nat),c:cl(w.club).n,pos:w.pos,g:1,me:w.me,id:w.id,pts:w.pts,ach:w.ach})});
   return out;
 }
 

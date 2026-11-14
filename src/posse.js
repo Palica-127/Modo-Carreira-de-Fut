@@ -583,10 +583,7 @@
       if(!reiniciou&&tentaDesarme(s,h,P))continue;
       /* jogada interativa: a bola está com o jogador do usuário num momento de decisão */
       let forca=null;
-      if(VIVO&&s==VIVO.s&&h>0&&!reiniciou&&t-VIVO.ult>=VIVO.cd&&T[s].xi[h].n==VIVO.nome&&vivo(s,h)&&momentoVivo(s,h)){
-        if(VIVO.esc.length){const c=VIVO.esc.shift();VIVO.ult=t;forca=c.t=='auto'?null:c}
-        else{const ops=decide(s,h,P,{lista:true});if(ops&&ops.length>1){pausa={s,h,t,ops:resumoOps(ops)};rei=reiniciou;return}}
-      }
+      /* decisões interativas removidas: o jogador do usuário joga no automático */
       const op=decide(s,h,P,forca);
       if(!op){gasta(s,2);continue}
       if(op.t=='passe'||op.t=='cruz'){

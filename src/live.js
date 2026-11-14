@@ -5,9 +5,10 @@
    ============================================================ */
 let LVT=null;
 const lvMs=[1400,700,300];
-const lvMine=r=>r.h==S.club||r.a==S.club;
+let WCME=null;const ME=()=>WCME!=null?WCME:S.club;
+const lvMine=r=>r.h==ME()||r.a==ME();
 const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
-const lvRes=()=>ui.lv?(ui.lv.V?ui.lv.V.r:S.last[ui.lv.i]):null;
+const lvRes=()=>ui.lv?(ui.lv.V?ui.lv.V.r:(ui.lv.R||S.last[ui.lv.i])):null;
 const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
 function lvTick(){const L=ui.lv;if(!L||L.pause||L.dec)return;if(PIT&&PIT.hold){if(!PIT.hs)PIT.hs=Date.now();if(Date.now()-PIT.hs<7000)return;PIT.hs=0;if(PIT.cel)lvKick(PIT);PIT.q=[];PIT.seg=null;PIT.hold=false}else if(PIT)PIT.hs=0;if(L.V){lvTickV(L);return}L.t=Math.min(90,L.t+1);if(L.t>=90){L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}L.t>=90?lvDraw():lvUpd()}
 /* ---------- partida jogada de verdade, minuto a minuto (o motor roda enquanto a transmissão avança) ---------- */
@@ -30,24 +31,28 @@ function lvEsc(k){const L=ui.lv;if(!L||!L.V||!L.dec)return;const V=L.V,c=k<0?{t:
 /* fim da partida: lança o resultado no calendário e passa a mostrar a súmula normal */
 function lvFim(L){
   const V=L.V;lvRun(L,90);clearInterval(LVT);LVT=null;
-  const nt=vivoFecha(V);
-  const i=S.last.findIndex(r=>lvMine(r)&&!r.sn);
+  const vr=V.r,nt=vivoFecha(V);
+  const i=V.ph=='wc'||V.ph=='po'?-1:S.last.findIndex(r=>lvMine(r)&&!r.sn);
+  /* guarda o resultado na própria transmissão: não depende de S.last depois do render() */
+  const r=V.ph=='wc'||V.ph=='po'?V.fin:i>=0?S.last[i]:(vr&&vr.st?vr:null);
   S.lvp=0;L.V=null;L.dec=null;L.t=90;L.pend=false;PIT=null;
-  if(i<0){ui.lv=null;lvDraw();save();render();return}
-  S.last[i].sn=1;L.i=i;save();render();
-  {const r=S.last[i],my=r.h==S.club?0:1;if(r.pl||true)sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}
-  lvDraw();
+  if(!r){ui.lv=null;lvDraw();save();render();return}
+  r.sn=1;L.i=i;L.R=r;save();render();
+  {const my=r.h==ME()?0:1;try{sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}catch(e){}}
+  ui.lv=L;lvDraw();
 }
 function liveV(V,pz){PIT=null;ui.lv={V,i:-1,t:V.min||0,sp:0,pause:false,pend:false,dec:null};
   if(!V.min){V.p.ateMinuto(1);}
   lvSync(ui.lv);lvTimer();lvDraw()}
 function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause&&typeof requestAnimationFrame=='undefined')LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
 function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;if(!fim)r.sn=1;PIT=null;ui.lv={i,t:fim?90:0,sp:0,pause:false,pend:false};lvTimer();lvDraw()}
-function lvClose(){if(ui.lv&&(ui.lv.V||ui.lv.t<90&&S.lvp))return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();render(true)}
+function lvClose(){if(ui.lv&&(ui.lv.V||ui.lv.t<90&&S.lvp))return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();const wc=WCME!=null;WCME=null;const po=POLIVE;POLIVE=0;render(true);if(wc)wcStepUi();if(po)poStepUi()}
 function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvUpd()}
 function lvPause(){ui.lv.pause=!ui.lv.pause;lvTimer();lvUpd()}
 /* se a página for recarregada no meio da transmissão, ela recomeça */
 function lvBoot(){
+  if(S&&S.apur&&S.pu&&S.pu.y==S.y&&!S.pu.ack&&poGate())return;
+  if(S&&S.wcl&&S.wcl.called&&S.apur){wcResume();return}
   if(S&&S.pj&&S.ph=='season'&&S.pj.w==S.week){
     const g=wkPlan()[0],V=g?pmViva(g,S.pj):null;
     if(V){V.min=0;const pz=vivoReplay(V,S.pj.min|0);V.min=S.pj.min|0;liveV(V,pz);return}
@@ -302,9 +307,9 @@ function lvPitchHtml(r){
 }
 function lvHtml(){
   const L=ui.lv,r=lvRes();if(!r||!r.st)return '';
-  const t=L.t,tv=L.pend?t-1:t,fim=t>=90&&!L.V,h=cl(r.h),a=cl(r.a),my=r.h==S.club?0:1,gs=[0,1].map(s=>r.sc.filter(z=>z[1]==s&&z[0]<=tv).length);
+  const t=L.t,tv=L.pend?t-1:t,fim=t>=90&&!L.V,h=cl(r.h),a=cl(r.a),my=r.h==ME()?0:1,gs=[0,1].map(s=>r.sc.filter(z=>z[1]==s&&z[0]<=tv).length);
   if(fim&&!r.mvp){let b=[0,0,-1];r.pr.forEach((rows,s)=>rows.forEach((p,i)=>{if(p[5]>b[2])b=[s,i,p[5]]}));r.mvp=[b[0],b[1]]}
-  const res=r.win==null?'Empate':r.win==S.club?'Vitória':'Derrota',rc=r.win==null?'e':r.win==S.club?'w':'l';
+  const res=r.win==null?'Empate':r.win==ME()?'Vitória':'Derrota',rc=r.win==null?'e':r.win==ME()?'w':'l';
   const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
   const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
   const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;

@@ -38,8 +38,8 @@ const fmPois=m=>{const e=Math.exp(-m);let k=0,p=1;do{k++;p*=Math.random()}while(
 function fmGame(a,b,neu){const d=(S.cs[a].s-S.cs[b].s)/30;return[fmPois(Math.max(.2,1.3*Math.exp(d/2)*(neu?1:1.1))),fmPois(Math.max(.2,1.1*Math.exp(-d/2)))]}
 /* confronto de ida e volta; empate no agregado vai aos pênaltis. t = {n:rótulo, a, b, w, s:'placar'} */
 function fmTie(a,b,nome,log){
-  const g1=fmGame(a,b),g2=fmGame(b,a),A=g1[0]+g2[1],B=g1[1]+g2[0];let w,pen='';
-  if(A!=B)w=A>B?a:b;else{const pa=C(.5+(S.cs[a].s-S.cs[b].s)/200,.35,.65);w=Math.random()<pa?a:b;pen=' (pên.)'}
+  const g1=fmG(a,b,{nm:nome,leg:1}),g2=fmG(b,a,{nm:nome,leg:2,ag:[g1[1],g1[0]]}),A=g1[0]+g2[1],B=g1[1]+g2[0],ur=FMU&&FMU.res[FMN-1];let w,pen='';
+  if(A!=B)w=A>B?a:b;else if(ur&&ur.w!=null){w=ur.w;pen=' (pên.)'}else{const pa=C(.5+(S.cs[a].s-S.cs[b].s)/200,.35,.65);w=Math.random()<pa?a:b;pen=' (pên.)'}
   log.push({r:nome,a,b,w,s:`${g1[0]}-${g1[1]} / ${g2[1]}-${g2[0]}${pen}`});
   return{w,l:w==a?b:a};
 }
@@ -61,7 +61,7 @@ function fmQuad(f8,log){
   const G=[[0,3,4,7],[1,2,5,6]].map(ix=>ix.map(i=>f8[i])),up=[],lead=[];
   G.forEach((g,gi)=>{
     const T={};g.forEach(id=>T[id]={id,P:0,G:0,S:0});
-    for(const a of g)for(const b of g){if(a==b)continue;const[x,y]=fmGame(a,b);T[a].G+=x;T[b].G+=y;T[a].S+=x-y;T[b].S+=y-x;if(x>y)T[a].P+=3;else if(y>x)T[b].P+=3;else{T[a].P++;T[b].P++}}
+    for(const a of g)for(const b of g){if(a==b)continue;const[x,y]=fmG(a,b,{nm:'Quadrangular '+'AB'[gi],leg:0});T[a].G+=x;T[b].G+=y;T[a].S+=x-y;T[b].S+=y-x;if(x>y)T[a].P+=3;else if(y>x)T[b].P+=3;else{T[a].P++;T[b].P++}}
     const r=Object.values(T).sort((p,q)=>q.P-p.P||q.S-p.S||q.G-p.G);
     log.push({r:'Quadrangular '+'AB'[gi],tab:r.map(x=>({id:x.id,p:x.P,s:x.S}))});
     up.push(r[0].id,r[1].id);lead.push(r[0].id);

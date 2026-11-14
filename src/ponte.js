@@ -10,6 +10,7 @@ const POS_ANTIGA={GK:'GOL',CB:'ZAG',FB:'ZAG',DM:'VOL',CM:'MEI',AM:'MEI',W:'PNT',
 
 /* elenco do clube no formato do motor: força escalada para bater com a força do clube no jogo */
 function motorElenco(cid,lu){
+  if(cid>=WCB)return wcElenco(cid,lu);
   const c=S.cs[cid],sq=squadOf(cid).filter(x=>!x.me),top=sq.slice().sort((a,b)=>b.ovr-a.ovr).slice(0,14),med=top.reduce((s,x)=>s+x.ovr,0)/Math.max(1,top.length),d=FK_EF(c.s)-med;
   const js=sq.map(x=>({n:x.n,pos:x.pos,fp:x.fp,ovr:Math.round(C(x.ovr+d,30,97)),age:x.age||26,nat:x.nat||'',rv:x.rv?1:0}));
   if(cid==S.club&&lu){
@@ -21,7 +22,7 @@ function motorElenco(cid,lu){
 
 /* monta os dois times e as opções do motor para uma partida do clube do usuário */
 function montaMotor(x){
-  const{h,a,my,lu,knock,ag}=x,me=S.club,ids=[h,a];
+  const{h,a,my,lu,knock,ag}=x,me=ME(),ids=[h,a];
   const js=ids.map(id=>motorElenco(id,id==me?lu:null));
   const T=ids.map((id,i)=>MT.timeIA(js[i],cl(id).n));
   const opt={entradas:[],moral:[0,0]};
@@ -52,9 +53,10 @@ function pmMotor(r,x){
 function userFixture(g){
   const me=S.club;
   if(g.ph=='end'){return g.h==null?null:{h:g.h,a:g.a,my:g.h==me?0:1,knock:0,kind:'lg',ag:null,label:'Liga',isLg:true}}
-  const k=allComps().find(k=>kDue(k,S.week)&&k.al.includes(me));if(!k)return null;
+  const k=allComps().find(k=>kDue(k,S.week)&&k.al.includes(me)&&kPair(k));if(!k)return null;
   const m=kPair(k);if(!m)return null;
   const base={h:m[0],a:m[1],my:m[0]==me?0:1,kind:k.k,isLg:false};
+  if(k.nl&&k.rd<k.nl)return{...base,knock:0,ag:null,label:k.n+' — '+k.rn[k.rd]};
   if(kTwo(k)&&!k.l1)return{...base,knock:0,ag:null,label:k.n+' — '+k.rn[k.rd]+' (ida)'};
   if(kTwo(k)){const i=k.dr.findIndex(q=>q.includes(me)),g1=k.l1[i];return{...base,knock:1,ag:[g1[1],g1[0]],label:k.n+' — '+k.rn[k.rd]+' (volta)'}}
   return{...base,knock:1,ag:null,label:k.n+' — '+k.rn[k.rd]};
@@ -90,6 +92,7 @@ function vivoReplay(V,min){
 /* fim da partida: lança o resultado no calendário (tabela, copas, estatísticas) como qualquer outra partida */
 function vivoFecha(V){
   for(let n=0;n<50&&!V.p.feito();n++){if(V.p.pausa())V.p.escolhe({t:'auto'});V.p.avanca(Infinity)}
+  if(V.ph=='wc'||V.ph=='po'){V.fin=V.ph=='wc'?wcFecha(V):poFecha(V);return S.ti.length}
   PRE={h:V.x.h,a:V.x.a,w:V.w,lu:V.lu,inn:V.inn,m:V.p.resultado(),js:V.js};
   const nt=S.ti.length;
   try{if(V.ph=='mid')stepMid();else stepEnd()}finally{PRE=null}

@@ -3292,5 +3292,203 @@
 "ok": true,
 "team": "Vanspor",
 "score": 1.15
+},
+"am\u00e9rica-de-cali": {
+"n": "Am\u00e9rica de Cali",
+"ok": true,
+"team": "Am\u00e9rica de Cali",
+"score": 1.0
+},
+"atl\u00e9tico-nacional": {
+"n": "Atl\u00e9tico Nacional",
+"ok": true,
+"team": "Atl\u00e9tico Nacional",
+"score": 1.0
+},
+"barcelona--equ": {
+"n": "Barcelona (EQU)",
+"ok": true,
+"team": "Barcelona (EQU)",
+"score": 1.0
+},
+"celtic": {
+"n": "Celtic",
+"ok": true,
+"team": "Celtic",
+"score": 1.0
+},
+"club-brugge": {
+"n": "Club Brugge",
+"ok": true,
+"team": "Club Brugge",
+"score": 1.0
+},
+"cobreloa": {
+"n": "Cobreloa",
+"ok": true,
+"team": "Cobreloa",
+"score": 1.0
+},
+"colo-colo": {
+"n": "Colo-Colo",
+"ok": true,
+"team": "Colo-Colo",
+"score": 1.0
+},
+"cruz-azul": {
+"n": "Cruz Azul",
+"ok": true,
+"team": "Cruz Azul",
+"score": 1.0
+},
+"deportivo-cali": {
+"n": "Deportivo Cali",
+"ok": true,
+"team": "Deportivo Cali",
+"score": 1.0
+},
+"estrela-vermelha": {
+"n": "Estrela Vermelha",
+"ok": true,
+"team": "Estrela Vermelha",
+"score": 1.0
+},
+"guadalajara": {
+"n": "Guadalajara",
+"ok": true,
+"team": "Guadalajara",
+"score": 1.0
+},
+"independiente-del-valle": {
+"n": "Independiente del Valle",
+"ok": true,
+"team": "Independiente del Valle",
+"score": 1.0
+},
+"ldu-quito": {
+"n": "LDU Quito",
+"ok": true,
+"team": "LDU Quito",
+"score": 1.0
+},
+"malm\u00f6": {
+"n": "Malm\u00f6",
+"ok": true,
+"team": "Malm\u00f6",
+"score": 1.0
+},
+"millonarios": {
+"n": "Millonarios",
+"ok": true,
+"team": "Millonarios",
+"score": 1.0
+},
+"nacional--par": {
+"n": "Nacional (PAR)",
+"ok": true,
+"team": "Nacional (PAR)",
+"score": 1.0
+},
+"nacional--uru": {
+"n": "Nacional (URU)",
+"ok": true,
+"team": "Nacional (URU)",
+"score": 1.0
+},
+"olimpia": {
+"n": "Olimpia",
+"ok": true,
+"team": "Olimpia",
+"score": 1.0
+},
+"olympiacos": {
+"n": "Olympiacos",
+"ok": true,
+"team": "Olympiacos",
+"score": 1.0
+},
+"once-caldas": {
+"n": "Once Caldas",
+"ok": true,
+"team": "Once Caldas",
+"score": 1.0
+},
+"panathinaikos": {
+"n": "Panathinaikos",
+"ok": true,
+"team": "Panathinaikos",
+"score": 1.0
+},
+"partizan": {
+"n": "Partizan",
+"ok": true,
+"team": "Partizan",
+"score": 1.0
+},
+"pe\u00f1arol": {
+"n": "Pe\u00f1arol",
+"ok": true,
+"team": "Pe\u00f1arol",
+"score": 1.0
+},
+"red-bull-salzburg": {
+"n": "Red Bull Salzburg",
+"ok": true,
+"team": "Red Bull Salzburg",
+"score": 1.0
+},
+"shakhtar-donetsk": {
+"n": "Shakhtar Donetsk",
+"ok": true,
+"team": "Shakhtar Donetsk",
+"score": 1.0
+},
+"sporting-cristal": {
+"n": "Sporting Cristal",
+"ok": true,
+"team": "Sporting Cristal",
+"score": 1.0
+},
+"steaua-bucure\u0219ti": {
+"n": "Steaua Bucure\u0219ti",
+"ok": true,
+"team": "Steaua Bucure\u0219ti",
+"score": 1.0
+},
+"s\u00e3o-caetano": {
+"n": "S\u00e3o Caetano",
+"ok": true,
+"team": "S\u00e3o Caetano",
+"score": 1.0
+},
+"tigres-uanl": {
+"n": "Tigres UANL",
+"ok": true,
+"team": "Tigres UANL",
+"score": 1.0
+},
+"universidad-cat\u00f3lica": {
+"n": "Universidad Cat\u00f3lica",
+"ok": true,
+"team": "Universidad Cat\u00f3lica",
+"score": 1.0
+},
+"universitario": {
+"n": "Universitario",
+"ok": true,
+"team": "Universitario",
+"score": 1.0
+},
+"uni\u00f3n-espa\u00f1ola": {
+"n": "Uni\u00f3n Espa\u00f1ola",
+"ok": true,
+"team": "Uni\u00f3n Espa\u00f1ola",
+"score": 1.0
+},
+"young-boys": {
+"n": "Young Boys",
+"ok": true,
+"team": "Young Boys",
+"score": 1.0
 }
 }
