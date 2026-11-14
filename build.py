@@ -15,14 +15,16 @@ def _slug(s):
 legimg={}
 _i=data.index('const LEG=[')
 for _n in re.findall(r"\{n:'([^']+)'",data[_i:data.index('];',_i)]):
-    _f='assets/legends/'+_slug(_n)+'.webp'
+    _f='assets/players/'+_slug(_n)+'.webp'
+    if not os.path.exists(_f):_f='assets/legends/'+_slug(_n)+'.webp'
     if os.path.exists(_f):legimg[_n]='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode()
 _bn=[]
 _a=hist.index('const BDO_REAL=rowsOf(`')+len('const BDO_REAL=rowsOf(`');_b=hist.index('`)',_a)
 for _l in hist[_a:_b].strip().splitlines():_bn.append(_l.strip().split('|')[1])
 _bn+=re.findall(r"\['([^']+)','[A-Z]{3}','",hist[hist.index('const BDO_TOP'):])
 for _n in _bn:
-    _f='assets/legends/'+_slug(_n)+'.webp'
+    _f='assets/players/'+_slug(_n)+'.webp'
+    if not os.path.exists(_f):_f='assets/legends/'+_slug(_n)+'.webp'
     if _n not in legimg and os.path.exists(_f):legimg[_n]='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode()
 crestclr={}
 def _dom(path):
@@ -55,7 +57,8 @@ if os.path.exists('tools/flags.json'):
         _f='assets/flags/'+_i+'.webp'
         if os.path.exists(_f):
             _d='data:image/webp;base64,'+base64.b64encode(open(_f,'rb').read()).decode();flagimg[_n]=_d;flagimg[_c]=_d
-crests='const CRESTCLR='+json.dumps(crestclr,ensure_ascii=False)+';\nconst FLAGIMG='+json.dumps(flagimg,ensure_ascii=False)+';\nconst LEGIMG='+json.dumps(legimg,ensure_ascii=False)+';\nconst CREST='+json.dumps(crest,ensure_ascii=False)+';\n'
+pset=sorted(f[:-5] for f in os.listdir('assets/players')) if os.path.isdir('assets/players') else []
+crests='const PSET=new Set('+json.dumps(pset)+');\nconst CRESTCLR='+json.dumps(crestclr,ensure_ascii=False)+';\nconst FLAGIMG='+json.dumps(flagimg,ensure_ascii=False)+';\nconst LEGIMG='+json.dumps(legimg,ensure_ascii=False)+';\nconst CREST='+json.dumps(crest,ensure_ascii=False)+';\n'
 boot="\nif(typeof document!='undefined'){optLoad();S=null;render()}\n"
 js="'use strict';\n"+crests+strip(data)+"\n"+strip(sqd)+"\n"+strip(hist)+"\n"+strip(eng)+"\n"+strip(motor)+"\n"+strip(atrib)+"\n"+strip(chute)+"\n"+strip(regras)+"\n"+strip(tatica)+"\n"+strip(cond)+"\n"+strip(arbitro)+"\n"+strip(narra)+"\n"+strip(posse)+"\n"+strip(ponte)+"\n"+strip(ui)+"\n"+strip(abas)+"\n"+strip(live)+"\n"+strip(menu)+boot
 icon="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='18' fill='#060A22' stroke='#00F5A0' stroke-width='3'/><path d='M20 10l7 5-2.7 8.3h-8.6L13 15z' fill='#00C2FF'/></svg>"
