@@ -1088,6 +1088,10 @@ function wcDraw(){
   const tie=(a,b,r,pend)=>({pend:pend&&!r,mine:a==W.my||b==W.my,t:[tm(a,r?r.ga:null,r&&r.w===a,r&&r.w===b),tm(b,r?r.gb:null,r&&r.w===b,r&&r.w===a)],note:r&&r.pen?'decidido nos pênaltis':''});
   const cols=W.ko.map(c=>({n:c.n,ties:c.ties.map(t=>tie(t.a,t.b,t,0))}));
   if(W.ph=='k'&&!W.done)cols.push({n:WC_KR[W.rnd],ties:W.cur.map(([a,b])=>tie(a,b,W.rs[wcKey(W,a,b)],1))});
+  /* chave completa desde as oitavas: fases que ainda não saíram aparecem como "A definir" */
+  const bl=()=>({pend:1,empty:1,t:[{h:'<span>A definir</span>',empty:1,s:''},{h:'<span>A definir</span>',empty:1,s:''}]});
+  for(let i=cols.length;i<WC_KR.length;i++)cols.push({n:WC_KR[i],ties:[]});
+  cols.forEach((c,i)=>{while(c.ties.length<(8>>i))c.ties.push(bl())});
   const mg=W.G.findIndex(g=>g.includes(W.my)),grp=gi=>{
     const rows=W.G[gi].slice().sort((x,y)=>{const X=W.T[x],Y=W.T[y];return Y.pt-X.pt||(Y.gf-Y.ga)-(X.gf-X.ga)||Y.gf-X.gf}).map((i,k)=>{const t=W.T[i];return '<tr class="'+(i==W.my?'mine':'')+'"><td>'+(k+1)+'</td><td class="bkn">'+nm(i)+'</td><td>'+t.j+'</td><td>'+(t.gf-t.ga>0?'+':'')+(t.gf-t.ga)+'</td><td><b>'+t.pt+'</b></td></tr>'}).join('');
     return '<div class="pn"><h2>Grupo '+'ABCDEFGH'[gi]+'</h2><table class="wcg"><thead><tr><th></th><th>Seleção</th><th>J</th><th>SG</th><th>Pts</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -1097,7 +1101,7 @@ function wcDraw(){
   const btn=W.done?'<button class="play" style="flex:1" onclick="wcClose()">Continuar</button>':pend?'<button class="play" style="flex:1" onclick="wcPlay()">⚽ Jogar ao vivo: '+esc(W.T[pend.a].n)+' x '+esc(W.T[pend.b].n)+'</button><button class="ghost" onclick="wcSimRest()">⏩ Simular o restante</button>':'<button class="play" style="flex:1" onclick="wcSimRest()">⏩ Ver o resto da Copa</button>';
   o.innerHTML='<div class="pn sheet fp lvsh"><div class="shtop"><small class="muted">🌍 Copa do Mundo '+W.y+' · '+esc(S.p.nat)+(W.starter?' · titular':' · no banco')+'</small></div>'
     +'<div class="pn"><h2>'+esc(S.p.nat)+' na Copa</h2><p class="note" style="margin:0 0 8px">'+st+'</p><div class="chips"><span><b>'+me.ap+'</b> jogos</span><span><b>'+me.g+'</b> gols</span><span><b>'+me.a+'</b> assistências</span></div><div class="row lvctl" style="margin-top:12px">'+btn+'</div></div>'
-    +(W.ko.length||W.ph=='k'?'<div class="pn full"><h2>Mata-mata</h2>'+bracketHtml(cols,W.done?flg(W.T[W.champ].n)+'<b>'+esc(W.T[W.champ].n)+'</b>':'')+'</div>':'')
+    +(W.ko.length||W.ph=='k'?'<div class="pn full"><h2>Mata-mata</h2>'+bracketHtml(cols,W.done?flg(W.T[W.champ].n)+'<b>'+esc(W.T[W.champ].n)+'</b>':'','wc')+'</div>':'')
     +'<div class="shg">'+(mg>=0?grp(mg):'')+'</div>'
     +'<details class="pn det"><summary>Todos os grupos</summary><div class="shg">'+W.G.map((_,i)=>i!=mg?grp(i):'').join('')+'</div></details></div>';
 }

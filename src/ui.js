@@ -174,10 +174,10 @@ function poPanel(l,d,src){
   return `<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><b>Jogos extras de ${src.y}</b><ul class="pol">${lg.map(row).join('')}</ul><p class="note">Resolvidos no fim da temporada. Sublinhado = classificado.</p></div>`;
 }
 /* ---------- chaves (brackets) de mata-mata: colunas por fase, vencedor em destaque ---------- */
-function bracketHtml(cols,champ){
+function bracketHtml(cols,champ,cls){
   const row=t=>`<div class="bkr${t.w?' win':t.l?' lose':''}${t.me?' me':''}${t.empty?' emp':''}"${t.on?` onclick="${t.on}"`:''}><span class="bkn">${t.h}</span><b class="bks">${t.s==null?'':t.s}</b></div>`;
   const tie=t=>`<div class="bkp"><div class="bkt${t.mine?' mine':''}${t.pend?' pend':''}${t.empty?' emp':''}">${row(t.t[0])}${row(t.t[1])}${t.note?`<small>${esc(t.note)}</small>`:''}</div></div>`;
-  return `<div class="bkw"><div class="bk">${cols.map((c,i)=>`<div class="bkc${i==cols.length-1&&!champ?' fin':''}${cols[i+1]&&c.ties.length==2*cols[i+1].ties.length?' lk':''}${i?' nx':''}"><h4><span>${esc(c.n)}</span></h4><div class="bkl">${c.ties.map(tie).join('')}</div></div>`).join('')}${champ?`<div class="bkc ch nx"><h4><span>Campeão</span></h4><div class="bkl"><div class="bkp"><div class="bkt champ"><i class="bkcup">🏆</i>${champ}</div></div></div></div>`:''}</div></div>`;
+  return `<div class="bkw${cls?' '+cls:''}"><div class="bk">${cols.map((c,i)=>`<div class="bkc${i==cols.length-1&&!champ?' fin':''}${cols[i+1]&&c.ties.length==2*cols[i+1].ties.length?' lk':''}${i?' nx':''}"><h4><span>${esc(c.n)}</span></h4><div class="bkl">${c.ties.map(tie).join('')}</div></div>`).join('')}${champ?`<div class="bkc ch nx"><h4><span>Campeão</span></h4><div class="bkl"><div class="bkp"><div class="bkt champ"><i class="bkcup">🏆</i>${champ}</div></div></div></div>`:''}</div></div>`;
 }
 function compBracket(k){
   const cn=id=>({h:`${shield(cl(id),'xs')}<span>${esc(cl(id).n)}</span>`,me:id==S.club,on:`sheet('c','${cl(id).id}')`});

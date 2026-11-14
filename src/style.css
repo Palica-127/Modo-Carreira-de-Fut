@@ -816,3 +816,8 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 .tb tbody tr:nth-child(even) td,.tb tr:nth-child(even) td{background:rgba(255,255,255,.02)}
 .tb tr:hover td{background:rgba(255,255,255,.04)}
 .tb th{padding:7px 4px;border-bottom:2px solid var(--line)}
+.bkw.wc{padding:18px 14px 22px;background:radial-gradient(120% 60% at 50% 0,rgba(58,198,211,.10),transparent 70%),rgba(255,255,255,.02)}
+.bkw.wc .bk{gap:56px}.bkw.wc .bkc{width:206px}.bkw.wc .bkp{min-height:92px;padding:8px 0}
+.bkw.wc .bkc:not(.fin):not(.ch) .bkp::after,.bkw.wc .bkc.nx .bkt::before{width:28px}.bkw.wc .bkc:not(.fin):not(.ch) .bkp::after{right:-28px}.bkw.wc .bkc.nx .bkt::before{left:-28px}.bkw.wc .bkc.lk .bkp:nth-child(odd)::before{right:-28px}
+.bkw.wc .bkt{padding:5px;border-radius:13px}.bkw.wc .bkr{padding:7px 9px;gap:8px}.bkw.wc .bkn{font-size:12.5px}.bkw.wc .bkn .flg{width:24px;height:16px;margin:0;border-radius:3px}.bkw.wc .bks{font-size:15px;min-width:24px}
+.bkw.wc .bkc h4{margin-bottom:10px}
