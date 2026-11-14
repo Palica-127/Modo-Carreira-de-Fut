@@ -334,7 +334,7 @@ function shP(s){
     const w=h.reduce((a,e)=>a+e[3],0);nota=w?(h.reduce((a,e)=>a+e[6]/100*e[3],0)/w).toFixed(2):'—';pk=car.pk||x.ovr;
   }
   const best=plc.length?Math.min(...plc.map(z=>z.pos))+'º':'—';
-  const hero=shHero(entryCard({...x,club:x.club},'',{on:'',tag:''}),esc(x.n),`${PNQ[x.pos]||x.pos} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,
+  const hero=shHero(entryCard({...x,club:x.club},'big',{on:'',tag:''}),esc(x.n),`${PNQ[x.pos]||x.pos} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,
     [me?'<b>VOCÊ</b> seu jogador':x.ret?'<b>APOSENTADO</b> em '+x.ret:x.ghost?'<b>FORA DO RANKING</b>':'<b>ATIVO</b> craque do mundo',
      ix>=0&&ix<10?`<b>TOP ${ix+1}</b> na história do jogo`:ix>=0?`<b>${ix+1}º</b> no ranking de lendas`:''].filter(Boolean),
     [['Bolas de Ouro',cnt('bo')],['Champions',cnt('ucl')],['Libertadores',cnt('lib')],['Copas do Mundo',cnt('wc')],['Mundiais',cnt('mc')],['Ligas',cnt('lig')],['Pontos',lp]]);
@@ -394,7 +394,7 @@ function shQ(s){
   const x=sqPlayer(c,+slot),pq=(S.pq||{})[pqKey(x)]||[],real=typeof honorsOf==='function'?honorsOf(x.n):[];
   const gan=[];pq.forEach(e=>String(e[3]||'').split('').forEach(k=>{if(TKEY[k])gan.push({k:TKEY[k],y:e[0]})}));
   const titles=[...real,...gan],cnt=k=>titles.filter(z=>z.k==k).length;
-  const hero=shHero(entryCard({...x,club:x.club},'',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,[x.q?'<b>ELENCO</b> jogador do clube':'<b>ELENCO</b>'],
+  const hero=shHero(entryCard({...x,club:x.club},'big',{on:''}),esc(x.n),`${PNQ[x.pos]} · ${clubLnk(c.n,c.id)} · ${x.age} anos · ${esc(x.nat)}`,[x.q?'<b>ELENCO</b> jogador do clube':'<b>ELENCO</b>'],
     [['OVR',x.ovr],['Idade',x.age],['Posição',PNQ[x.pos]||x.pos],['Champions',cnt('ucl')],['Libertadores',cnt('lib')],['Ligas',cnt('lig')],['Copas nac.',cnt('dom')]]);
   const rows=pq.slice().reverse().map(e=>({c:[e[0],tn(cl(e[1])),e[2],esc(String(e[3]||'').split('').map(k=>TL[k]).filter(Boolean).join(', '))||'—']}));
   const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfRows(titles)}</div><div class="pn"><h2>Atributos</h2>${statBars(pst(x.ovr,x.pos,x.id))}</div>`;

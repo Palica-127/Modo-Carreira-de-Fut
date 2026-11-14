@@ -36,8 +36,8 @@ const cmpT=(a,b)=>{const x=S.tb[a.id],y=S.tb[b.id];return y.Pt-x.Pt||(y.F-y.A)-(
 const stand=(l,d)=>S.cs.filter(c=>c.l==l&&c.d==d).sort(cmpT);
 
 /* ---------- calendário (round-robin) ---------- */
-const rr=t=>{let a=[...t],n=a.length,r=[];for(let i=0;i<n-1;i++){const m=[];for(let j=0;j<n/2;j++)m.push([a[j],a[n-1-j]]);r.push(m);a.splice(1,0,a.pop())}return 2*(n-1)<=SEASON?r.concat(r.map(x=>x.map(([h,b])=>[b,h]))):r};   // turno e returno; divisões enormes jogam turno único
-const rounds=(l,d)=>FXC[l+'-'+d]||(FXC[l+'-'+d]=rr(S.dv[l+'-'+d].ord));
+const rr=(t,one)=>{let a=[...t],n=a.length,r=[];for(let i=0;i<n-1;i++){const m=[];for(let j=0;j<n/2;j++)m.push([a[j],a[n-1-j]]);r.push(m);a.splice(1,0,a.pop())}return !one&&2*(n-1)<=SEASON?r.concat(r.map(x=>x.map(([h,b])=>[b,h]))):r};   // turno e returno; divisões enormes jogam turno único
+const rounds=(l,d)=>FXC[l+'-'+d]||(FXC[l+'-'+d]=rr(S.dv[l+'-'+d].ord,SINGLE[LEAGUES[l].k+d]));
 /* rodadas espalhadas pelas SEASON semanas: weeksOf(n)[k] = semana da rodada k */
 const WK={};
 const weeksOf=n=>WK[n]||(WK[n]=(()=>{const o=[];for(let w=1;w<=SEASON;w++)if(Math.floor(w*n/SEASON)>Math.floor((w-1)*n/SEASON))o.push(w);return o})());
@@ -116,7 +116,7 @@ function newGame(f){
   pcEnsure();qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
-function afterLoad(){FXC={};rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
+function afterLoad(){FXC={};if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
 /* ---------- temporada ---------- */
 function qualifyByStrength(){
@@ -586,12 +586,16 @@ function end(){
   S.champs.push(champ);
   qualify();                                     // vagas do ano seguinte
   const fin={};LEAGUES.forEach((L,li)=>L.dn.forEach((_,di)=>{fin[li+'-'+di]=stand(li,di).map(c=>c.id)}));
-  histSeason(fin);
+  /* acessos, rebaixamentos e jogos extras (mata-matas, quadrangulares, repescagens) conforme src/formatos.js */
+  const MV=fmMoves(fin);S.po={y:S.y,lg:MV.lg,ch:MV.champ};
+  const finH={...fin};Object.keys(MV.champ).forEach(k=>{finH[k]=[MV.champ[k],...fin[k].filter(i=>i!=MV.champ[k])]});
+  histSeason(finH);
   /* 2) estatísticas do usuário */
   S.hist.push({...S.cur,l:mc0.l,d:mc0.d,pos,o:O(),ag:S.p.age});S.cur=null;
   const ys=S.hist.filter(x=>x.y==S.y).reduce((s,x)=>({ap:s.ap+x.ap,g:s.g+x.g,a:s.a+x.a,rs:s.rs+x.rs,lg:s.lg+x.lg}),{ap:0,g:0,a:0,rs:0,lg:0});
   const avg=ys.ap?ys.rs/ys.ap:0,aw=[],dn=L0.dn[mc0.d];
-  if(pos==1){S.ti.push({y:S.y,t:dn+' ('+L0.n+')',k:'lig',c:S.club});S.rep=C(S.rep+(tier==0?6:3),0,100);S.pop=C(S.pop+(tier==0?4:2),0,100);news('🏆 '+mc0.n+' é campeão da '+dn+'!')}
+  const chMe=MV.champ[mc0.l+'-'+mc0.d];
+  if(chMe!=null?chMe==S.club:pos==1){S.ti.push({y:S.y,t:dn+' ('+L0.n+')',k:'lig',c:S.club});S.rep=C(S.rep+(tier==0?6:3),0,100);S.pop=C(S.pop+(tier==0?4:2),0,100);news('🏆 '+mc0.n+' é campeão da '+dn+'!')}
   const top=scorers(mc0.l,mc0.d),mx=top.length?top[0].g:0,myG=S.hist.filter(x=>x.y==S.y&&x.c==S.club).reduce((s,x)=>s+x.lg,0);
   if(myG>0&&myG>=mx)aw.push('Artilheiro da '+dn+' ('+myG+' gols)');
   if(ys.ap>=15&&avg>=7.3)aw.push('Craque da '+dn);
@@ -624,13 +628,13 @@ function end(){
   });
   snap(S.y+' fim');
   /* 6) promoção / rebaixamento e força dos clubes */
-  const up_=[],dn_=[];
-  LEAGUES.forEach((L,li)=>{for(let d=0;d<L.dn.length-1;d++){
-    fin[li+'-'+d].slice(-2).forEach(id=>dn_.push(id));fin[li+'-'+(d+1)].slice(0,2).forEach(id=>up_.push(id));}});
+  const up_=MV.up,dn_=MV.dn,dnS=new Set(dn_),mine=[];
+  Object.values(MV.lg).forEach(lg=>lg.forEach(t=>{if(!mine.includes(t)&&(t.a==S.club||t.b==S.club))mine.push(t)}));
+  mine.forEach(t=>news(`${t.r}: ${cl(t.a).n} x ${cl(t.b).n} (${t.s}) — avança ${cl(t.w).n}.`));
   S.cs.forEach(c=>{
     if(c.l<0){c.s=C(c.s+R(-1.5,1.5)+(c.b-c.s)*.2,66,84);return}
     const f=fin[c.l+'-'+c.d],p=f.indexOf(c.id);
-    c.s+=(c.b-c.s)*.12+R(-2,2.4)+(p==0?1.2:p>=f.length-2?-1.2:0);c.b+=(c.s-c.b)*.15;
+    c.s+=(c.b-c.s)*.12+R(-2,2.4)+(p==0?1.2:dnS.has(c.id)?-1.2:0);c.b+=(c.s-c.b)*.15;
   });
   up_.forEach(id=>S.cs[id].d--);dn_.forEach(id=>S.cs[id].d++);
   S.cs.forEach(c=>{if(c.l<0)return;const[hi,lo]=divRange(c.l,c.d);c.s=Math.round(C(c.s,lo,hi)*10)/10});

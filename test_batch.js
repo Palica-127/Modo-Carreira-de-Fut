@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm');
-const base=fs.readFileSync('src/data.js','utf8')+'\n'+fs.readFileSync('src/engine.js','utf8')+`
+const base=fs.readFileSync('src/data.js','utf8')+'\n'+fs.readFileSync('src/formatos.js','utf8')+'\n'+fs.readFileSync('src/engine.js','utf8')+`
 function render(){}
 function career(pot,lgi,pos){
   newGame({name:'T',nat:'Brasil',h:180,w:72,pos:pos,lg:lgi});S.p.pot=pot;

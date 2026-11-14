@@ -27,6 +27,7 @@ Abra `pro-football-career.html` no navegador (celular ou PC). O progresso é sal
 ## Estrutura
 ```
 src/data.js     ligas, clubes, nomes, eventos, constantes
+src/formatos.js acesso, rebaixamento, playoffs e quadrangulares
 src/engine.js   simulação, competições, ofertas, Bola de Ouro, save/load
 src/hist.js     histórico real (Bola de Ouro, Champions, Libertadores, Copa)
 src/ui.js       estrutura das telas e abas principais
@@ -37,6 +38,26 @@ build.py        junta tudo em pro-football-career.html
 test_engine.js, test_batch.js, tools/smoke.js   testes
 ```
 Edite os arquivos em `src/` e rode `python3 build.py` para gerar o HTML final.
+
+## Acesso e rebaixamento por liga (`src/formatos.js`)
+Os jogos extras são simulados no fim da temporada (ida e volta; empate vai aos pênaltis) e aparecem na tabela da divisão.
+| Liga | Fronteira | Regra |
+|---|---|---|
+| Brasil | A ↔ B | 4 caem; sobem 2 diretos + mata-mata do 3º ao 6º (2 vagas) |
+| Brasil | B ↔ C | 4 caem; 8 primeiros da C jogam 2 quadrangulares (1,4,5,8 / 2,3,6,7), 2 de cada grupo sobem; líderes fazem a final do título. Turno único (19 rodadas) |
+| Inglaterra | PL ↔ Championship ↔ League One | 3 caem; 2 diretos + playoff do 3º ao 6º |
+| Inglaterra | League One ↔ League Two | 4 caem; 3 diretos + playoff do 4º ao 7º |
+| Espanha | La Liga ↔ Segunda | 3 caem; 2 diretos + playoff do 3º ao 6º (1 vaga) |
+| Espanha | Segunda ↔ Primeira Federación | 4 caem; 2 diretos + playoff do 3º ao 6º (2 vagas) |
+| Itália | A ↔ B | 3 caem; 2 diretos + playoff do 3º ao 8º |
+| Itália | B ↔ C | 4 caem; 3 diretos + playoff do 4º ao 9º |
+| Alemanha | 1ª ↔ 2ª ↔ 3. Liga | 2 caem direto; 3º da divisão de baixo x 16º da de cima (repescagem) |
+| França | Ligue 1 ↔ Ligue 2 | 2 caem; 2 diretos + playoff 3º-5º; o vencedor enfrenta o 16º da Ligue 1 |
+| Portugal | Primeira ↔ Liga 2 | 2 caem; 2 diretos; 3º da Liga 2 x 16º da Primeira |
+| Holanda | Eredivisie ↔ Eerste Divisie | 2 caem; 2 diretos + playoff 3º-8º; vencedor x 16º da Eredivisie |
+| Argentina | Liga ↔ Primera Nacional | 2 caem; sobe o campeão + vencedor do Reducido (2º-9º) |
+| Turquia | Süper Lig ↔ 1. Lig | 3 caem; 2 diretos + playoff 3º-6º |
+Fontes das regras de 2026: Brasil, Argentina, Holanda e Portugal conferidos em notícias e regulamentos; Inglaterra, Espanha, Itália, Alemanha, França e Turquia seguem o formato conhecido (simplificado para uma divisão única onde a real tem grupos).
 
 ## Testes
 ```

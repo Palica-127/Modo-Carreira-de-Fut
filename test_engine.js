@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm');
-const code=fs.readFileSync('src/data.js','utf8')+'\n'+fs.readFileSync('src/hist.js','utf8')+'\n'+fs.readFileSync('src/engine.js','utf8')+`
+const code=fs.readFileSync('src/data.js','utf8')+'\n'+fs.readFileSync('src/hist.js','utf8')+'\n'+fs.readFileSync('src/formatos.js','utf8')+'\n'+fs.readFileSync('src/engine.js','utf8')+`
 function render(){}
 function playCareer(opts){
   newGame({name:'Teste',nat:'Brasil',h:180,w:72,pos:opts.pos||'ATA',lg:opts.lg==null?0:opts.lg});
