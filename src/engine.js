@@ -146,6 +146,17 @@ function rvFixIds(){
     if(byN[x.n]!=null){x.id=byN[x.n];return}
     const k=x.id+'|'+x.n;if(!rm[k])rm[k]='r'+(++RVID);x.id=rm[k];own[x.id]=x.n;
   }));
+  /* a marca de Bola de Ouro na carreira de cada rival também vinha do id repetido: refaz pelo nome (tira a do Dembélé, dá a do Quenda) */
+  all.forEach(r=>{
+    if(!r.h||!r.car)return;
+    r.h.forEach(e=>{
+      const b=(S.bdo||[]).find(z=>z.y==e[0]);if(!b)return;
+      const i=b.top.findIndex(z=>z.n==r.n),has=String(e[8]||'').indexOf('o')>=0,want=i==0;
+      if(i>=0)e[7]=i+1;else if(e[7]&&e[7]<=10)e[7]=0;
+      if(has&&!want){e[8]=String(e[8]).replace('o','');r.car.bo=Math.max(0,(r.car.bo||0)-1)}
+      else if(!has&&want){e[8]=String(e[8]||'')+'o';r.car.bo=(r.car.bo||0)+1}
+    });
+  });
 }
 function afterLoad(){FXC={};try{rvFixIds()}catch(e){console.error(e)}if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 

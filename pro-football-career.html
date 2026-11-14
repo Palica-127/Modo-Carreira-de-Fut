@@ -2023,6 +2023,17 @@ function rvFixIds(){
     if(byN[x.n]!=null){x.id=byN[x.n];return}
     const k=x.id+'|'+x.n;if(!rm[k])rm[k]='r'+(++RVID);x.id=rm[k];own[x.id]=x.n;
   }));
+  /* a marca de Bola de Ouro na carreira de cada rival também vinha do id repetido: refaz pelo nome (tira a do Dembélé, dá a do Quenda) */
+  all.forEach(r=>{
+    if(!r.h||!r.car)return;
+    r.h.forEach(e=>{
+      const b=(S.bdo||[]).find(z=>z.y==e[0]);if(!b)return;
+      const i=b.top.findIndex(z=>z.n==r.n),has=String(e[8]||'').indexOf('o')>=0,want=i==0;
+      if(i>=0)e[7]=i+1;else if(e[7]&&e[7]<=10)e[7]=0;
+      if(has&&!want){e[8]=String(e[8]).replace('o','');r.car.bo=Math.max(0,(r.car.bo||0)-1)}
+      else if(!has&&want){e[8]=String(e[8]||'')+'o';r.car.bo=(r.car.bo||0)+1}
+    });
+  });
 }
 function afterLoad(){FXC={};try{rvFixIds()}catch(e){console.error(e)}if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
@@ -5560,7 +5571,7 @@ function lendJog(){
   const row=(x,i)=>ldRow({pos:i+1,lead:legImg(x.n,'lgav')||`<span class="lgav ph">${esc(x.n[0])}</span>`,name:esc(x.n)+lgTag(x),sub:`${x.pos} · ${flg(x.nat)} · ${x.g} gols`,mid:ldTit(x),pts:Math.round(x.pts),unit:'PTS',on:lgOn(x),cls:x.me?'me':''});
   const best=k=>l.reduce((a,b)=>(b[k]||0)>(a[k]||0)?b:a,l[0]);
   const rec=[['Bolas de Ouro','bo'],['Copas do Mundo','wc'],['Champions','ucl'],['Gols na carreira','g']].map(([t,k])=>{const x=best(k);return `<div class="rec" onclick="${lgOn(x)}"><small>${t}</small><b>${x[k]}</b><span>${esc(x.n)} ${flg(x.nat)}</span></div>`}).join('');
-  const yrs=bdoAll().sort((a,b)=>b.y-a.y).filter(x=>x.n!='—').slice(0,12).map(x=>`<li class="byr ${x.me?'me':''}"><span class="yr">${x.y}</span>${legImg(x.n,'lgav')||`<span class="lgav ph">${esc(x.n[0])}</span>`}<span class="nm2">${esc(x.n)}${x.nat?' '+flg(x.nat):''}</span><small>${esc(x.c||'')}</small></li>`).join('');
+  const yrs=bdoAll().sort((a,b)=>b.y-a.y).filter(x=>x.n!='—').slice(0,12).map(x=>{const on=bdoWho(x);return `<li class="byr ${x.me?'me':''}" ${on?`onclick="${on}" style="cursor:pointer"`:''}><span class="yr">${x.y}</span>${bdoAv(x)}<span class="nm2">${esc(x.n)}${x.nat?' '+flg(x.nat):''}</span><small>${esc(x.c||'')}</small></li>`}).join('');
   return `<div class="ldg"><div class="pn"><h2>Top 10 de todos os tempos</h2><div class="pods">${l.slice(0,3).map(pod).join('')}</div><ul class="lrk">${l.slice(3,10).map((x,i)=>row(x,i+3)).join('')}</ul>${mi>=10?`<p class="note">Sua posição na história: <b>${mi+1}º</b> com ${Math.round(l[mi].pts)} pontos.</p>`:''}
   <p class="note">Pontuação = Bolas de Ouro, Copas do Mundo, Champions, Libertadores, Mundiais, ligas e gols. As lendas reais têm números aproximados até 2025. Os craques do jogo entram no ranking conforme acumulam prêmios e títulos.</p></div>
   <div class="ldc"><div class="pn"><h2>Recordes</h2><div class="recs">${rec}</div></div><div class="pn"><h2>Bola de Ouro por ano</h2><ul class="lrk">${yrs}</ul></div></div></div>
