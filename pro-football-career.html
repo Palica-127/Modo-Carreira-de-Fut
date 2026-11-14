@@ -5418,7 +5418,7 @@ let LVT=null;
 const lvMs=[1400,700,300];
 const lvMine=r=>r.h==S.club||r.a==S.club;
 const lvIdx=()=>S.last.findIndex(r=>lvMine(r)&&!r.sn);
-const lvRes=()=>ui.lv?(ui.lv.V?ui.lv.V.r:S.last[ui.lv.i]):null;
+const lvRes=()=>ui.lv?(ui.lv.V?ui.lv.V.r:(ui.lv.R||S.last[ui.lv.i])):null;
 const lvLast=()=>{for(let i=S.last.length-1;i>=0;i--)if(lvMine(S.last[i])&&S.last[i].st)return i;return -1};
 function lvTick(){const L=ui.lv;if(!L||L.pause||L.dec)return;if(PIT&&PIT.hold){if(!PIT.hs)PIT.hs=Date.now();if(Date.now()-PIT.hs<7000)return;PIT.hs=0;if(PIT.cel)lvKick(PIT);PIT.q=[];PIT.seg=null;PIT.hold=false}else if(PIT)PIT.hs=0;if(L.V){lvTickV(L);return}L.t=Math.min(90,L.t+1);if(L.t>=90){L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}}L.t>=90?lvDraw():lvUpd()}
 /* ---------- partida jogada de verdade, minuto a minuto (o motor roda enquanto a transmissão avança) ---------- */
@@ -5441,14 +5441,15 @@ function lvEsc(k){const L=ui.lv;if(!L||!L.V||!L.dec)return;const V=L.V,c=k<0?{t:
 /* fim da partida: lança o resultado no calendário e passa a mostrar a súmula normal */
 function lvFim(L){
   const V=L.V;lvRun(L,90);clearInterval(LVT);LVT=null;
-  const nt=vivoFecha(V);
+  const vr=V.r,nt=vivoFecha(V);
   const i=S.last.findIndex(r=>lvMine(r)&&!r.sn);
+  /* guarda o resultado na própria transmissão: não depende de S.last depois do render() */
+  const r=i>=0?S.last[i]:(vr&&vr.st?vr:null);
   S.lvp=0;L.V=null;L.dec=null;L.t=90;L.pend=false;PIT=null;
-  if(i<0){ui.lv=null;lvDraw();save();render();return}
-  const r=S.last[i];r.sn=1;L.i=i;save();render();
-  if(S.last[i]!==r){const j=S.last.indexOf(r);if(j>=0)L.i=j;else{const k=lvLast();if(k<0){ui.lv=null;lvDraw();return}L.i=k}}
-  {const my=r.h==S.club?0:1;sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}
-  lvDraw();
+  if(!r){ui.lv=null;lvDraw();save();render();return}
+  r.sn=1;L.i=i;L.R=r;save();render();
+  {const my=r.h==S.club?0:1;try{sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}catch(e){}}
+  ui.lv=L;lvDraw();
 }
 function liveV(V,pz){PIT=null;ui.lv={V,i:-1,t:V.min||0,sp:0,pause:false,pend:false,dec:null};
   if(!V.min){V.p.ateMinuto(1);}
