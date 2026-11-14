@@ -4219,10 +4219,7 @@ const MT=(()=>{
       if(!reiniciou&&tentaDesarme(s,h,P))continue;
       /* jogada interativa: a bola está com o jogador do usuário num momento de decisão */
       let forca=null;
-      if(VIVO&&s==VIVO.s&&h>0&&!reiniciou&&t-VIVO.ult>=VIVO.cd&&T[s].xi[h].n==VIVO.nome&&vivo(s,h)&&momentoVivo(s,h)){
-        if(VIVO.esc.length){const c=VIVO.esc.shift();VIVO.ult=t;forca=c.t=='auto'?null:c}
-        else{const ops=decide(s,h,P,{lista:true});if(ops&&ops.length>1){pausa={s,h,t,ops:resumoOps(ops)};rei=reiniciou;return}}
-      }
+      /* decisões interativas removidas: o jogador do usuário joga no automático */
       const op=decide(s,h,P,forca);
       if(!op){gasta(s,2);continue}
       if(op.t=='passe'||op.t=='cruz'){
@@ -5448,8 +5445,9 @@ function lvFim(L){
   const i=S.last.findIndex(r=>lvMine(r)&&!r.sn);
   S.lvp=0;L.V=null;L.dec=null;L.t=90;L.pend=false;PIT=null;
   if(i<0){ui.lv=null;lvDraw();save();render();return}
-  S.last[i].sn=1;L.i=i;save();render();
-  {const r=S.last[i],my=r.h==S.club?0:1;if(r.pl||true)sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}
+  const r=S.last[i];r.sn=1;L.i=i;save();render();
+  if(S.last[i]!==r){const j=S.last.indexOf(r);if(j>=0)L.i=j;else{const k=lvLast();if(k<0){ui.lv=null;lvDraw();return}L.i=k}}
+  {const my=r.h==S.club?0:1;sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}
   lvDraw();
 }
 function liveV(V,pz){PIT=null;ui.lv={V,i:-1,t:V.min||0,sp:0,pause:false,pend:false,dec:null};
