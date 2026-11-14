@@ -156,14 +156,15 @@ function viewProx(){
 const fmDots=f=>`<span class="fm">${String(f||'').split('').filter(Boolean).map(r=>`<i class="f${r}" title="${r=='V'?'Vitória':r=='E'?'Empate':'Derrota'}"></i>`).join('')}</span>`;
 function stTable(l,d){
   const T=stand(l,d),L=LEAGUES[l],nd=L.dn.length,my=cl(S.club),z=fmtZones(l,d),N=T.length;
+  const zi=d==0&&ZINFO[L.k]?ZINFO[L.k].flatMap(([n,cc])=>Array(n).fill(cc)):null;
   const rows=T.map((x,i)=>{const r=S.tb[x.id];let c='';
-    if(d==0){if(i<(UCLQ[L.k]||0))c='zu';else if(i<(LIBQ[L.k]||0))c='zl'}
+    if(d==0){if(zi)c=zi[i]||'';else if(i<(UCLQ[L.k]||0))c='zu';else if(i<(LIBQ[L.k]||0))c='zl'}
     if(d>0){if(i<z.up)c='zp';else if(z.quad&&i<z.quad)c='zo';else if(z.po&&i>=z.po[0]-1&&i<z.po[1])c='zo';else if(z.repLow!=null&&i==z.repLow)c='zo'}
     if(z.dn&&i>=N-z.dn)c='zd';else if(z.rep>0&&i==N-z.rep)c='zr';
     const sg=r.F-r.A;
     return `<tr class="${x.id==S.club?'mine ':''}${c}"><td class="po"><b>${i+1}</b></td><td class="cb">${tn(x)}</td><td>${r.P}</td><td class="w">${r.W}</td><td class="w">${r.D}</td><td class="w">${r.L}</td><td class="sg ${sg>0?'p':sg<0?'n':''}">${sg>0?'+'+sg:sg}</td><td class="pt"><b>${r.Pt}</b></td><td class="fo">${fmDots(r.f)}</td></tr>`}).join('');
   const poN=z.quad?'Quadrangular de acesso':z.po?'Mata-mata de acesso':'Repescagem de acesso';
-  return `<div class="tw"><table class="lt"><thead><tr><th class="po">#</th><th class="cb">Clube</th><th>J</th><th class="w">V</th><th class="w">E</th><th class="w">D</th><th>SG</th><th>Pts</th><th class="fo">Últimos</th></tr></thead><tbody>${rows}</tbody></table></div>`+`<div class="lgd">${d==0&&UCLQ[L.k]?'<span><i style="background:var(--zu)"></i>Champions</span>':''}${d==0&&LIBQ[L.k]?'<span><i style="background:var(--zl)"></i>Libertadores</span>':''}${z.up?'<span><i style="background:var(--zp)"></i>Acesso direto</span>':''}${d>0&&(z.po||z.quad||z.repLow!=null)?`<span><i style="background:var(--zo)"></i>${poN}</span>`:''}${z.rep>0?'<span><i style="background:var(--zr)"></i>Repescagem</span>':''}${z.dn?'<span><i style="background:var(--zd)"></i>Rebaixamento</span>':''}</div>`+poPanel(l,d);
+  return `<div class="tw"><table class="lt"><thead><tr><th class="po">#</th><th class="cb">Clube</th><th>J</th><th class="w">V</th><th class="w">E</th><th class="w">D</th><th>SG</th><th>Pts</th><th class="fo">Últimos</th></tr></thead><tbody>${rows}</tbody></table></div>`+`<div class="lgd">${zi?ZINFO[L.k].map(([n,cc,t])=>`<span><i style="background:var(--${cc})"></i>${t}</span>`).join(''):''}${!zi&&d==0&&UCLQ[L.k]?'<span><i style="background:var(--zu)"></i>Champions</span>':''}${!zi&&d==0&&LIBQ[L.k]?'<span><i style="background:var(--zl)"></i>Libertadores</span>':''}${z.up?'<span><i style="background:var(--zp)"></i>Acesso direto</span>':''}${d>0&&(z.po||z.quad||z.repLow!=null)?`<span><i style="background:var(--zo)"></i>${poN}</span>`:''}${z.rep>0?'<span><i style="background:var(--zr)"></i>Repescagem</span>':''}${z.dn?'<span><i style="background:var(--zd)"></i>Rebaixamento</span>':''}</div>`+poPanel(l,d);
 }
 /* jogos extras da última temporada (mata-mata, quadrangulares, repescagem) desta divisão */
 function poPanel(l,d){

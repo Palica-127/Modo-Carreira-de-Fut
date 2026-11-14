@@ -23,6 +23,8 @@ const FMT={
 };
 /* divisões de turno único (sem returno): Série C do Brasileiro */
 const SINGLE={BRA2:1};
+/* zonas só de exibição na tabela da 1ª divisão: [quantos, cor, legenda]. Brasil: 1-4 grupos da Libertadores, 5º fase prévia, 6º-11º Sul-Americana (a Sul-Americana não é disputada no jogo) */
+const ZINFO={BRA:[[4,'zu','Libertadores (fase de grupos)'],[1,'zo','Libertadores (fase prévia)'],[6,'zp','Sul-Americana']]};
 const fmtOf=(k,d)=>(FMT[k]||[])[d]||{a:2};
 const fmtUp=f=>(f.a||0)+(f.po&&!f.vs?f.w:0)+(f.quad?4:0);        // quantos sobem sem repescagem = quantos caem direto
 /* divisão d da liga: o que o regulamento diz sobre ela (para tabela e legenda) */
