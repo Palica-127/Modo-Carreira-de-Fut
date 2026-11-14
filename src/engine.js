@@ -910,7 +910,8 @@ function sqGen(c,i){
   const nat=!L||r()<.3?RNAT[Math.floor(r()*RNAT.length)]:L.nat;
   const pos=SQP[i],idx=SQP.slice(0,i).filter(p=>p==pos).length;
   const ag=age<21?-(21-age)*2.4:age>31?-(age-31)*1.5:0;
-  const ovr=Math.round(C(c.s+[2,-1,-4,-7,-9,-11][idx]+ag+(r()*6-3),35,92));
+  /* nota própria do jogador (pelo nome, posição na fila e idade): não depende da força do clube nem da divisão */
+  const ovr=Math.round(C(58+[4,1,-2,-5,-7,-9][idx]+ag+(r()*10-5),40,72));
   const pot=Math.round(C(ovr+(age<24?(24-age)*1.8*(.5+r()):r()*2),ovr,95));
   return{id:c.id+'.'+i,n:nmR(nat,r),nat,pos,age,ovr,pot,club:c.id,slot:i,q:1};
 }
@@ -929,8 +930,8 @@ function sqReal(c){
     const lim=Math.max(g=='G'||g=='GK'?40:37,a0+1+h0%3);
     if(age>=lim){const r=mulb(hash(c.n+'|'+i+'|'+age)),nt=L?L.nat:'Brasil';n=nmR(nt,r);nat=nt;age=18+(age-lim)%5;fix=0}
     const h=(hash(n+c.n)%1000)/1000;
-    /* notas do EA FC (src/squads.js); sem nota: base/juvenil (50-64) ou, em clubes fora da base, estimativa pela força do clube */
-    let ovr=fix?fix+sqAdj(age)-sqAdj(a0):ev=='y'||!fix&&q[4]=='y'?50+14*h+(age>21?-2:0):C(c.s-22+16*h,45,80)+sqAdj(age);
+    /* notas do EA FC (src/squads.js); sem nota: base/juvenil (50-64) ou nota própria fixa (52-68, pelo nome e idade), nunca derivada da força do clube/divisão */
+    let ovr=fix?fix+sqAdj(age)-sqAdj(a0):ev=='y'||!fix&&q[4]=='y'?50+14*h+(age>21?-2:0):52+16*h+sqAdj(age);
     ovr=Math.round(C(ovr,35,97));const pot=Math.round(C(ovr+(age<24?(24-age)*1.6*(.5+h):h*2),ovr,96));
     const pos=g=='G'||g=='GK'?'GOL':g=='D'||g=='CB'||g=='LB'||g=='RB'?'ZAG':g=='CDM'?'VOL':g=='CM'||g=='CAM'?'MEI':g=='LW'||g=='RW'?'PNT':g=='ST'?'ATA':g=='M'?(h0%5<2?'VOL':'MEI'):(h0%5<2?'PNT':'ATA');
     pool[pos].push({n,nat,pos,fp:g,age,ovr,pot,club:c.id,q:1});
