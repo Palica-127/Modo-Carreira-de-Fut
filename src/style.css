@@ -767,3 +767,32 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 .fut .fa.ph img{width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 5px rgba(0,0,0,.4))}
 .tb tr.zo td.z{background:var(--warn,#E6A23C)}.tb tr.zr td.z{background:#C77DFF}
 .pol{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.7}.pol u{text-decoration:none;font-weight:700;color:var(--ok)}
+/* ---- tabela de classificação (estilo de campeonato) ---- */
+:root{--zu:#3B82F6;--zl:#E5B94E;--zp:#34C58A;--zo:#F0A23B;--zr:#B785F5;--zd:#EF5B5B}
+.lt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.lt th{position:sticky;top:0;z-index:1;background:var(--panel);font:700 10.5px var(--d);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 4px;border-bottom:2px solid var(--line)}
+.lt td{text-align:center;padding:0 4px;height:40px;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.lt th.cb,.lt td.cb{text-align:left;width:100%}
+.lt tbody tr:nth-child(even) td{background:rgba(255,255,255,.022)}
+.lt tbody tr:hover td{background:rgba(255,255,255,.05)}
+.lt td.po{width:34px;padding-left:6px}
+.lt td.po b{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:7px;font:700 12.5px var(--d);color:var(--muted)}
+.lt td.po b.zu{background:var(--zu);color:#fff}.lt td.po b.zl{background:var(--zl);color:#1B1405}.lt td.po b.zp{background:var(--zp);color:#04150E}
+.lt td.po b.zo{background:var(--zo);color:#1B1005}.lt td.po b.zr{background:var(--zr);color:#12061F}.lt td.po b.zd{background:var(--zd);color:#fff}
+.lt td .tn{font:600 13.5px var(--b);gap:8px;text-transform:none}
+.lt td.sg{color:var(--muted)}.lt td.sg.p{color:var(--ok)}.lt td.sg.n{color:var(--bad)}
+.lt td.pt{padding-right:8px}.lt td.pt b{display:inline-block;min-width:34px;padding:4px 6px;border-radius:8px;background:rgba(255,255,255,.08);font:800 14px var(--d);color:var(--ink)}
+.lt tr.mine td{background:color-mix(in srgb,var(--acc) 14%,transparent)!important;font-weight:700}
+.lt tr.mine td.po{box-shadow:inset 3px 0 var(--acc)}
+.lt tbody tr:first-child td.pt b{background:var(--gold,#D9B35F);color:#1B1405}
+.lt .fm{display:inline-flex;gap:3px;align-items:center}
+.lt .fm i{width:13px;height:13px;border-radius:50%;display:inline-block}
+.lt .fm i.fV{background:var(--ok)}.lt .fm i.fE{background:#7C828D}.lt .fm i.fD{background:var(--bad)}
+.lt td.fo{padding-right:8px}
+.lgd{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:11.5px;color:var(--muted)}
+.lgd span{display:inline-flex;align-items:center;gap:6px}.lgd i{width:10px;height:10px;border-radius:3px;display:inline-block}
+@media (max-width:640px){.lt .fo,.lt th.fo{display:none}.lt td.w,.lt th.w{display:none}.lt td{height:38px}}
+/* tabelas genéricas */
+.tb tbody tr:nth-child(even) td,.tb tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.tb tr:hover td{background:rgba(255,255,255,.04)}
+.tb th{padding:7px 4px;border-bottom:2px solid var(--line)}

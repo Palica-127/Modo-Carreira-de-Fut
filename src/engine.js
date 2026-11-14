@@ -337,7 +337,7 @@ function fx(h,a,label,knock,kind,ag){
   if(h==S.club||a==S.club){const r=pm(h,a,label,knock,kind,ag);S.last.push(r);return r}
   return aiMatch(h,a,knock,kind,ag);
 }
-const up=(h,a,g)=>[[h,0,1],[a,1,0]].forEach(([id,i,j])=>{const t=S.tb[id];t.P++;t.F+=g[i];t.A+=g[j];if(g[i]>g[j]){t.W++;t.Pt+=3}else if(g[i]==g[j]){t.D++;t.Pt++}else t.L++});
+const up=(h,a,g)=>[[h,0,1],[a,1,0]].forEach(([id,i,j])=>{const t=S.tb[id];t.P++;t.F+=g[i];t.A+=g[j];t.f=((t.f||'')+(g[i]>g[j]?'V':g[i]==g[j]?'E':'D')).slice(-5);if(g[i]>g[j]){t.W++;t.Pt+=3}else if(g[i]==g[j]){t.D++;t.Pt++}else t.L++});
 
 /* troféu do usuário */
 function trophy(k,label){
