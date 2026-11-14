@@ -4444,7 +4444,7 @@ const tierOf=o=>o>=85?4:o>=75?3:o>=65?2:1;
 const pst=(ovr,pos,seed)=>['VEL','FIN','PAS','DRI','DEF','FIS'].map((l,i)=>[l,C(Math.round(ovr+PROF[pos][i]+(hash(String(seed)+i)%7-3)),25,99)]);
 const myStats=(at=S.at)=>[['VEL',Math.floor(at[0])],['FIN',Math.floor(at[1])],['PAS',Math.round((at[2]+at[6])/2)],['DRI',Math.floor(at[3])],['DEF',Math.floor(at[4])],['FIS',Math.floor(at[5])]];
 /* foto recortada do jogador real: arquivo em assets/players/ (lista PSET gerada pelo build); sem foto -> boneco */
-const pslug=n=>String(n).normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^ -]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+const pslug=n=>String(n).normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^\u0000-\u007f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const pphoto=n=>{if(!n)return '';const k=pslug(n);return typeof PSET!=='undefined'&&PSET.has(k)?'assets/players/'+k+'.webp':''};
 function cardFb(el,cid){const p=el.parentNode;if(p)p.innerHTML=bust(cl(cid).hue,cl(cid))}
 function card(o){
