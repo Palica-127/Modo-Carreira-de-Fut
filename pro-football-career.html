@@ -2015,6 +2015,14 @@ function rvFixIds(){
     if(seen[r.id]){const old=r.id,nid='r'+(++RVID);(S.bdo||[]).forEach(b=>b.top.forEach(x=>{if(x.id==old&&x.n==r.n)x.id=nid}));r.id=nid}
     else seen[r.id]=r;
   });
+  /* Bola de Ouro guarda só o id do craque: se dois nomes dividiam o mesmo id, a ficha abria o jogador errado (ex.: Quenda 2029 -> Dembélé 2026) */
+  const byN={},own={};all.forEach(r=>{byN[r.n]=r.id;own[r.id]=r.n});const rm={};
+  (S.bdo||[]).forEach(b=>b.top.forEach(x=>{
+    if(!x.id||x.id=='me'||own[x.id]===x.n)return;
+    if(own[x.id]===undefined){own[x.id]=x.n;return}
+    if(byN[x.n]!=null){x.id=byN[x.n];return}
+    const k=x.id+'|'+x.n;if(!rm[k])rm[k]='r'+(++RVID);x.id=rm[k];own[x.id]=x.n;
+  }));
 }
 function afterLoad(){FXC={};try{rvFixIds()}catch(e){console.error(e)}if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
