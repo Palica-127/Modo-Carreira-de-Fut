@@ -678,14 +678,25 @@
     const resultado=()=>({log,g:G,st,T,t,pen,arb:ARB,ini,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length});
     /* avança até o minuto m do relógio da transmissão (1º tempo com acréscimos termina no 45; o fim vem no 90) */
     function ateMinuto(m){
-      if(m>=90)return avanca(Infinity);
-      if(m>=45&&fase<3)return avanca(0,3);
       if(m<45)return avanca(fase==0?Math.min(m*60,2700):0);
-      if(fase>=3)avanca(t2+(m-45)*60);
+      if(m==45){if(fase==0)avanca(2700);return}      // fim dos 45': o acréscimo do 1º tempo é transmitido à parte (acrTot/ateAcr)
+      if(fase<2)avanca(0,2);                           // termina o acréscimo e começa o 2º tempo
+      if(fase==2)avanca(t2+Math.min(m-45,45)*60);      // 90' = fim do tempo normal; o acréscimo vem de ateAcr
+    }
+    /* acréscimos transmitidos minuto a minuto: h = 1 ou 2 (tempo); acrTot devolve quantos minutos o árbitro deu; ateAcr(h,x) joga até o minuto x do acréscimo */
+    function acrTot(h){
+      if(h==1){if(fase==0)avanca(2701);return fase>=1?a1:0}
+      if(fase<2)avanca(0,2);
+      if(fase==2)avanca(t2+2701);
+      return fase>=3?a2:0;
+    }
+    function ateAcr(h,x){
+      if(h==1){if(fase<=1)avanca(2700+x*60);return}
+      if(fase==2||fase==3)avanca(t2+2700+x*60);
     }
     refresh();inicio(0);evento('inicio',{});
     [0,1].forEach(s=>evento('tatica',{s,d:{estilo:T[s].chave,form:T[s].form,treinador:T[s].tec.nome,minuto:0}}));
-    return{log,avanca,ateMinuto,resultado,feito:()=>feito,pausa:()=>pausa,
+    return{log,avanca,ateMinuto,acrTot,ateAcr,resultado,feito:()=>feito,pausa:()=>pausa,
       escolhe:c=>{if(VIVO&&pausa){VIVO.esc.push(c);pausa=null}},
       pendentes:()=>VIVO?VIVO.esc.length:0};
   }

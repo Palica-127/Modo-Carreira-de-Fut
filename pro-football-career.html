@@ -1948,9 +1948,21 @@ function mkRv(age){
   const gap=age<=19?R(14,26):age<=21?R(8,16):age<=23?R(3,10):age<=30?R(0,4):age<=33?R(2,8):R(6,12);
   return{id:'r'+(++RVID),n:nm(nat),nat,pos,age,ovr:C(pot-gap,50,97),pot,club:0,ad:[0,0,0,0,0,0].map(()=>RI(-3,3)),inj:0,cur:{ap:0,g:0,a:0,rs:0,lg:0},car:newCar(),h:[]};
 }
+/* transferência de um rival: craque não desce de patamar (Haaland não sai do City para um clube bem mais fraco); só se muda para clube do mesmo nível ou melhor.
+   Jogadores mais velhos ou já em queda aceitam uma descida pequena. Devolve null se não houver destino adequado. */
+function moveClub(r){
+  const cur=cl(r.club),cs=cur?cur.s:0,fall=r.age>=32?5:r.age>=30?3:1.5;
+  const floor=Math.max(cs-fall,r.ovr-7);
+  const cand=S.cs.filter(c=>c.l>=0&&c.d==0&&c.id!=r.club&&c.s>=floor&&c.s<=r.ovr+6);
+  if(!cand.length)return null;
+  const w=cand.map(c=>Math.exp(-Math.pow(c.s-(Math.max(r.ovr,cs)+(c.s>cs?1:0)),2)/30)*(c.s>=cs-.5?1.6:.5));
+  let tot=w.reduce((a,b)=>a+b,0),x=Math.random()*tot;
+  for(let i=0;i<cand.length;i++){x-=w[i];if(x<=0)return cand[i].id}
+  return cand[cand.length-1].id;
+}
 function pickClub(r){
   const tops=S.cs.filter(c=>c.l>=0&&c.d==0);let tot=0;
-  const w=tops.map(c=>{const x=Math.exp(-Math.pow(c.s-(r.ovr-3),2)/60);tot+=x;return x});
+  const w=tops.map(c=>{const x=Math.exp(-Math.pow(c.s-(r.ovr-3),2)/24);tot+=x;return x});
   let x=Math.random()*tot;for(let i=0;i<tops.length;i++){x-=w[i];if(x<=0)return tops[i].id}
   return tops[0].id;
 }
@@ -1995,7 +2007,16 @@ function newGame(f){
   pcEnsure();qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
-function afterLoad(){FXC={};if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
+function rvFixIds(){
+  const num=id=>+String(id).replace(/\D/g,'')||0;let mx=RVID;
+  const all=[...S.rv,...(S.hof||[])];all.forEach(r=>{mx=Math.max(mx,num(r.id))});(S.bdo||[]).forEach(b=>b.top.forEach(x=>{if(x.id&&x.id!='me')mx=Math.max(mx,num(x.id))}));
+  RVID=mx;const seen={};
+  all.forEach(r=>{
+    if(seen[r.id]){const old=r.id,nid='r'+(++RVID);(S.bdo||[]).forEach(b=>b.top.forEach(x=>{if(x.id==old&&x.n==r.n)x.id=nid}));r.id=nid}
+    else seen[r.id]=r;
+  });
+}
+function afterLoad(){FXC={};try{rvFixIds()}catch(e){console.error(e)}if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
 /* ---------- temporada ---------- */
 function qualifyByStrength(){
@@ -2411,8 +2432,12 @@ function gen(n){
   const ov=O(),v=val(),me=cl(S.club),o=[];
   Sh(S.cs.filter(c=>c.l>=0&&c.id!=S.club)).forEach(c=>{
     if(o.length>=n)return;
-    const g=c.s-(ov+S.rep/15);if(g>8||g<-10||Math.random()<.35)return;
-    const ln=!S.loan&&c.s<me.s-4&&ov>=c.s-4&&S.p.age<24&&Math.random()<.6,s=sal(ov,c)*R(1,1.35);
+    const g=c.s-(ov+S.rep/15);if(g>8||g<-8||Math.random()<.35)return;
+    /* realismo: ninguém sai de um clube grande para um bem mais fraco. Descer só para quem está no banco (empréstimo de jovem) ou é veterano */
+    const up=c.s-me.s,rd=role(),reserve=rd=='Reserva'||rd=='Rodízio',lowOk=(S.p.age>=31&&up>=-6)||(reserve&&up>=-4);
+    const ln=!S.loan&&up<-4&&ov>=c.s-4&&S.p.age<24&&reserve&&Math.random()<.6;
+    if(up<-2&&!lowOk&&!ln)return;
+    const s=sal(ov,c)*R(1,1.35);
     o.push({t:ln?'emp':'perm',club:c.id,sal:Math.round(s/10)*10,yrs:ln?1:RI(2,5),bon:Math.round(s*R(.4,1.2)/10)*10,cl:Math.round(v*R(1.8,3)),fee:Math.round(v*R(.85,1.25))});
   });
   return o;
@@ -2512,7 +2537,12 @@ function evolveRivals(){
   }
   while(keep.length<96){const r=mkRv(RI(17,19));r.club=pickClub(r);keep.push(r)}
   S.rv=keep;
-  S.rv.forEach(r=>{if(!r.club||Math.random()<(r.age<=20?.3:.2)*(r.real?.5:1))r.club=pickClub(r)});
+  S.rv.forEach(r=>{
+    if(!r.club){r.club=pickClub(r);return}
+    /* quem já está num clube de elite quase nunca sai; quem está abaixo do próprio nível procura um melhor */
+    const sub=cl(r.club)?cl(r.club).s:0,gap=r.ovr-3-sub,p=(r.age<=20?.3:.2)*(r.real?.5:1)*(r.ovr>=86&&gap<=3?.3:1)*(gap>5?1.6:1);
+    if(Math.random()<p){const n=moveClub(r);if(n!=null)r.club=n}
+  });
   rcBuild();
 }
 
@@ -4631,14 +4661,25 @@ const MT=(()=>{
     const resultado=()=>({log,g:G,st,T,t,pen,arb:ARB,ini,subs:subsN.slice(),en:en.map(a=>a.map(v=>Math.round(v))),moral:mo.slice(),lesoes:lesoes.slice(),min:{a1,a2},exp:[...exp[0]].concat([...exp[1]]).length});
     /* avança até o minuto m do relógio da transmissão (1º tempo com acréscimos termina no 45; o fim vem no 90) */
     function ateMinuto(m){
-      if(m>=90)return avanca(Infinity);
-      if(m>=45&&fase<3)return avanca(0,3);
       if(m<45)return avanca(fase==0?Math.min(m*60,2700):0);
-      if(fase>=3)avanca(t2+(m-45)*60);
+      if(m==45){if(fase==0)avanca(2700);return}      // fim dos 45': o acréscimo do 1º tempo é transmitido à parte (acrTot/ateAcr)
+      if(fase<2)avanca(0,2);                           // termina o acréscimo e começa o 2º tempo
+      if(fase==2)avanca(t2+Math.min(m-45,45)*60);      // 90' = fim do tempo normal; o acréscimo vem de ateAcr
+    }
+    /* acréscimos transmitidos minuto a minuto: h = 1 ou 2 (tempo); acrTot devolve quantos minutos o árbitro deu; ateAcr(h,x) joga até o minuto x do acréscimo */
+    function acrTot(h){
+      if(h==1){if(fase==0)avanca(2701);return fase>=1?a1:0}
+      if(fase<2)avanca(0,2);
+      if(fase==2)avanca(t2+2701);
+      return fase>=3?a2:0;
+    }
+    function ateAcr(h,x){
+      if(h==1){if(fase<=1)avanca(2700+x*60);return}
+      if(fase==2||fase==3)avanca(t2+2700+x*60);
     }
     refresh();inicio(0);evento('inicio',{});
     [0,1].forEach(s=>evento('tatica',{s,d:{estilo:T[s].chave,form:T[s].form,treinador:T[s].tec.nome,minuto:0}}));
-    return{log,avanca,ateMinuto,resultado,feito:()=>feito,pausa:()=>pausa,
+    return{log,avanca,ateMinuto,acrTot,ateAcr,resultado,feito:()=>feito,pausa:()=>pausa,
       escolhe:c=>{if(VIVO&&pausa){VIVO.esc.push(c);pausa=null}},
       pendentes:()=>VIVO?VIVO.esc.length:0};
   }
@@ -4767,7 +4808,7 @@ function adaptaResultado(r,m,x,js){
     const J=MT.jogadores(m),aut=J.quem(e.s,e.p,e.t),nx=ev[i+1],as=nx&&nx.k=='assistencia'?J.quem(nx.s,nx.p,nx.t):'';
     const mine=as==nome&&e.s==my;
     if(aut==nome&&e.s==my)r.gl++;else if(mine)r.as++;
-    r.sc.push([mn(e.t),e.s,aut,mine?1:0,as]);
+    r.sc.push([mn(e.t),e.s,aut,mine?1:0,as,M.fmt(e.t)]);
   });
   /* creditar rivais (gols, assistências, notas) e artilheiros do campeonato */
   if(!x.parcial)r.sc.forEach(z=>{
@@ -4791,7 +4832,7 @@ function adaptaResultado(r,m,x,js){
     else if(l.k=='substituicao'&&txt.includes('entra você'))c='ok';
     else if(l.k=='lesao'&&txt.includes('você'))c='b';
     if(l.k=='gol'&&c){const g=r.sc.find(z=>!z.u&&z[0]==mn(l.t));if(g)g.u=1}
-    r.ev.push({m:Math.min(90,l.n),t:(l.k=='gol'&&c?'⚽ ':l.k=='cartao'?(c=='y'?'🟨 ':'🟥 '):'')+txt,c});
+    r.ev.push({m:Math.min(90,l.n),f:l.t!=null?M.fmt(l.t):null,t:(l.k=='gol'&&c?'⚽ ':l.k=='cartao'?(c=='y'?'🟨 ':'🟥 '):'')+txt,c});
   });
   r.sc.forEach(z=>{delete z.u});
   /* cartões e lesão do usuário */
@@ -5797,13 +5838,27 @@ function lvSync(L,fim){const V=L.V,pz=V.p.pausa();L.dec=null;L.opc=null;
   if(pz&&!fim){L.dec=pz;L.opc=pz.ops.map(o=>o.t=='chute'?{t:'chute'}:o.t=='passe'?{t:'passe',j:o.j}:{t:o.t})}
   vivoRefresh(V);V.min=L.t}
 function lvTickV(L){
-  L.t=Math.min(90,L.t+1);L.V.p.ateMinuto(L.t);lvSync(L);
+  const V=L.V,P=V.p;
+  if(L.ac){                                   // acréscimos: um minuto por tique, com os lances aparecendo no relógio (45+1', 90+2'...)
+    const a=L.ac;
+    if(a.x>=a.tot){
+      L.ac=null;
+      if(a.h==2){lvFim(L);return}
+      P.ateMinuto(46);L.t=46;lvSync(L);lvUpd();return   // acabou o acréscimo do 1º tempo: começa o 2º
+    }
+    a.x++;P.ateAcr(a.h,a.x);lvSync(L);lvUpd();return
+  }
+  L.t=Math.min(90,L.t+1);P.ateMinuto(L.t);lvSync(L);
   if(L.dec){lvDraw();return}
-  if(L.t>=90){lvFim(L);return}
+  if(L.t==45||L.t>=90){
+    const h=L.t==45?1:2,tot=P.acrTot(h);
+    if(tot>0){L.ac={h,x:0,tot};lvSync(L);lvUpd();return}
+    if(h==2){lvFim(L);return}
+  }
   lvUpd();
 }
 /* roda o motor até o minuto, decidindo no automático o que o jogador não decidiu */
-function lvRun(L,min){const V=L.V;V.p.ateMinuto(min);let n=0;while(V.p.pausa()&&n++<400){const c={t:'auto'};V.dec.push(c);V.p.escolhe(c);V.p.ateMinuto(min)}}
+function lvRun(L,min){const V=L.V,go=()=>min>=90?V.p.avanca(Infinity):V.p.ateMinuto(min);go();let n=0;while(V.p.pausa()&&n++<400){const c={t:'auto'};V.dec.push(c);V.p.escolhe(c);go()}}
 function lvEsc(k){const L=ui.lv;if(!L||!L.V||!L.dec)return;const V=L.V,c=k<0?{t:'auto'}:L.opc[k];
   V.dec.push(c);V.p.escolhe(c);if(S.pj){S.pj.dec=V.dec.slice();S.pj.min=L.t;save()}
   V.p.ateMinuto(L.t);lvSync(L);
@@ -5816,7 +5871,7 @@ function lvFim(L){
   const i=V.ph=='wc'||V.ph=='po'?-1:S.last.findIndex(r=>lvMine(r)&&!r.sn);
   /* guarda o resultado na própria transmissão: não depende de S.last depois do render() */
   const r=V.ph=='wc'||V.ph=='po'?V.fin:i>=0?S.last[i]:(vr&&vr.st?vr:null);
-  S.lvp=0;L.V=null;L.dec=null;L.t=90;L.pend=false;PIT=null;
+  S.lvp=0;L.V=null;L.dec=null;L.ac=null;L.t=90;L.pend=false;PIT=null;
   if(!r){ui.lv=null;lvDraw();save();render();return}
   r.sn=1;L.i=i;L.R=r;save();render();
   {const my=r.h==ME()?0:1;try{sfx(S.ti.length>nt?'cup':r.g[my]>r.g[1-my]?'win':r.g[my]<r.g[1-my]?'lose':'draw')}catch(e){}}
@@ -5825,7 +5880,7 @@ function lvFim(L){
 function liveV(V,pz){PIT=null;ui.lv={V,i:-1,t:V.min||0,sp:0,pause:false,pend:false,dec:null};
   if(!V.min){V.p.ateMinuto(1);}
   lvSync(ui.lv);lvTimer();lvDraw()}
-function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&ui.lv.t<90&&!ui.lv.pause&&typeof requestAnimationFrame=='undefined')LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
+function lvTimer(){clearInterval(LVT);LVT=null;if(ui.lv&&(ui.lv.t<90||ui.lv.ac)&&!ui.lv.pause&&typeof requestAnimationFrame=='undefined')LVT=setInterval(lvTick,lvMs[ui.lv.sp])}
 function liveOpen(i,fim){const r=S.last[i];if(!r||!r.st)return;if(!fim)r.sn=1;PIT=null;ui.lv={i,t:fim?90:0,sp:0,pause:false,pend:false};lvTimer();lvDraw()}
 function lvClose(){if(ui.lv&&(ui.lv.V||ui.lv.t<90&&S.lvp))return;clearInterval(LVT);LVT=null;ui.lv=null;lvDraw();const wc=WCME!=null;WCME=null;const po=POLIVE;POLIVE=0;render(true);if(wc)wcStepUi();if(po)poStepUi()}
 function lvSpeed(k){ui.lv.sp=k;ui.lv.pause=false;lvTimer();lvUpd()}
@@ -5943,7 +5998,7 @@ function lvFrame(now){
   lvStep(P,dt);lvPaint(P);
   const L=ui.lv;
   if(P.hold){P.hs=(P.hs||0)+dt*1000;if(P.hs>9000){if(P.cel)lvKick(P);P.q=[];P.seg=null;P.hold=false;P.hs=0}}else P.hs=0;
-  if(!L.pause&&L.t<90&&!P.hold&&!P.cel){const tm=lvMs[L.sp];L.acc=(L.acc||0)+dt*1000;if(L.acc>=tm){L.acc=Math.min(L.acc-tm,tm);lvTick()}}
+  if(!L.pause&&(L.t<90||L.ac)&&!P.hold&&!P.cel){const tm=lvMs[L.sp];L.acc=(L.acc||0)+dt*1000;if(L.acc>=tm){L.acc=Math.min(L.acc-tm,tm);lvTick()}}
 }
 /* comemoração do gol: escudo do time, autor e assistente; depois, novo pontapé inicial */
 function lvGoalIn(P,g){
@@ -6088,11 +6143,11 @@ function lvPitchHtml(r){
 }
 function lvHtml(){
   const L=ui.lv,r=lvRes();if(!r||!r.st)return '';
-  const t=L.t,tv=L.pend?t-1:t,fim=t>=90&&!L.V,h=cl(r.h),a=cl(r.a),my=r.h==ME()?0:1,gs=[0,1].map(s=>r.sc.filter(z=>z[1]==s&&z[0]<=tv).length);
+  const t=L.t,tv=(L.pend?t-1:t)+(L.ac&&L.ac.h==1?L.ac.x:0),fim=t>=90&&!L.V,h=cl(r.h),a=cl(r.a),my=r.h==ME()?0:1,gs=[0,1].map(s=>r.sc.filter(z=>z[1]==s&&z[0]<=tv).length);
   if(fim&&!r.mvp){let b=[0,0,-1];r.pr.forEach((rows,s)=>rows.forEach((p,i)=>{if(p[5]>b[2])b=[s,i,p[5]]}));r.mvp=[b[0],b[1]]}
   const res=r.win==null?'Empate':r.win==ME()?'Vitória':'Derrota',rc=r.win==null?'e':r.win==ME()?'w':'l';
-  const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[0]}'</span>`).join('')}</div>`;
-  const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
+  const scL=s=>`<div class="lvg">${r.sc.filter(z=>z[1]==s&&z[0]<=tv).map(z=>`<span>⚽ ${esc(z[2])} ${z[5]||z[0]+"'"}</span>`).join('')}</div>`;
+  const head=`<div class="lvh">${lvTeamH(h,0,'b')}<div class="lvc"><small>${esc(r.comp)}${r.agg?' · agregado '+r.agg[0]+'x'+r.agg[1]:''}</small><b class="num">${gs[0]}<i>x</i>${gs[1]}</b><span class="lvm">${fim?'Fim de jogo'+(r.pen?' · pênaltis':''):L.ac?(L.ac.x?t+'+'+L.ac.x+"'":t+"' · +"+L.ac.tot+' min'):(t?t+"'":'Bola rolando')}</span>${fim?`<span class="lvres ${rc}">${res}</span>`:`<i class="lvbar"><u style="width:${(t/90*100).toFixed(1)}%"></u></i>`}</div>${lvTeamH(a,1,'r')}</div><div class="lvgs">${scL(0)}${scL(1)}</div>`;
   const ctl=fim?`<div class="row lvctl"><button class="play" style="flex:1" onclick="lvClose()">Continuar</button></div>`:`<div class="row lvctl"><button class="ghost" onclick="lvPause()">${L.pause?'▶ Continuar':'⏸ Pausar'}</button>${['1x','2x','5x'].map((x,k)=>`<button class="pill" aria-pressed="${L.sp==k}" onclick="lvSpeed(${k})">${x}</button>`).join('')}${t<45?'<button class="ghost" onclick="lvSkip()">⏭ 2º tempo</button>':''}<button class="ghost" onclick="lvSim()">⏩ Simular tudo</button></div>`;
   const dec=L.dec?`<div class="pn lvdec"><h2>⚡ Sua decisão · ${t}'</h2><p class="note" style="margin:0 0 8px">A bola chegou até você. O que fazer?</p><div class="chips2">${L.dec.ops.map((o,k)=>{
     const rt=o.t=='chute'?`⚽ Chutar <small>(chance de gol ~${Math.round(o.xg*100)}%)</small>`:o.t=='passe'?`${o.cruz?'🎯 Cruzar para':'➡️ Passar para'} ${esc(o.nome)} <small>(${o.q>=.8?'fácil':o.q>=.6?'razoável':'arriscado'})</small>`:o.t=='drib'?'🌀 Driblar o marcador':'🏃 Conduzir a bola';
@@ -6100,7 +6155,7 @@ function lvHtml(){
   let body;
   if(!fim){
     const lines=r.ev.filter(e=>e.m<=tv).slice(-9).reverse();
-    body=`<div class="lvmain">${r.xi?'<div id="lvslot"></div>':''}<div class="pn lvlog"><h2>Lances</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.m}’</b> ${e.t}</div>`).join('')}</div></div></div><div class="shg"><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,tv)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,tv)}</div></div>`;
+    body=`<div class="lvmain">${r.xi?'<div id="lvslot"></div>':''}<div class="pn lvlog"><h2>Lances</h2><div class="log">${lines.map(e=>`<div class="e ${e.c}"><b>${e.f||e.m+'’'}</b> ${e.t}</div>`).join('')}</div></div></div><div class="shg"><div class="pn"><h2>Estatísticas ao vivo</h2>${lvRows(r,tv)}</div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,tv)}</div></div>`;
   }else{
     const me=r.pl?`<div class="pn"><h2>Sua atuação</h2>${kv([['Nota',r.rt],['Minutos',r.mn+"'"],['Gols',r.gl],['Assistências',r.as],['Cartões',(r.yc?'🟨':'')+(r.rc?'🟥':'')||'—']])}</div>`:`<div class="pn"><h2>Sua atuação</h2><p class="note" style="margin:0">${S.inj>0?'Você está lesionado.':'Você não atuou nesta partida.'}</p></div>`;
     body=`<div class="shg"><div><div class="pn"><h2>Estatísticas da partida</h2>${lvRows(r,90)}</div>${me}</div><div><div class="pn"><h2>Destaques da partida</h2>${lvPlayers(r)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)}</span><span><i class="r"></i>${esc(a.n)}</span></p></div><div class="pn"><h2>Domínio da partida</h2>${lvMom(r,90)}<p class="lvlg"><span><i class="b"></i>${esc(h.n)} dominando</span><span><i class="r"></i>${esc(a.n)} dominando</span></p></div></div></div>`;
@@ -6110,12 +6165,12 @@ function lvHtml(){
 /* atualiza só placar, controles, log e estatísticas: não recria o campo (sem piscar, sem perder a rolagem) */
 function lvUpd(){
   const o=document.getElementById('lvo'),L=ui.lv;
-  if(!o||!L||L.t>=90||!document.getElementById('lvpitch')){lvDraw();return}
+  if(!o||!L||(L.t>=90&&!L.V)||!document.getElementById('lvpitch')){lvDraw();return}
   const r=lvRes(),tmp=document.createElement('div');tmp.innerHTML=lvHtml();
   for(const sel of ['.lvh .lvc','.lvgs','.lvctl','.lvdec','.lvlog .log','.shg']){const a=o.querySelector(sel),b=tmp.querySelector(sel);if(a&&b&&a.innerHTML!==b.innerHTML)a.innerHTML=b.innerHTML}
   if(PIT&&r&&PIT.t!=L.t){PIT.t=L.t;lvPlan(r,L.t,lvMs[L.sp])}
 }
-function lvSkip(){const L=ui.lv;if(!L||L.t>=45)return;L.t=45;if(L.V){lvRun(L,45);lvSync(L);if(S.pj){S.pj.dec=L.V.dec.slice();S.pj.min=45;save()}}L.pend=false;PIT=null;lvDraw()}
+function lvSkip(){const L=ui.lv;if(!L||L.t>=45)return;L.t=45;L.ac=null;if(L.V){lvRun(L,45);L.V.p.avanca(0,2);lvSync(L);if(S.pj){S.pj.dec=L.V.dec.slice();S.pj.min=45;save()}}L.pend=false;PIT=null;lvDraw()}
 function lvSim(){const L=ui.lv;if(!L)return;if(L.V){lvFim(L);return}L.t=90;L.pend=false;clearInterval(LVT);LVT=null;if(S.lvp){S.lvp=0;save()}PIT=null;lvDraw()}
 function lvDraw(){
   let o=document.getElementById('lvo');

@@ -111,7 +111,7 @@ function adaptaResultado(r,m,x,js){
     const J=MT.jogadores(m),aut=J.quem(e.s,e.p,e.t),nx=ev[i+1],as=nx&&nx.k=='assistencia'?J.quem(nx.s,nx.p,nx.t):'';
     const mine=as==nome&&e.s==my;
     if(aut==nome&&e.s==my)r.gl++;else if(mine)r.as++;
-    r.sc.push([mn(e.t),e.s,aut,mine?1:0,as]);
+    r.sc.push([mn(e.t),e.s,aut,mine?1:0,as,M.fmt(e.t)]);
   });
   /* creditar rivais (gols, assistências, notas) e artilheiros do campeonato */
   if(!x.parcial)r.sc.forEach(z=>{
@@ -135,7 +135,7 @@ function adaptaResultado(r,m,x,js){
     else if(l.k=='substituicao'&&txt.includes('entra você'))c='ok';
     else if(l.k=='lesao'&&txt.includes('você'))c='b';
     if(l.k=='gol'&&c){const g=r.sc.find(z=>!z.u&&z[0]==mn(l.t));if(g)g.u=1}
-    r.ev.push({m:Math.min(90,l.n),t:(l.k=='gol'&&c?'⚽ ':l.k=='cartao'?(c=='y'?'🟨 ':'🟥 '):'')+txt,c});
+    r.ev.push({m:Math.min(90,l.n),f:l.t!=null?M.fmt(l.t):null,t:(l.k=='gol'&&c?'⚽ ':l.k=='cartao'?(c=='y'?'🟨 ':'🟥 '):'')+txt,c});
   });
   r.sc.forEach(z=>{delete z.u});
   /* cartões e lesão do usuário */

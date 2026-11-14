@@ -71,9 +71,21 @@ function mkRv(age){
   const gap=age<=19?R(14,26):age<=21?R(8,16):age<=23?R(3,10):age<=30?R(0,4):age<=33?R(2,8):R(6,12);
   return{id:'r'+(++RVID),n:nm(nat),nat,pos,age,ovr:C(pot-gap,50,97),pot,club:0,ad:[0,0,0,0,0,0].map(()=>RI(-3,3)),inj:0,cur:{ap:0,g:0,a:0,rs:0,lg:0},car:newCar(),h:[]};
 }
+/* transferência de um rival: craque não desce de patamar (Haaland não sai do City para um clube bem mais fraco); só se muda para clube do mesmo nível ou melhor.
+   Jogadores mais velhos ou já em queda aceitam uma descida pequena. Devolve null se não houver destino adequado. */
+function moveClub(r){
+  const cur=cl(r.club),cs=cur?cur.s:0,fall=r.age>=32?5:r.age>=30?3:1.5;
+  const floor=Math.max(cs-fall,r.ovr-7);
+  const cand=S.cs.filter(c=>c.l>=0&&c.d==0&&c.id!=r.club&&c.s>=floor&&c.s<=r.ovr+6);
+  if(!cand.length)return null;
+  const w=cand.map(c=>Math.exp(-Math.pow(c.s-(Math.max(r.ovr,cs)+(c.s>cs?1:0)),2)/30)*(c.s>=cs-.5?1.6:.5));
+  let tot=w.reduce((a,b)=>a+b,0),x=Math.random()*tot;
+  for(let i=0;i<cand.length;i++){x-=w[i];if(x<=0)return cand[i].id}
+  return cand[cand.length-1].id;
+}
 function pickClub(r){
   const tops=S.cs.filter(c=>c.l>=0&&c.d==0);let tot=0;
-  const w=tops.map(c=>{const x=Math.exp(-Math.pow(c.s-(r.ovr-3),2)/60);tot+=x;return x});
+  const w=tops.map(c=>{const x=Math.exp(-Math.pow(c.s-(r.ovr-3),2)/24);tot+=x;return x});
   let x=Math.random()*tot;for(let i=0;i<tops.length;i++){x-=w[i];if(x<=0)return tops[i].id}
   return tops[0].id;
 }
@@ -118,7 +130,16 @@ function newGame(f){
   pcEnsure();qualifyByStrength();setupSeason();snap('Início');
   news('Você assinou seu primeiro contrato profissional com o '+cl(S.club).n+'.');save();
 }
-function afterLoad(){FXC={};if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
+function rvFixIds(){
+  const num=id=>+String(id).replace(/\D/g,'')||0;let mx=RVID;
+  const all=[...S.rv,...(S.hof||[])];all.forEach(r=>{mx=Math.max(mx,num(r.id))});(S.bdo||[]).forEach(b=>b.top.forEach(x=>{if(x.id&&x.id!='me')mx=Math.max(mx,num(x.id))}));
+  RVID=mx;const seen={};
+  all.forEach(r=>{
+    if(seen[r.id]){const old=r.id,nid='r'+(++RVID);(S.bdo||[]).forEach(b=>b.top.forEach(x=>{if(x.id==old&&x.n==r.n)x.id=nid}));r.id=nid}
+    else seen[r.id]=r;
+  });
+}
+function afterLoad(){FXC={};try{rvFixIds()}catch(e){console.error(e)}if(!S.po)S.po=null;rcBuild();pcEnsure();hxEnsure();try{allComps().forEach(k=>{if(!k.dr&&k.ch==null)drawK(k)})}catch(e){}}
 
 /* ---------- temporada ---------- */
 function qualifyByStrength(){
@@ -534,8 +555,12 @@ function gen(n){
   const ov=O(),v=val(),me=cl(S.club),o=[];
   Sh(S.cs.filter(c=>c.l>=0&&c.id!=S.club)).forEach(c=>{
     if(o.length>=n)return;
-    const g=c.s-(ov+S.rep/15);if(g>8||g<-10||Math.random()<.35)return;
-    const ln=!S.loan&&c.s<me.s-4&&ov>=c.s-4&&S.p.age<24&&Math.random()<.6,s=sal(ov,c)*R(1,1.35);
+    const g=c.s-(ov+S.rep/15);if(g>8||g<-8||Math.random()<.35)return;
+    /* realismo: ninguém sai de um clube grande para um bem mais fraco. Descer só para quem está no banco (empréstimo de jovem) ou é veterano */
+    const up=c.s-me.s,rd=role(),reserve=rd=='Reserva'||rd=='Rodízio',lowOk=(S.p.age>=31&&up>=-6)||(reserve&&up>=-4);
+    const ln=!S.loan&&up<-4&&ov>=c.s-4&&S.p.age<24&&reserve&&Math.random()<.6;
+    if(up<-2&&!lowOk&&!ln)return;
+    const s=sal(ov,c)*R(1,1.35);
     o.push({t:ln?'emp':'perm',club:c.id,sal:Math.round(s/10)*10,yrs:ln?1:RI(2,5),bon:Math.round(s*R(.4,1.2)/10)*10,cl:Math.round(v*R(1.8,3)),fee:Math.round(v*R(.85,1.25))});
   });
   return o;
@@ -635,7 +660,12 @@ function evolveRivals(){
   }
   while(keep.length<96){const r=mkRv(RI(17,19));r.club=pickClub(r);keep.push(r)}
   S.rv=keep;
-  S.rv.forEach(r=>{if(!r.club||Math.random()<(r.age<=20?.3:.2)*(r.real?.5:1))r.club=pickClub(r)});
+  S.rv.forEach(r=>{
+    if(!r.club){r.club=pickClub(r);return}
+    /* quem já está num clube de elite quase nunca sai; quem está abaixo do próprio nível procura um melhor */
+    const sub=cl(r.club)?cl(r.club).s:0,gap=r.ovr-3-sub,p=(r.age<=20?.3:.2)*(r.real?.5:1)*(r.ovr>=86&&gap<=3?.3:1)*(gap>5?1.6:1);
+    if(Math.random()<p){const n=moveClub(r);if(n!=null)r.club=n}
+  });
   rcBuild();
 }
 
