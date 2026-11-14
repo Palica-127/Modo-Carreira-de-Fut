@@ -699,17 +699,17 @@ tr.kr td:first-child{box-shadow:inset 3px 0 var(--kc)}
 
 /* Bola de Ouro: destaque do último vencedor, arquivo em cartões */
 .bdh{grid-column:1/-1;display:flex;align-items:center;gap:clamp(14px,3vw,30px);padding:clamp(14px,3vw,26px);background:linear-gradient(100deg,rgba(217,179,95,.14),rgba(255,255,255,.03) 60%)}
-.bkw{overflow-x:auto;padding:6px 4px 14px;-webkit-overflow-scrolling:touch}.bk{display:flex;gap:30px;min-width:max-content;align-items:stretch}
-.bkc{display:flex;flex-direction:column;width:224px;position:relative}
+.bkw{overflow-x:auto;padding:14px 12px 18px;border-radius:14px;background:radial-gradient(120% 80% at 50% 0,rgba(255,255,255,.05),transparent 70%);-webkit-overflow-scrolling:touch}.bk{display:flex;gap:34px;min-width:max-content;align-items:stretch;margin:0 auto;width:max-content}
+.bkc{display:flex;flex-direction:column;width:250px;position:relative}
 .bkc h4{margin:0 0 10px;text-align:center}.bkc h4 span{display:inline-block;padding:4px 14px;border-radius:99px;font:800 11px var(--d);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);background:rgba(255,213,74,.1);border:1px solid rgba(255,213,74,.28)}
 .bkl{display:flex;flex-direction:column;flex:1;min-height:0}
-.bkp{flex:1 1 0;display:flex;align-items:center;position:relative;padding:5px 0;min-height:74px}
+.bkp{flex:1 1 0;display:flex;align-items:center;position:relative;padding:10px 0;min-height:128px}
 .bkt{position:relative;width:100%;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02)),var(--bg2);border:1px solid rgba(255,255,255,.12);border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.28)}
 .bkt.mine{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 18px -2px var(--acc)}.bkt.pend{border-style:dashed}.bkt.emp{opacity:.45;box-shadow:none}
-.bkc:not(.fin):not(.ch) .bkp::after{content:"";position:absolute;right:-15px;top:50%;width:15px;border-top:2px solid rgba(255,255,255,.22)}
-.bkc.nx .bkt::before{content:"";position:absolute;left:-15px;top:50%;width:15px;border-top:2px solid rgba(255,255,255,.22)}
-.bkc.lk .bkp:nth-child(odd)::before{content:"";position:absolute;right:-15px;top:50%;height:100%;border-left:2px solid rgba(255,255,255,.22)}
-.bkr{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}.bkr+.bkr{border-top:1px solid rgba(255,255,255,.08)}.bkr:first-child{border-radius:11px 11px 0 0}.bkr:last-child{border-radius:0 0 11px 11px}.bkt>.bkr:only-child{border-radius:11px}
+.bkc:not(.fin):not(.ch) .bkp::after{content:"";position:absolute;right:-17px;top:50%;width:17px;border-top:2px solid rgba(255,255,255,.22)}
+.bkc.nx .bkt::before{content:"";position:absolute;left:-17px;top:50%;width:17px;border-top:2px solid rgba(255,255,255,.22)}
+.bkc.lk .bkp:nth-child(odd)::before{content:"";position:absolute;right:-17px;top:50%;height:100%;border-left:2px solid rgba(255,255,255,.22)}
+.bkr{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer}.bkr+.bkr{border-top:1px solid rgba(255,255,255,.08)}.bkr:first-child{border-radius:11px 11px 0 0}.bkr:last-child{border-radius:0 0 11px 11px}.bkt>.bkr:only-child{border-radius:11px}
 .bkn{display:flex;align-items:center;gap:8px;min-width:0;flex:1;font:600 13px var(--b)}.bkn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bkn .shield{width:22px;height:26px;flex:none}
 .bks{font:800 17px var(--d);min-width:24px;text-align:center;padding:1px 6px;border-radius:7px;background:rgba(255,255,255,.07)}.bkr.win{background:linear-gradient(90deg,rgba(255,213,74,.2),rgba(255,213,74,.03))}.bkr.win .bkn{color:var(--gold-hi,#ffd54a)}.bkr.win .bks{background:var(--gold,#ffd54a);color:#111}.bkr.lose{opacity:.5}.bkr.me .bkn{color:var(--acc)}.bkr.emp{cursor:default;color:var(--muted)}.bkr.emp .bkn{color:var(--muted);font-weight:500;font-style:italic}
 .bkt small{display:block;padding:4px 10px 7px;border-top:1px solid rgba(255,255,255,.07);color:var(--muted);font-size:11px;text-align:center}
@@ -5035,7 +5035,12 @@ function render(keep){
   try{a.innerHTML=hud()+'<main class="pg enter">'+PG[ui.pg]()+'</main>'+nav()+(S.ev?evm():'')+(ui.sheet?sheetHtml():'')}
   catch(e){a.innerHTML='<div class="pn"><h2>Erro ao exibir</h2><p>'+esc(e.message)+'</p><button class="play" onclick="reset(true)">Nova carreira</button></div>';console.error(e)}
   window.scrollTo(0,keep?y:0);
+  bkFit();
 }
+/* encolhe as chaves para caberem na largura da tela */
+function bkFit(){try{document.querySelectorAll('.bkw').forEach(w=>{const b=w.querySelector('.bk');if(!b)return;b.style.zoom='';const cw=w.clientWidth-24,bw=b.scrollWidth;if(bw>cw&&cw>0)b.style.zoom=Math.max(.45,cw/bw).toFixed(3)})}catch(e){}}
+window.addEventListener('resize',bkFit);
+{let bt=0;new MutationObserver(()=>{if(!document.querySelector('.bkw'))return;cancelAnimationFrame(bt);bt=requestAnimationFrame(()=>{const bs=[...document.querySelectorAll('.bk')];if(bs.some(b=>!b.dataset.fit)){bs.forEach(b=>b.dataset.fit=1);bkFit()}})}).observe(document.body,{childList:true,subtree:true})}
 /* ---------- Caixa de e-mail, Seleção e plano semanal (portado do BrasLOL) ---------- */
 const mailLbl=()=>{const n=(S.mail||[]).filter(m=>!m.rd).length;return 'Caixa'+(n?' ('+n+')':'')};
 function mailAll(){(S.mail||[]).forEach(m=>m.rd=1);save();render(true)}
