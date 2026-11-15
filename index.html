@@ -2906,9 +2906,118 @@ const STAR_BY=(()=>{const m={};STARS.forEach(s=>{m[s.n]=s});return m})();
 function honorsOf(n){
   const o=[],s=STAR_BY[n];
   BDO_REAL.forEach(z=>{if(z.n==n)o.push({k:'bo',y:z.y})});
-  if(s){['ucl','wc','lib','mc'].forEach(k=>s[k].forEach(y=>o.push({k,y})));for(let i=0;i<s.lg;i++)o.push({k:'lig',y:''})}
+  if(s){
+    ['ucl','wc','lib','mc'].forEach(k=>s[k].forEach(y=>o.push({k,y})));
+    const ct=careerOf(n);ct.lig.forEach(z=>o.push(z));
+    for(let i=ct.lig.length;i<s.lg;i++)o.push({k:'lig',y:''});   // ligas sem ano (fora do histórico dos 10 países)
+    ct.dom.forEach(z=>o.push(z));
+  }
   return o;
 }
+/* ============================================================
+   CARREIRA POR CLUBE (aproximada): clube:temporada inicial-final (ano em que a temporada termina).
+   Cruzada com NAT_H dá as ligas e copas nacionais que o jogador ganhou, com ano e clube (a partir de 1970).
+   ============================================================ */
+const CAR_H=(()=>{const m={};`
+Lionel Messi|Barcelona:2005-2021;Paris Saint-Germain:2022-2023
+Cristiano Ronaldo|Manchester United:2004-2009;Real Madrid:2010-2018;Juventus:2019-2021;Manchester United:2022-2022
+Diego Maradona|Boca Juniors:1981-1981;Barcelona:1983-1984;Napoli:1985-1991;Boca Juniors:1996-1997
+Johan Cruyff|Ajax:1970-1973;Barcelona:1974-1978;Ajax:1982-1983;Feyenoord:1984-1984
+Ronaldo Nazário|PSV:1995-1996;Barcelona:1997-1997;Inter:1998-2002;Real Madrid:2003-2006;Milan:2007-2008;Corinthians:2009-2011
+Franz Beckenbauer|Bayern München:1970-1977;Hamburger SV:1980-1982
+Michel Platini|AS Nancy Lorraine:1973-1979;Saint-Étienne:1979-1982;Juventus:1983-1987
+Zinedine Zidane|Cannes:1990-1992;Juventus:1997-2001;Real Madrid:2002-2006
+Gerd Müller|Bayern München:1970-1979
+Eusébio|Benfica:1970-1975
+Marco van Basten|Ajax:1982-1987;Milan:1988-1993
+Zico|Flamengo:1972-1983;Flamengo:1986-1989
+Romário|Vasco da Gama:1985-1988;PSV:1989-1993;Barcelona:1994-1994;Flamengo:1995-1996;Vasco da Gama:1999-2000
+Ronaldinho|Paris Saint-Germain:2002-2003;Barcelona:2004-2008;Milan:2009-2011;Flamengo:2011-2012;Atlético Mineiro:2012-2013
+Kaká|Milan:2004-2009;Real Madrid:2010-2013;Milan:2014-2014
+Thierry Henry|Monaco:1995-1999;Arsenal:2000-2007;Barcelona:2008-2010
+Xavi|Barcelona:1999-2015
+Andrés Iniesta|Barcelona:2003-2018
+Roberto Baggio|Fiorentina:1988-1990;Juventus:1991-1995;Milan:1996-1997;Inter:1999-2000
+Kylian Mbappé|Monaco:2016-2017;Paris Saint-Germain:2018-2024;Real Madrid:2025-2025
+Mohamed Salah|Chelsea:2014-2014;Roma:2016-2017;Liverpool:2018-2025
+Erling Haaland|Borussia Dortmund:2021-2022;Manchester City:2023-2025
+Virgil van Dijk|Southampton:2016-2017;Liverpool:2018-2025
+Jude Bellingham|Borussia Dortmund:2021-2023;Real Madrid:2024-2025
+Rodri|Atlético de Madrid:2019-2019;Manchester City:2020-2025
+Ousmane Dembélé|Borussia Dortmund:2017-2017;Barcelona:2018-2023;Paris Saint-Germain:2024-2025
+Alisson Becker|Roma:2017-2017;Liverpool:2018-2025
+Gianluigi Donnarumma|Milan:2016-2021;Paris Saint-Germain:2022-2025
+Florian Wirtz|Bayer Leverkusen:2021-2025
+Thibaut Courtois|Chelsea:2012-2018;Real Madrid:2019-2025
+Federico Valverde|Real Madrid:2019-2025
+Pedri|Barcelona:2021-2025
+Raphinha|Leeds United:2021-2022;Barcelona:2023-2025
+Lamine Yamal|Barcelona:2024-2025
+Joshua Kimmich|Bayern München:2016-2025
+Harry Kane|Bayern München:2024-2025
+Achraf Hakimi|Real Madrid:2018-2019;Borussia Dortmund:2020-2020;Inter:2021-2021;Paris Saint-Germain:2022-2025
+Vitinha|Porto:2020-2022;Paris Saint-Germain:2023-2025
+Lautaro Martínez|Inter:2019-2025
+Jamal Musiala|Bayern München:2020-2025
+Alexis Mac Allister|Brighton:2020-2023;Liverpool:2024-2025
+Frenkie de Jong|Ajax:2017-2019;Barcelona:2020-2025
+Julián Álvarez|Manchester City:2023-2024;Atlético de Madrid:2025-2025
+Alessandro Bastoni|Inter:2019-2025
+Nicolò Barella|Inter:2020-2025
+Mike Maignan|Lille:2019-2021;Milan:2022-2025
+Kevin De Bruyne|Chelsea:2013-2014;Wolfsburg:2015-2015;Manchester City:2016-2025
+Marquinhos|Paris Saint-Germain:2014-2025
+Khvicha Kvaratskhelia|Napoli:2023-2024;Paris Saint-Germain:2025-2025
+Victor Osimhen|Napoli:2021-2024
+Rúben Dias|Benfica:2018-2020;Manchester City:2021-2025
+Antonio Rüdiger|Chelsea:2018-2022;Real Madrid:2023-2025
+Trent Alexander-Arnold|Liverpool:2017-2025
+Paulo Dybala|Juventus:2016-2022;Roma:2023-2025
+Phil Foden|Manchester City:2018-2025
+Ryan Gravenberch|Ajax:2019-2022;Bayern München:2023-2023;Liverpool:2024-2025
+Emiliano Martínez|Aston Villa:2021-2025
+Rodrygo|Real Madrid:2020-2025
+Dani Carvajal|Real Madrid:2014-2025
+David de Gea|Manchester United:2012-2023
+Luis Díaz|Porto:2020-2022;Liverpool:2022-2025
+Ederson|Benfica:2016-2017;Manchester City:2018-2025
+N'Golo Kanté|Leicester City:2015-2016;Chelsea:2017-2023
+Désiré Doué|Paris Saint-Germain:2025-2025
+João Neves|Benfica:2023-2024;Paris Saint-Germain:2025-2025
+Marc-André ter Stegen|Barcelona:2015-2025
+Éder Militão|Porto:2019-2019;Real Madrid:2020-2025
+Aurélien Tchouaméni|Real Madrid:2023-2025
+Bernardo Silva|Monaco:2015-2017;Manchester City:2018-2025
+João Cancelo|Juventus:2018-2019;Manchester City:2020-2022
+Cole Palmer|Manchester City:2021-2023;Chelsea:2024-2025
+Declan Rice|Arsenal:2024-2025
+Martin Ødegaard|Arsenal:2021-2025
+Bukayo Saka|Arsenal:2019-2025
+Moisés Caicedo|Brighton:2021-2023;Chelsea:2024-2025
+Enzo Fernández|Benfica:2022-2023;Chelsea:2023-2025
+Marcus Thuram|Inter:2024-2025
+Jules Koundé|Sevilla:2019-2022;Barcelona:2023-2025
+Gregor Kobel|Borussia Dortmund:2021-2025
+Harry Maguire|Manchester United:2019-2025
+`.trim().split('\n').forEach(l=>{const [n,c]=l.split('|');m[n]=c.split(';').map(z=>{const [cl,y]=z.split(':'),[a,b]=y.split('-');return{c:cl,a:+a,b:+b}})});return m})();
+const _CT={};
+/* ligas e copas nacionais ganhas (com ano e clube) a partir da carreira acima; só 1970-2025 */
+function careerTitles(n){
+  if(_CT[n])return _CT[n];
+  const out={lig:[],dom:[]},car=CAR_H[n];
+  if(car&&typeof NAT_H!=='undefined')car.forEach(st=>{
+    const key=Object.keys(NAT_H).find(k=>NAT_H[k].lig.some(r=>(k=='ARG'?r.slice(1):[r[1]]).indexOf(st.c)>=0)||NAT_H[k].dom.some(r=>r[1]==st.c));
+    if(!key)return;const L=LEAGUES.find(l=>l.k==key);
+    ['lig','dom'].forEach(t=>NAT_H[key][t].forEach(r=>{
+      const y=+r[0];if(y<st.a||y>st.b)return;
+      if((key=='ARG'&&t=='lig'?r.slice(1):[r[1]]).indexOf(st.c)>=0)out[t].push({k:t,y,cn:st.c,t:t=='lig'?(L?L.dn[0]:'Liga nacional'):(L?L.cup:'Copa nacional')});
+    }));
+  });
+  out.lig.sort((a,b)=>a.y-b.y);out.dom.sort((a,b)=>a.y-b.y);
+  return _CT[n]=out;
+}
+/* mesmas conquistas com o id do clube no jogo (para o escudo e o troféu da liga na ficha) */
+const careerOf=n=>{const o=careerTitles(n),f=z=>({...z,c:typeof cn2id=='function'&&typeof S!='undefined'&&S&&S.cs?cn2id(z.cn):null});return{lig:o.lig.map(f),dom:o.dom.map(f)}};
 
 /* ============================================================
    FORMATOS DE ACESSO E REBAIXAMENTO (regulamentos 2025/26)
@@ -3143,6 +3252,8 @@ function rvFixIds(){
     if(byN[x.n]!=null){x.id=byN[x.n];return}
     const k=x.id+'|'+x.n;if(!rm[k])rm[k]='r'+(++RVID);x.id=rm[k];own[x.id]=x.n;
   }));
+  /* conquistas reais dos craques: refaz com o histórico por clube (saves antigos tinham só a contagem de ligas, sem ano) */
+  S.rv.forEach(r=>{if(r.real&&typeof honorsOf=='function'){try{r.pre=honorsOf(r.n)}catch(e){}}});
   /* a marca de Bola de Ouro na carreira de cada rival também vinha do id repetido: refaz pelo nome (tira a do Dembélé, dá a do Quenda) */
   all.forEach(r=>{
     if(!r.h||!r.car)return;
@@ -4177,7 +4288,7 @@ function rvAny(id){
 }
 const TKEY={l:'lig',d:'dom',u:'ucl',b:'lib',m:'mc',w:'wc',o:'bo'};
 const ligTxt=(cid,k)=>{try{const c=cl(cid),L=c&&c.l>=0?LEAGUES[c.l]:null;if(!L)return '';return k=='dom'?'Copa · '+L.k:(L.dn[c.d]||L.n)}catch(e){return ''}};
-const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0],c:e[1],t:ligTxt(e[1],TKEY[k])})})});return o};
+const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y,c:h.c,t:h.t}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0],c:e[1],t:ligTxt(e[1],TKEY[k])})})});return o};
 
 /* todos os vencedores da Bola de Ouro: histórico real + simulados */
 /* conquistas do ano de um candidato (apuração do jogo): títulos do clube na temporada, gols e assistências */
@@ -6896,7 +7007,8 @@ function shC(s){
 function shL(s){
   const all=legList(),x=all.find(z=>z.st=='lenda'&&z.n==s.id);if(!x)return null;
   const yrs=BDO_REAL.filter(z=>z.n==x.n).map(z=>z.y),n=(k,v)=>Array.from({length:Math.min(v||0,14)},()=>({k,y:''}));
-  const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...n('lig',x.lg)];
+  const ca=careerOf(x.n),ligs=[...ca.lig,...n('lig',Math.max(0,x.lg-ca.lig.length))];   // ligas com ano/clube (1970+) e as anteriores sem ano
+  const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...ligs,...ca.dom];
   const i=all.indexOf(x);
   const hero=shHero(legImg(x.n,'lgph')||`<div class="h2b"><b class="h2big">${natCode(x.nat)}</b><small>${PNQ[x.pos]||x.pos}</small></div>`,esc(x.n),`${PNQ[x.pos]||x.pos} · ${esc(x.nat)}`,
     ['<b>LENDA</b> histórico real',i<10?`<b>TOP ${i+1}</b> na história do jogo`:`<b>${i+1}º</b> no ranking de lendas`],

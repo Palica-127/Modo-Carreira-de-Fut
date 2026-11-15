@@ -146,6 +146,8 @@ function rvFixIds(){
     if(byN[x.n]!=null){x.id=byN[x.n];return}
     const k=x.id+'|'+x.n;if(!rm[k])rm[k]='r'+(++RVID);x.id=rm[k];own[x.id]=x.n;
   }));
+  /* conquistas reais dos craques: refaz com o histórico por clube (saves antigos tinham só a contagem de ligas, sem ano) */
+  S.rv.forEach(r=>{if(r.real&&typeof honorsOf=='function'){try{r.pre=honorsOf(r.n)}catch(e){}}});
   /* a marca de Bola de Ouro na carreira de cada rival também vinha do id repetido: refaz pelo nome (tira a do Dembélé, dá a do Quenda) */
   all.forEach(r=>{
     if(!r.h||!r.car)return;
@@ -1180,7 +1182,7 @@ function rvAny(id){
 }
 const TKEY={l:'lig',d:'dom',u:'ucl',b:'lib',m:'mc',w:'wc',o:'bo'};
 const ligTxt=(cid,k)=>{try{const c=cl(cid),L=c&&c.l>=0?LEAGUES[c.l]:null;if(!L)return '';return k=='dom'?'Copa · '+L.k:(L.dn[c.d]||L.n)}catch(e){return ''}};
-const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0],c:e[1],t:ligTxt(e[1],TKEY[k])})})});return o};
+const rvTitles=r=>{const o=(r.pre||[]).map(h=>({k:h.k,y:h.y,c:h.c,t:h.t}));(r.h||[]).forEach(e=>{String(e[8]||'').split('').forEach(k=>{if(TKEY[k])o.push({k:TKEY[k],y:e[0],c:e[1],t:ligTxt(e[1],TKEY[k])})})});return o};
 
 /* todos os vencedores da Bola de Ouro: histórico real + simulados */
 /* conquistas do ano de um candidato (apuração do jogo): títulos do clube na temporada, gols e assistências */

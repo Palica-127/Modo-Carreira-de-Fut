@@ -382,7 +382,8 @@ function shC(s){
 function shL(s){
   const all=legList(),x=all.find(z=>z.st=='lenda'&&z.n==s.id);if(!x)return null;
   const yrs=BDO_REAL.filter(z=>z.n==x.n).map(z=>z.y),n=(k,v)=>Array.from({length:Math.min(v||0,14)},()=>({k,y:''}));
-  const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...n('lig',x.lg)];
+  const ca=careerOf(x.n),ligs=[...ca.lig,...n('lig',Math.max(0,x.lg-ca.lig.length))];   // ligas com ano/clube (1970+) e as anteriores sem ano
+  const it=[...yrs.map(y=>({k:'bo',y})),...n('wc',x.wc),...n('ucl',x.ucl),...n('lib',x.lib),...n('mc',x.mc),...ligs,...ca.dom];
   const i=all.indexOf(x);
   const hero=shHero(legImg(x.n,'lgph')||`<div class="h2b"><b class="h2big">${natCode(x.nat)}</b><small>${PNQ[x.pos]||x.pos}</small></div>`,esc(x.n),`${PNQ[x.pos]||x.pos} · ${esc(x.nat)}`,
     ['<b>LENDA</b> histórico real',i<10?`<b>TOP ${i+1}</b> na história do jogo`:`<b>${i+1}º</b> no ranking de lendas`],
