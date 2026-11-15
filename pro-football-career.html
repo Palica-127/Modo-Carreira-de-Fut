@@ -1756,6 +1756,1121 @@ const MCH={'Real Madrid':8,'Barcelona':3,'Bayern München':4,'Milan':4,'Inter':3
  'Liverpool':1,'Manchester City':1,'Chelsea':2,'Borussia Dortmund':1,'Feyenoord':1,'Nacional (URU)':3,'Peñarol':3,'Santos':2,'São Paulo':3,
  'Boca Juniors':3,'River Plate':1,'Independiente':2,'Racing Club':1,'Olimpia':1,'Grêmio':1,'Flamengo':1,'Corinthians':2,'Internacional':1};
 
+/* >>> NAT_H (gerado por tools/build_champs.py; não editar à mão) */
+/* Campeões reais das ligas e copas nacionais (1970-2025): ano|campeão|vice. Na Argentina há vários campeões por ano (um por torneio). */
+const NAT_H={
+ ENG:{
+  lig:rowsOf(`
+1970|Everton|Leeds United
+1971|Arsenal|Leeds United
+1972|Derby County|Leeds United
+1973|Liverpool|Arsenal
+1974|Leeds United|Liverpool
+1975|Derby County|Liverpool
+1976|Liverpool|Manchester United
+1977|Liverpool|Manchester City
+1978|Nottingham Forest|Liverpool
+1979|Liverpool|Nottingham Forest
+1980|Liverpool|Manchester United
+1981|Aston Villa|Ipswich Town
+1982|Liverpool|Ipswich Town
+1983|Liverpool|Watford
+1984|Liverpool|Southampton
+1985|Everton|Liverpool
+1986|Liverpool|Everton
+1987|Everton|Liverpool
+1988|Liverpool|Manchester United
+1989|Arsenal|Liverpool
+1990|Liverpool|Aston Villa
+1991|Arsenal|Liverpool
+1992|Leeds United|Manchester United
+1993|Manchester United|Aston Villa
+1994|Manchester United|Blackburn Rovers
+1995|Blackburn Rovers|Manchester United
+1996|Manchester United|Newcastle United
+1997|Manchester United|Newcastle United
+1998|Arsenal|Manchester United
+1999|Manchester United|Arsenal
+2000|Manchester United|Arsenal
+2001|Manchester United|Arsenal
+2002|Arsenal|Liverpool
+2003|Manchester United|Arsenal
+2004|Arsenal|Chelsea
+2005|Chelsea|Arsenal
+2006|Chelsea|Manchester United
+2007|Manchester United|Chelsea
+2008|Manchester United|Chelsea
+2009|Manchester United|Liverpool
+2010|Chelsea|Manchester United
+2011|Manchester United|Chelsea
+2012|Manchester City|Manchester United
+2013|Manchester United|Manchester City
+2014|Manchester City|Liverpool
+2015|Chelsea|Manchester City
+2016|Leicester City|Arsenal
+2017|Chelsea|Tottenham Hotspur
+2018|Manchester City|Manchester United
+2019|Manchester City|Liverpool
+2020|Liverpool|Manchester City
+2021|Manchester City|Manchester United
+2022|Manchester City|Liverpool
+2023|Manchester City|Arsenal
+2024|Manchester City|Arsenal
+2025|Liverpool|Arsenal
+`),
+  dom:rowsOf(`
+1970|Chelsea|Leeds United
+1971|Arsenal|Liverpool
+1972|Leeds United|Arsenal
+1973|Sunderland|Leeds United
+1974|Liverpool|Newcastle United
+1975|West Ham United|Fulham
+1976|Southampton|Manchester United
+1977|Manchester United|Liverpool
+1978|Ipswich Town|Arsenal
+1979|Arsenal|Manchester United
+1980|West Ham United|Arsenal
+1981|Tottenham Hotspur|Manchester City
+1982|Tottenham Hotspur
+1983|Manchester United|Brighton
+1984|Everton|Watford
+1985|Manchester United|Everton
+1986|Liverpool|Everton
+1987|Coventry City|Tottenham Hotspur
+1988|Wimbledon|Liverpool
+1989|Liverpool|Everton
+1990|Manchester United|Crystal Palace
+1991|Tottenham Hotspur|Nottingham Forest
+1992|Liverpool|Sunderland
+1993|Arsenal|Sheffield Wednesday
+1994|Manchester United|Chelsea
+1995|Everton|Manchester United
+1996|Manchester United|Liverpool
+1997|Chelsea|Middlesbrough
+1998|Arsenal|Newcastle United
+1999|Manchester United|Newcastle United
+2000|Chelsea|Aston Villa
+2001|Liverpool|Arsenal
+2002|Arsenal|Chelsea
+2003|Arsenal|Southampton
+2004|Manchester United|Millwall
+2005|Arsenal|Manchester United
+2006|Liverpool|West Ham United
+2007|Chelsea|Manchester United
+2008|Portsmouth|Cardiff City
+2009|Chelsea|Everton
+2010|Chelsea|Portsmouth
+2011|Manchester City|Stoke City
+2012|Chelsea|Liverpool
+2013|Wigan Athletic|Manchester City
+2014|Arsenal|Hull City
+2015|Arsenal|Aston Villa
+2016|Manchester United|Crystal Palace
+2017|Arsenal|Chelsea
+2018|Chelsea|Manchester United
+2019|Manchester City|Watford
+2020|Arsenal|Chelsea
+2021|Leicester City|Chelsea
+2022|Liverpool|Chelsea
+2023|Manchester City|Manchester United
+2024|Manchester United|Manchester City
+2025|Crystal Palace|Manchester City
+`),
+ },
+ ESP:{
+  lig:rowsOf(`
+1970|Atlético de Madrid|Athletic Bilbao
+1971|Valencia|Barcelona
+1972|Real Madrid|Valencia
+1973|Atlético de Madrid|Barcelona
+1974|Barcelona|Atlético de Madrid
+1975|Real Madrid|Real Zaragoza
+1976|Real Madrid|Barcelona
+1977|Atlético de Madrid|Barcelona
+1978|Real Madrid|Barcelona
+1979|Real Madrid|Sporting de Gijón
+1980|Real Madrid|Real Sociedad
+1981|Real Sociedad|Real Madrid
+1982|Real Sociedad|Barcelona
+1983|Athletic Bilbao|Real Madrid
+1984|Athletic Bilbao|Real Madrid
+1985|Barcelona|Atlético de Madrid
+1986|Real Madrid|Barcelona
+1987|Real Madrid|Barcelona
+1988|Real Madrid|Real Sociedad
+1989|Real Madrid|Barcelona
+1990|Real Madrid|Valencia
+1991|Barcelona|Atlético de Madrid
+1992|Barcelona|Real Madrid
+1993|Barcelona|Real Madrid
+1994|Barcelona|Deportivo La Coruña
+1995|Real Madrid|Deportivo La Coruña
+1996|Atlético de Madrid|Valencia
+1997|Real Madrid|Barcelona
+1998|Barcelona|Athletic Bilbao
+1999|Barcelona|Real Madrid
+2000|Deportivo La Coruña|Barcelona
+2001|Real Madrid|Deportivo La Coruña
+2002|Valencia|Deportivo La Coruña
+2003|Real Madrid|Real Sociedad
+2004|Valencia|Barcelona
+2005|Barcelona|Real Madrid
+2006|Barcelona|Real Madrid
+2007|Real Madrid|Barcelona
+2008|Real Madrid|Villarreal
+2009|Barcelona|Real Madrid
+2010|Barcelona|Real Madrid
+2011|Barcelona|Real Madrid
+2012|Real Madrid|Barcelona
+2013|Barcelona|Real Madrid
+2014|Atlético de Madrid|Barcelona
+2015|Barcelona|Real Madrid
+2016|Barcelona|Real Madrid
+2017|Real Madrid|Barcelona
+2018|Barcelona|Atlético de Madrid
+2019|Barcelona|Atlético de Madrid
+2020|Real Madrid|Barcelona
+2021|Atlético de Madrid|Real Madrid
+2022|Real Madrid|Barcelona
+2023|Barcelona|Real Madrid
+2024|Real Madrid|Barcelona
+2025|Barcelona|Real Madrid
+`),
+  dom:rowsOf(`
+1970|Real Madrid|Valencia
+1971|Barcelona|Valencia
+1972|Atlético de Madrid|Valencia
+1973|Athletic Bilbao|Castellón
+1974|Real Madrid|Barcelona
+1975|Real Madrid|Atlético de Madrid
+1976|Atlético de Madrid|Real Zaragoza
+1977|Real Betis|Athletic Bilbao
+1978|Barcelona|Las Palmas
+1979|Valencia|Real Madrid
+1980|Real Madrid|Castilla
+1981|Barcelona|Sporting de Gijón
+1982|Real Madrid|Sporting de Gijón
+1983|Barcelona|Real Madrid
+1984|Athletic Bilbao|Barcelona
+1985|Atlético de Madrid|Athletic Bilbao
+1986|Real Zaragoza|Barcelona
+1987|Real Sociedad|Atlético de Madrid
+1988|Barcelona|Real Sociedad
+1989|Real Madrid|Real Valladolid
+1990|Barcelona|Real Madrid
+1991|Atlético de Madrid|Mallorca
+1992|Atlético de Madrid|Real Madrid
+1993|Real Madrid|Real Zaragoza
+1994|Real Zaragoza|Celta de Vigo
+1995|Deportivo La Coruña|Valencia
+1996|Atlético de Madrid|Barcelona
+1997|Barcelona|Real Betis
+1998|Barcelona|Mallorca
+1999|Valencia|Atlético de Madrid
+2000|Espanyol|Atlético de Madrid
+2001|Real Zaragoza|Celta de Vigo
+2002|Deportivo La Coruña|Real Madrid
+2003|Mallorca|Recreativo
+2004|Real Zaragoza|Real Madrid
+2005|Real Betis|Osasuna
+2006|Espanyol|Real Zaragoza
+2007|Sevilla|Getafe
+2008|Valencia|Getafe
+2009|Barcelona|Athletic Bilbao
+2010|Sevilla|Atlético de Madrid
+2011|Real Madrid|Barcelona
+2012|Barcelona|Athletic Bilbao
+2013|Atlético de Madrid|Real Madrid
+2014|Real Madrid|Barcelona
+2015|Barcelona|Athletic Bilbao
+2016|Barcelona|Sevilla
+2017|Barcelona|Alavés
+2018|Barcelona|Sevilla
+2019|Valencia|Barcelona
+2020|Real Sociedad|Athletic Bilbao
+2021|Barcelona|Athletic Bilbao
+2022|Real Betis|Valencia
+2023|Real Madrid|Osasuna
+2024|Athletic Bilbao|Mallorca
+2025|Barcelona|Real Madrid
+`),
+ },
+ ITA:{
+  lig:rowsOf(`
+1970|Cagliari|Inter
+1971|Inter|Milan
+1972|Juventus
+1973|Juventus|Milan
+1974|Lazio|Juventus
+1975|Juventus|Napoli
+1976|Torino|Juventus
+1977|Juventus|Torino
+1978|Juventus
+1979|Milan|Perugia
+1980|Inter|Juventus
+1981|Juventus|Roma
+1982|Juventus|Fiorentina
+1983|Roma|Juventus
+1984|Juventus|Roma
+1985|Hellas Verona|Torino
+1986|Juventus|Roma
+1987|Napoli|Juventus
+1988|Milan|Napoli
+1989|Inter|Napoli
+1990|Napoli|Milan
+1991|Sampdoria|Milan
+1992|Milan|Juventus
+1993|Milan|Inter
+1994|Milan|Juventus
+1995|Juventus|Parma
+1996|Milan|Juventus
+1997|Juventus|Parma
+1998|Juventus|Inter
+1999|Milan|Lazio
+2000|Lazio|Juventus
+2001|Roma|Juventus
+2002|Juventus|Roma
+2003|Juventus|Inter
+2004|Milan|Roma
+2005|Juventus|Milan
+2006|Inter|Roma
+2007|Inter|Roma
+2008|Inter|Roma
+2009|Inter|Juventus
+2010|Inter|Roma
+2011|Milan|Inter
+2012|Juventus|Milan
+2013|Juventus|Napoli
+2014|Juventus|Roma
+2015|Juventus|Roma
+2016|Juventus|Napoli
+2017|Juventus|Roma
+2018|Juventus|Napoli
+2019|Juventus|Napoli
+2020|Juventus|Inter
+2021|Inter|Milan
+2022|Milan|Inter
+2023|Napoli|Lazio
+2024|Inter|Milan
+2025|Napoli|Inter
+`),
+  dom:rowsOf(`
+1970|Bologna|Torino
+1971|Torino|Milan
+1972|Milan|Napoli
+1973|Milan|Juventus
+1974|Bologna|Palermo
+1975|Fiorentina|Milan
+1976|Napoli|Hellas Verona
+1977|Milan|Inter
+1978|Inter|Napoli
+1979|Juventus|Palermo
+1980|Roma|Torino
+1981|Roma|Torino
+1982|Inter|Torino
+1983|Juventus|Hellas Verona
+1984|Roma|Hellas Verona
+1985|Sampdoria|Milan
+1986|Roma|Sampdoria
+1987|Napoli|Atalanta
+1988|Sampdoria|Torino
+1989|Sampdoria|Napoli
+1990|Juventus|Milan
+1991|Roma|Sampdoria
+1992|Parma|Juventus
+1993|Torino|Roma
+1994|Sampdoria|Ancona
+1995|Juventus|Parma
+1996|Fiorentina|Atalanta
+1997|Vicenza|Napoli
+1998|Lazio|Milan
+1999|Parma|Fiorentina
+2000|Lazio|Inter
+2001|Fiorentina|Parma
+2002|Parma|Juventus
+2003|Milan|Roma
+2004|Lazio|Juventus
+2005|Inter|Roma
+2006|Inter|Roma
+2007|Roma|Inter
+2008|Roma|Inter
+2009|Lazio|Sampdoria
+2010|Inter|Roma
+2011|Inter|Palermo
+2012|Napoli|Juventus
+2013|Lazio|Roma
+2014|Napoli|Fiorentina
+2015|Juventus|Lazio
+2016|Juventus|Milan
+2017|Juventus|Lazio
+2018|Juventus|Milan
+2019|Lazio|Atalanta
+2020|Napoli|Juventus
+2021|Juventus|Atalanta
+2022|Inter|Juventus
+2023|Inter|Fiorentina
+2024|Juventus|Atalanta
+2025|Bologna|Milan
+`),
+ },
+ GER:{
+  lig:rowsOf(`
+1970|Mönchengladbach|Bayern München
+1971|Mönchengladbach|Bayern München
+1972|Bayern München
+1973|Bayern München
+1974|Bayern München|Mönchengladbach
+1975|Mönchengladbach|Hertha BSC
+1976|Mönchengladbach|Hamburger SV
+1977|Mönchengladbach
+1978|Mönchengladbach
+1979|Hamburger SV|VfB Stuttgart
+1980|Bayern München|Hamburger SV
+1981|Bayern München|Hamburger SV
+1982|Hamburger SV
+1983|Hamburger SV|Werder Bremen
+1984|VfB Stuttgart|Hamburger SV
+1985|Bayern München|Werder Bremen
+1986|Bayern München|Werder Bremen
+1987|Bayern München|Hamburger SV
+1988|Werder Bremen|Bayern München
+1989|Bayern München
+1990|Bayern München
+1991|Bayern München
+1992|VfB Stuttgart|Borussia Dortmund
+1993|Werder Bremen|Bayern München
+1994|Bayern München
+1995|Borussia Dortmund|Werder Bremen
+1996|Borussia Dortmund|Bayern München
+1997|Bayern München|Bayer Leverkusen
+1998|Bayern München
+1999|Bayern München|Bayer Leverkusen
+2000|Bayern München|Bayer Leverkusen
+2001|Bayern München
+2002|Borussia Dortmund|Bayer Leverkusen
+2003|Bayern München|VfB Stuttgart
+2004|Werder Bremen|Bayern München
+2005|Bayern München
+2006|Bayern München|Werder Bremen
+2007|VfB Stuttgart
+2008|Bayern München|Werder Bremen
+2009|Wolfsburg|Bayern München
+2010|Bayern München
+2011|Borussia Dortmund|Bayer Leverkusen
+2012|Borussia Dortmund|Bayern München
+2013|Bayern München|Borussia Dortmund
+2014|Bayern München|Borussia Dortmund
+2015|Bayern München|Wolfsburg
+2016|Bayern München|Borussia Dortmund
+2017|Bayern München|RB Leipzig
+2018|Bayern München
+2019|Bayern München|Borussia Dortmund
+2020|Bayern München|Borussia Dortmund
+2021|Bayern München|RB Leipzig
+2022|Bayern München|Borussia Dortmund
+2023|Bayern München|Borussia Dortmund
+2024|Bayer Leverkusen|VfB Stuttgart
+2025|Bayern München|Bayer Leverkusen
+`),
+  dom:rowsOf(`
+1970|Kickers Offenbach
+1971|Bayern München
+1973|Mönchengladbach
+1974|Eintracht Frankfurt|Hamburger SV
+1975|Eintracht Frankfurt|MSV Duisburg
+1976|Hamburger SV
+1977|Hertha BSC
+1978|Fortuna Düsseldorf
+1979|Fortuna Düsseldorf|Hertha BSC
+1980|Fortuna Düsseldorf
+1981|Eintracht Frankfurt
+1982|Bayern München
+1983|Fortuna Köln
+1984|Bayern München|Mönchengladbach
+1985|Bayer Uerdingen|Bayern München
+1986|Bayern München|VfB Stuttgart
+1987|Hamburger SV|Stuttgarter Kickers
+1988|Eintracht Frankfurt|VfL Bochum
+1989|Borussia Dortmund|Werder Bremen
+1990|Werder Bremen
+1991|Werder Bremen
+1992|Mönchengladbach
+1993|Bayer Leverkusen|Hertha BSC Amateure
+1994|Werder Bremen|Rot-Weiss Essen
+1995|Mönchengladbach|Wolfsburg
+1996|Karlsruher SC
+1997|VfB Stuttgart|Energie Cottbus
+1998|Bayern München|MSV Duisburg
+1999|Werder Bremen|Bayern München
+2000|Bayern München|Werder Bremen
+2001|Union Berlin
+2002|Bayer Leverkusen
+2003|Bayern München
+2004|Werder Bremen|Alemannia Aachen
+2005|Bayern München
+2006|Bayern München|Eintracht Frankfurt
+2007|VfB Stuttgart
+2008|Bayern München|Borussia Dortmund
+2009|Werder Bremen|Bayer Leverkusen
+2010|Bayern München|Werder Bremen
+2011|MSV Duisburg
+2012|Borussia Dortmund|Bayern München
+2013|Bayern München|VfB Stuttgart
+2014|Bayern München|Borussia Dortmund
+2015|Wolfsburg|Borussia Dortmund
+2016|Bayern München|Borussia Dortmund
+2017|Borussia Dortmund|Eintracht Frankfurt
+2018|Eintracht Frankfurt|Bayern München
+2019|Bayern München|RB Leipzig
+2020|Bayern München|Bayer Leverkusen
+2021|Borussia Dortmund|RB Leipzig
+2022|RB Leipzig|Freiburg
+2023|RB Leipzig|Eintracht Frankfurt
+2024|Bayer Leverkusen
+2025|VfB Stuttgart|Arminia Bielefeld
+`),
+ },
+ FRA:{
+  lig:rowsOf(`
+1970|Saint-Étienne|Marseille
+1971|Marseille|Saint-Étienne
+1972|Marseille|Nîmes
+1973|Nantes|Nice
+1974|Saint-Étienne|Nantes
+1975|Saint-Étienne|Marseille
+1976|Saint-Étienne|Nice
+1977|Nantes|Lens
+1978|Monaco|Nantes
+1979|Strasbourg|Nantes
+1980|Nantes|Sochaux
+1981|Saint-Étienne|Nantes
+1982|Monaco|Saint-Étienne
+1983|Nantes|Bordeaux
+1984|Bordeaux|Monaco
+1985|Bordeaux|Nantes
+1986|Paris Saint-Germain|Nantes
+1987|Bordeaux|Marseille
+1988|Monaco|Bordeaux
+1989|Marseille|Paris Saint-Germain
+1990|Marseille|Bordeaux
+1991|Marseille|Monaco
+1992|Marseille|Monaco
+1993|Paris Saint-Germain
+1994|Paris Saint-Germain|Marseille
+1995|Nantes|Lyon
+1996|Auxerre|Paris Saint-Germain
+1997|Monaco|Paris Saint-Germain
+1998|Lens|Metz
+1999|Bordeaux|Marseille
+2000|Monaco|Paris Saint-Germain
+2001|Nantes|Lyon
+2002|Lyon|Lens
+2003|Lyon|Monaco
+2004|Lyon|Paris Saint-Germain
+2005|Lyon|Lille
+2006|Lyon|Bordeaux
+2007|Lyon|Marseille
+2008|Lyon|Bordeaux
+2009|Bordeaux|Marseille
+2010|Marseille|Lyon
+2011|Lille|Marseille
+2012|Montpellier|Paris Saint-Germain
+2013|Paris Saint-Germain|Marseille
+2014|Paris Saint-Germain|Monaco
+2015|Paris Saint-Germain|Lyon
+2016|Paris Saint-Germain|Lyon
+2017|Monaco|Paris Saint-Germain
+2018|Paris Saint-Germain|Monaco
+2019|Paris Saint-Germain|Lille
+2020|Paris Saint-Germain|Marseille
+2021|Lille|Paris Saint-Germain
+2022|Paris Saint-Germain|Marseille
+2023|Paris Saint-Germain|Lens
+2024|Paris Saint-Germain|Monaco
+2025|Paris Saint-Germain|Marseille
+`),
+  dom:rowsOf(`
+1970|Saint-Étienne|Nantes
+1971|Rennes|Lyon
+1972|Marseille|Bastia
+1973|Lyon|Nantes
+1974|Saint-Étienne|Monaco
+1975|Saint-Étienne|Lens
+1976|Marseille|Lyon
+1977|Saint-Étienne|Reims
+1978|AS Nancy Lorraine|Nice
+1979|Nantes|Auxerre
+1980|Monaco|Orléans
+1981|Bastia|Saint-Étienne
+1982|Paris Saint-Germain|Saint-Étienne
+1983|Paris Saint-Germain|Nantes
+1984|Metz|Monaco
+1985|Monaco|Paris Saint-Germain
+1986|Bordeaux|Marseille
+1987|Bordeaux|Marseille
+1988|Metz|Sochaux
+1989|Marseille|Monaco
+1990|Montpellier|RC Paris
+1991|Monaco|Marseille
+1993|Paris Saint-Germain|Nantes
+1994|Auxerre|Montpellier
+1995|Paris Saint-Germain|Strasbourg
+1996|Auxerre|Nîmes
+1997|Nice|Guingamp
+1998|Paris Saint-Germain|Lens
+1999|Nantes|Sedan
+2000|Nantes|Calais RUFC
+2001|Strasbourg|Amiens
+2002|Lorient|Bastia
+2003|Auxerre|Paris Saint-Germain
+2004|Paris Saint-Germain|LB Châteauroux
+2005|Auxerre|CS Sedan
+2006|Paris Saint-Germain|Marseille
+2007|Sochaux|Marseille
+2008|Lyon|Paris Saint-Germain
+2009|Guingamp|Rennes
+2010|Paris Saint-Germain|Monaco
+2011|Lille|Paris Saint-Germain
+2012|Lyon|US Quevilly
+2013|Bordeaux|Evian
+2014|Guingamp|Rennes
+2015|Paris Saint-Germain|Auxerre
+2016|Paris Saint-Germain|Marseille
+2017|Paris Saint-Germain|Angers
+2018|Paris Saint-Germain|Les Herbiers
+2019|Rennes|Paris Saint-Germain
+2020|Paris Saint-Germain|Saint-Étienne
+2021|Paris Saint-Germain|Monaco
+2022|Nantes|Nice
+2023|Toulouse|Nantes
+2024|Paris Saint-Germain|Lyon
+2025|Paris Saint-Germain|Reims
+`),
+ },
+ POR:{
+  lig:rowsOf(`
+1970|Sporting CP|Benfica
+1971|Benfica|Sporting CP
+1972|Benfica|Vitória de Setúbal
+1973|Benfica|Belenenses
+1974|Sporting CP|Benfica
+1975|Benfica|Porto
+1976|Benfica|Boavista
+1977|Benfica|Sporting CP
+1978|Porto|Benfica
+1979|Porto|Benfica
+1980|Sporting CP|Porto
+1981|Benfica|Porto
+1982|Sporting CP|Benfica
+1983|Benfica|Porto
+1984|Benfica|Porto
+1985|Porto|Sporting CP
+1986|Porto|Benfica
+1987|Benfica|Porto
+1988|Porto|Benfica
+1989|Benfica|Porto
+1990|Porto|Benfica
+1991|Benfica|Porto
+1992|Porto|Benfica
+1993|Porto|Benfica
+1994|Benfica|Porto
+1995|Porto|Sporting CP
+1996|Porto|Benfica
+1997|Porto|Sporting CP
+1998|Porto|Benfica
+1999|Porto|Boavista
+2000|Sporting CP|Porto
+2001|Boavista|Porto
+2002|Sporting CP|Boavista
+2003|Porto|Benfica
+2004|Porto|Benfica
+2005|Benfica|Porto
+2006|Porto|Sporting CP
+2007|Porto|Sporting CP
+2008|Porto|Sporting CP
+2009|Porto|Sporting CP
+2010|Benfica|Braga
+2011|Porto|Benfica
+2012|Porto|Benfica
+2013|Porto|Benfica
+2014|Benfica|Sporting CP
+2015|Benfica|Porto
+2016|Benfica|Sporting CP
+2017|Benfica|Porto
+2018|Porto|Benfica
+2019|Benfica|Porto
+2020|Porto|Benfica
+2021|Sporting CP|Porto
+2022|Porto|Sporting CP
+2023|Benfica|Porto
+2024|Sporting CP|Benfica
+2025|Sporting CP|Benfica
+`),
+  dom:rowsOf(`
+1970|Benfica|Sporting CP
+1971|Sporting CP|Benfica
+1972|Benfica|Sporting CP
+1973|Sporting CP|Vitória de Setúbal
+1974|Sporting CP|Benfica
+1975|Boavista|Benfica
+1976|Boavista|Vitória SC
+1977|Porto|Braga
+1978|Sporting CP|Porto
+1979|Boavista|Sporting CP
+1980|Benfica|Porto
+1981|Benfica|Porto
+1982|Sporting CP|Braga
+1983|Benfica|Porto
+1984|Porto|Rio Ave
+1985|Benfica|Porto
+1986|Benfica|Belenenses
+1987|Benfica|Sporting CP
+1988|Porto|Vitória SC
+1989|Belenenses|Benfica
+1990|Estrela|Farense
+1991|Porto|Beira-Mar
+1992|Boavista|Porto
+1993|Benfica|Boavista
+1994|Porto|Sporting CP
+1995|Sporting CP|Marítimo
+1996|Benfica|Sporting CP
+1997|Boavista|Benfica
+1998|Porto|Braga
+1999|Beira-Mar|Campomaiorense
+2000|Porto|Sporting CP
+2001|Porto|Marítimo
+2002|Sporting CP|Leixões
+2003|Porto|União de Leiria
+2004|Benfica|Porto
+2005|Vitória de Setúbal|Benfica
+2006|Porto|Vitória de Setúbal
+2007|Sporting CP|Belenenses
+2008|Sporting CP|Porto
+2009|Porto|Paços de Ferreira
+2010|Porto|Chaves
+2011|Porto|Vitória SC
+2012|Académica|Sporting CP
+2013|Vitória SC|Benfica
+2014|Benfica|Rio Ave
+2015|Sporting CP|Braga
+2016|Braga|Porto
+2017|Benfica|Vitória SC
+2018|Aves|Sporting CP
+2019|Sporting CP|Porto
+2020|Porto|Benfica
+2021|Braga|Benfica
+2022|Porto|Tondela
+2023|Porto|Braga
+2024|Porto|Sporting CP
+2025|Sporting CP|Benfica
+`),
+ },
+ NED:{
+  lig:rowsOf(`
+1970|Ajax
+1971|Feyenoord
+1972|Ajax
+1973|Ajax
+1974|Feyenoord
+1975|PSV
+1976|PSV
+1977|Ajax
+1978|PSV
+1979|Ajax
+1980|Ajax
+1982|Ajax
+1983|Ajax
+1984|Feyenoord
+1985|Ajax
+1986|PSV
+1987|PSV
+1988|PSV
+1989|PSV
+1990|Ajax
+1991|PSV
+1992|PSV
+1993|Feyenoord
+1994|Ajax
+1995|Ajax
+1996|Ajax
+1997|PSV
+1998|Ajax
+1999|Feyenoord
+2000|PSV
+2001|PSV
+2002|Ajax
+2003|PSV
+2004|Ajax
+2005|PSV
+2006|PSV
+2007|PSV
+2008|PSV
+2009|AZ Alkmaar
+2010|Twente
+2011|Ajax
+2012|Ajax
+2013|Ajax
+2014|Ajax
+2015|PSV
+2016|PSV
+2017|Feyenoord
+2018|PSV
+2019|Ajax
+2021|Ajax
+2022|Ajax
+2023|Feyenoord
+2024|PSV
+2025|PSV
+`),
+  dom:rowsOf(`
+1970|Ajax
+1971|Ajax
+1972|Ajax
+1973|NAC Breda
+1974|PSV
+1975|ADO Den Haag
+1976|PSV
+1977|Twente
+1979|Ajax
+1980|Feyenoord
+1982|Utrecht
+1983|Ajax
+1984|Feyenoord
+1985|Utrecht
+1986|Ajax
+1987|Ajax
+1988|PSV
+1989|PSV
+1990|PSV
+1991|Feyenoord
+1992|Feyenoord
+1993|Ajax
+1994|Feyenoord
+1995|Feyenoord
+1996|PSV
+1997|Roda JC
+1998|Ajax
+1999|Ajax
+2000|Roda JC
+2001|Twente|PSV
+2002|Ajax
+2003|Utrecht
+2004|Utrecht
+2005|PSV|Willem II
+2006|Ajax
+2007|Ajax
+2008|Feyenoord
+2009|Heerenveen
+2010|Ajax
+2011|Twente
+2012|PSV
+2013|AZ Alkmaar
+2014|PEC Zwolle
+2015|Groningen
+2016|Feyenoord
+2017|Vitesse
+2018|Feyenoord
+2019|Ajax
+2021|Ajax
+2022|PSV
+2023|PSV
+2024|Feyenoord
+2025|Go Ahead Eagles
+`),
+ },
+ ARG:{
+  lig:rowsOf(`
+1970|Independiente|Boca Juniors
+1971|Independiente|Rosario Central
+1972|San Lorenzo
+1973|Huracán|Rosario Central
+1974|Newell's Old Boys|San Lorenzo
+1975|River Plate
+1976|Boca Juniors
+1977|River Plate|Independiente
+1978|Quilmes|Independiente
+1979|River Plate
+1980|River Plate|Rosario Central
+1981|Boca Juniors|River Plate
+1982|Estudiantes|Ferro Carril Oeste
+1983|Independiente|Estudiantes
+1984|Argentinos Juniors|Ferro Carril Oeste
+1985|Argentinos Juniors
+1986|River Plate
+1987|Rosario Central
+1988|Newell's Old Boys
+1989|Independiente
+1990|River Plate
+1991|Newell's Old Boys|River Plate
+1992|Newell's Old Boys|Boca Juniors
+1993|Vélez Sarsfield|River Plate
+1994|Independiente|River Plate
+1995|San Lorenzo|Vélez Sarsfield
+1996|Vélez Sarsfield|River Plate
+1997|River Plate
+1998|Vélez Sarsfield|Boca Juniors
+1999|Boca Juniors|River Plate
+2000|River Plate|Boca Juniors
+2001|San Lorenzo|Racing Club
+2002|River Plate|Independiente
+2003|River Plate|Boca Juniors
+2004|River Plate|Newell's Old Boys
+2005|Vélez Sarsfield|Boca Juniors
+2006|Boca Juniors|Estudiantes
+2007|San Lorenzo|Lanús
+2008|River Plate|Boca Juniors
+2009|Vélez Sarsfield|Banfield
+2010|Argentinos Juniors|Estudiantes
+2011|Vélez Sarsfield|Boca Juniors
+2012|Arsenal|Vélez Sarsfield
+2013|Newell's Old Boys|Vélez Sarsfield|San Lorenzo
+2014|River Plate|Racing Club
+2015|Boca Juniors
+2016|Lanús
+2017|Boca Juniors
+2018|Boca Juniors
+2019|Racing Club
+2020|Boca Juniors
+2021|River Plate
+2022|Boca Juniors
+2023|River Plate
+2024|Vélez Sarsfield
+2025|Platense|Estudiantes|Rosario Central
+`),
+  dom:rowsOf(`
+2012|Boca Juniors|Racing Club
+2013|Arsenal|San Lorenzo
+2014|Huracán|Rosario Central
+2015|Boca Juniors|Rosario Central
+2016|River Plate|Rosario Central
+2017|River Plate|Atlético Tucumán
+2018|Rosario Central|Gimnasia La Plata
+2019|River Plate|Central Córdoba (Santiago del Estero)
+2020|Boca Juniors|Talleres
+2022|Patronato|Talleres
+2023|Estudiantes|Defensa y Justicia
+2024|Central Córdoba (Santiago del Estero)|Vélez Sarsfield
+2025|Independiente Rivadavia|Argentinos Juniors
+`),
+ },
+ TUR:{
+  lig:rowsOf(`
+1970|Fenerbahçe|Eskişehirspor
+1971|Galatasaray|Fenerbahçe
+1972|Galatasaray|Eskişehirspor
+1973|Galatasaray|Fenerbahçe
+1974|Fenerbahçe|Beşiktaş
+1975|Fenerbahçe|Galatasaray
+1976|Trabzonspor|Fenerbahçe
+1977|Trabzonspor|Fenerbahçe
+1978|Fenerbahçe|Trabzonspor
+1979|Trabzonspor|Galatasaray
+1980|Trabzonspor|Fenerbahçe
+1981|Trabzonspor|Adanaspor
+1982|Beşiktaş|Trabzonspor
+1983|Fenerbahçe|Trabzonspor
+1984|Trabzonspor|Fenerbahçe
+1985|Fenerbahçe|Beşiktaş
+1986|Beşiktaş|Galatasaray
+1987|Galatasaray|Beşiktaş
+1988|Galatasaray|Beşiktaş
+1989|Fenerbahçe|Beşiktaş
+1990|Beşiktaş|Fenerbahçe
+1991|Beşiktaş|Galatasaray
+1992|Beşiktaş|Fenerbahçe
+1993|Galatasaray|Beşiktaş
+1994|Galatasaray|Fenerbahçe
+1995|Beşiktaş|Trabzonspor
+1996|Fenerbahçe|Trabzonspor
+1997|Galatasaray|Beşiktaş
+1998|Galatasaray|Fenerbahçe
+1999|Galatasaray|Beşiktaş
+2000|Galatasaray|Beşiktaş
+2001|Fenerbahçe|Galatasaray
+2002|Galatasaray|Fenerbahçe
+2003|Beşiktaş|Galatasaray
+2004|Fenerbahçe|Trabzonspor
+2005|Fenerbahçe|Trabzonspor
+2006|Galatasaray|Fenerbahçe
+2007|Fenerbahçe|Beşiktaş
+2008|Galatasaray|Fenerbahçe
+2009|Beşiktaş|Sivasspor
+2010|Bursaspor|Fenerbahçe
+2011|Fenerbahçe|Trabzonspor
+2012|Galatasaray|Fenerbahçe
+2013|Galatasaray|Fenerbahçe
+2014|Fenerbahçe|Galatasaray
+2015|Galatasaray|Fenerbahçe
+2016|Beşiktaş|Fenerbahçe
+2017|Beşiktaş|Başakşehir
+2018|Galatasaray|Fenerbahçe
+2019|Galatasaray|Başakşehir
+2020|Başakşehir|Trabzonspor
+2021|Beşiktaş|Galatasaray
+2022|Trabzonspor|Fenerbahçe
+2023|Galatasaray|Fenerbahçe
+2024|Galatasaray|Fenerbahçe
+2025|Galatasaray|Fenerbahçe
+`),
+  dom:rowsOf(`
+1970|Eskişehirspor|Göztepe
+1971|Bursaspor|Eskişehirspor
+1972|Altay|Ankaragücü
+1973|Galatasaray|Ankaragücü
+1974|Bursaspor|Fenerbahçe
+1975|Trabzonspor|Beşiktaş
+1976|Trabzonspor|Galatasaray
+1977|Trabzonspor|Beşiktaş
+1978|Trabzonspor|Adana Demirspor
+1979|Altay|Fenerbahçe
+1980|Altay|Galatasaray
+1981|Ankaragücü|Boluspor
+1982|Galatasaray|Ankaragücü
+1983|Fenerbahçe|Mersin İdman Yurdu
+1984|Trabzonspor|Beşiktaş
+1985|Trabzonspor|Galatasaray
+1986|Bursaspor|Altay
+1987|Gençlerbirliği|Eskişehirspor
+1988|Sakaryaspor|Samsunspor
+1989|Fenerbahçe|Beşiktaş
+1990|Beşiktaş|Trabzonspor
+1991|Galatasaray|Ankaragücü
+1992|Bursaspor|Trabzonspor
+1993|Galatasaray|Beşiktaş
+1994|Galatasaray|Beşiktaş
+1995|Galatasaray|Trabzonspor
+1996|Galatasaray|Fenerbahçe
+1997|Trabzonspor|Kocaelispor
+1998|Beşiktaş|Galatasaray
+1999|Galatasaray|Beşiktaş
+2000|Galatasaray|Antalyaspor
+2001|Gençlerbirliği|Fenerbahçe
+2002|Kocaelispor|Beşiktaş
+2003|Trabzonspor|Gençlerbirliği
+2005|Galatasaray|Fenerbahçe
+2006|Beşiktaş
+2007|Kayseri Erciyesspor
+2008|Kayserispor|Gençlerbirliği
+2009|Beşiktaş|Fenerbahçe
+2010|Trabzonspor
+2011|Beşiktaş|Başakşehir
+2012|Fenerbahçe|Bursaspor
+2013|Trabzonspor
+2014|Galatasaray|Eskişehirspor
+2015|Bursaspor
+2016|Fenerbahçe
+2017|Konyaspor|Başakşehir
+2018|Akhisar Belediyespor|Fenerbahçe
+2019|Galatasaray|Akhisar Belediyespor
+2020|Trabzonspor|Alanyaspor
+2021|Beşiktaş|Antalyaspor
+2022|Sivasspor|Kayserispor
+2023|Fenerbahçe|Başakşehir
+2024|Beşiktaş|Trabzonspor
+2025|Galatasaray
+`),
+ },
+ BRA:{
+  lig:rowsOf(`
+1970|Fluminense|Palmeiras
+1971|Atlético Mineiro|São Paulo
+1972|Palmeiras|Botafogo
+1973|Palmeiras|São Paulo
+1974|Vasco da Gama|Cruzeiro
+1975|Internacional|Cruzeiro
+1976|Internacional|Corinthians
+1977|São Paulo|Atlético Mineiro
+1978|Guarani|Palmeiras
+1979|Internacional|Vasco da Gama
+1980|Flamengo|Atlético Mineiro
+1981|Grêmio|São Paulo
+1982|Flamengo|Grêmio
+1983|Flamengo|Santos
+1984|Fluminense|Vasco da Gama
+1985|Coritiba|Bangu
+1986|São Paulo|Guarani
+1987|Sport Recife|Guarani
+1988|Bahia|Internacional
+1989|Vasco da Gama|São Paulo
+1990|Corinthians|São Paulo
+1991|São Paulo|Bragantino
+1992|Flamengo|Botafogo
+1993|Palmeiras|Vitória
+1994|Palmeiras|Corinthians
+1995|Botafogo|Santos
+1996|Grêmio|Portuguesa
+1997|Vasco da Gama|Palmeiras
+1998|Corinthians|Cruzeiro
+1999|Corinthians|Atlético Mineiro
+2000|Vasco da Gama|São Caetano
+2001|Athletico Paranaense|São Caetano
+2002|Santos|Corinthians
+2003|Cruzeiro|Santos
+2004|Santos|Athletico Paranaense
+2005|Corinthians|Internacional
+2006|São Paulo|Internacional
+2007|São Paulo|Santos
+2008|São Paulo|Grêmio
+2009|Flamengo|Internacional
+2010|Fluminense|Cruzeiro
+2011|Corinthians|Vasco da Gama
+2012|Fluminense|Atlético Mineiro
+2013|Cruzeiro|Grêmio
+2014|Cruzeiro|São Paulo
+2015|Corinthians|Atlético Mineiro
+2016|Palmeiras|Santos
+2017|Corinthians|Palmeiras
+2018|Palmeiras|Flamengo
+2019|Flamengo|Santos
+2020|Flamengo|Internacional
+2021|Atlético Mineiro|Flamengo
+2022|Palmeiras|Internacional
+2023|Palmeiras|Grêmio
+2024|Botafogo|Palmeiras
+2025|Flamengo|Palmeiras
+`),
+  dom:rowsOf(`
+1989|Grêmio
+1990|Flamengo
+1991|Criciúma
+1992|Internacional
+1993|Cruzeiro
+1994|Grêmio
+1995|Corinthians
+1996|Cruzeiro
+1997|Grêmio
+1998|Palmeiras
+1999|Juventude
+2000|Cruzeiro
+2001|Grêmio
+2002|Corinthians
+2003|Cruzeiro
+2004|Santo André
+2005|Paulista
+2006|Flamengo
+2007|Fluminense
+2008|Sport Recife
+2009|Corinthians
+2010|Santos
+2011|Vasco da Gama
+2012|Palmeiras
+2013|Flamengo
+2014|Atlético Mineiro
+2015|Palmeiras
+2016|Grêmio
+2017|Cruzeiro
+2018|Cruzeiro
+2019|Athletico Paranaense
+2020|Palmeiras
+2021|Atlético Mineiro
+2022|Flamengo
+2023|São Paulo
+2024|Flamengo
+2025|Corinthians
+`),
+ },
+};
+/* <<< NAT_H */
 /* códigos de seleções que não estão no jogo */
 const SELC={'Hungria':'HUN','Tchecoslováquia':'TCH'};
 
@@ -3103,7 +4218,13 @@ function clubTitles(cid){
   const c=S.cs[cid],n=c.n,L=c.l>=0?LEAGUES[c.l]:null;
   const ucl=UCL_H.filter(x=>x.c==n).map(x=>x.y),uclV=UCL_H.filter(x=>x.r==n).map(x=>x.y);
   const lib=LIB_H.filter(x=>x.c==n).map(x=>x.y),libV=LIB_H.filter(x=>x.r==n).map(x=>x.y);
-  const lg=[],dom=[],mcG=[],low=[];
+  const lg=[],dom=[],mcG=[],low=[],lgV=[],domV=[];
+  /* histórico real das ligas e copas nacionais (1970-2025); depois de 2026 valem os campeões simulados */
+  const rh=L&&typeof NAT_H!='undefined'?NAT_H[L.k]:null;
+  if(rh)['lig','dom'].forEach(k=>rh[k].forEach(r=>{
+    const y=+r[0],multi=L.k=='ARG'&&k=='lig',ch=multi?r.slice(1):[r[1]];
+    if(ch.indexOf(n)>=0)(k=='lig'?lg:dom).push(y);else if(!multi&&r[2]==n)(k=='lig'?lgV:domV).push(y);
+  }));
   S.champs.forEach(h=>{
     if(h.ucl.c==cid)ucl.push(h.y);if(h.ucl.r==cid)uclV.push(h.y);
     if(h.lib.c==cid)lib.push(h.y);if(h.lib.r==cid)libV.push(h.y);
@@ -3111,7 +4232,7 @@ function clubTitles(cid){
     if(L){if(h.lg[L.k]==cid)lg.push(h.y);if(h.dom[L.k]==cid)dom.push(h.y)}
   });
   if(L)S.fin.forEach(f=>{for(let d=1;d<L.dn.length;d++){const a=f.p[c.l+'-'+d];if(a&&a[0]==cid)low.push({y:f.y,d})}});
-  return{ucl,uclV,lib,libV,mc:(MCH[n]||0)+mcG.length,mcG,lg,dom,low};
+  return{ucl,uclV,lib,libV,mc:(MCH[n]||0)+mcG.length,mcG,lg,dom,low,lgV,domV};
 }
 const cpPts=t=>t.ucl.length*10+t.lib.length*8+t.mc*5+t.lg.length*2+t.dom.length+t.uclV.length*3+t.libV.length*2;
 function clubPower(){return S.cs.map(c=>{const t=clubTitles(c.id);return{c,t,pts:cpPts(t)}}).sort((a,b)=>b.pts-a.pts||b.c.s-a.c.s)}
@@ -5749,13 +6870,13 @@ function shC(s){
   const mcIt=[...t.mcG.map(y=>({y})),...Array(Math.max(0,t.mc-t.mcG.length)).fill({y:''})];
   const hero=shHero(`<div class="h2b">${shield(c,'lg')}</div>`,esc(c.n),`${L?esc(L.n)+' · '+esc(dvName(c)):'Clube convidado'}${pos?' · '+pos+'º colocado':''}`,
     [c.id==S.club?'<b>SEU CLUBE</b>':'',`<b>${cpPts(t)} PTS</b> no power ranking de títulos`].filter(Boolean),
-    [['Champions',t.ucl.length],['Libertadores',t.lib.length],['Mundiais',t.mc],['Ligas (jogo)',t.lg.length],['Copas (jogo)',t.dom.length],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—']]);
-  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfBox('Mundial de Clubes',mcIt,x=>troIcon('mc',x.y,''))}${shelfBox('Liga dos Campeões',t.ucl.slice().sort((a,z)=>a-z),y=>troIcon('ucl',y,''))}${shelfBox('Libertadores',t.lib.slice().sort((a,z)=>a-z),y=>troIcon('lib',y,''))}${shelfBox(L?esc(L.dn[c.d])+' · ligas (jogo)':'Ligas nacionais (jogo)',t.lg.slice().sort((a,z)=>a-z),y=>troIcon('lig',y,L?L.dn[0]:'',L?'lig-'+L.k:''))}${t.dom.length?shelfBox('Copas nacionais (jogo)',t.dom.slice().sort((a,z)=>a-z),y=>troIcon('dom',y,'')):''}<p class="note">Champions e Libertadores: histórico real até 2025. Ligas e copas nacionais: só as temporadas do jogo. ${t.mc-t.mcG.length>0?'Mundiais sem ano são do histórico real (aprox.).':''}</p></div>
+    [['Champions',t.ucl.length],['Libertadores',t.lib.length],['Mundiais',t.mc],['Ligas',t.lg.length],['Copas',t.dom.length],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—']]);
+  const left=`<div class="pn"><h2>Estante de troféus</h2>${shelfBox('Mundial de Clubes',mcIt,x=>troIcon('mc',x.y,''))}${shelfBox('Liga dos Campeões',t.ucl.slice().sort((a,z)=>a-z),y=>troIcon('ucl',y,''))}${shelfBox('Libertadores',t.lib.slice().sort((a,z)=>a-z),y=>troIcon('lib',y,''))}${shelfBox(L?esc(L.dn[0])+' · ligas':'Ligas nacionais',t.lg.slice().sort((a,z)=>a-z),y=>troIcon('lig',y,L?L.dn[0]:'',L?'lig-'+L.k:''))}${t.dom.length?shelfBox('Copas nacionais · '+esc(L?L.cup:''),t.dom.slice().sort((a,z)=>a-z),y=>troIcon('dom',y,'')):''}<p class="note">Champions e Libertadores: histórico real até 2025. Ligas e copas nacionais: histórico real de 1970 a 2025 (clubes do jogo) mais as temporadas simuladas. ${t.mc-t.mcG.length>0?'Mundiais sem ano são do histórico real (aprox.).':''}</p></div>
     <div class="pn pod"><h2>Vices</h2><div class="chips"><span><b>${t.uclV.length}</b>Vice Champions</span><span><b>${t.libV.length}</b>Vice Liberta.</span><span><b>${t.low.length}</b>Divisões de acesso</span></div>${[...t.uclV.map(y=>({y,t:'Vice da Champions'})),...t.libV.map(y=>({y,t:'Vice da Libertadores'}))].sort((a,z)=>z.y-a.y).slice(0,8).map(r=>`<div class="pr2"><b>${r.y}</b><span>${r.t}</span></div>`).join('')||'<p class="note" style="margin:0">Vices continentais aparecem aqui.</p>'}</div>`;
   const sq=(RC[c.id]||[]).slice().sort((a,z)=>z.ovr-a.ovr).slice(0,10);
-  const right=`<div class="pn"><h2>Estatísticas</h2>${kv([['Liga',L?esc(L.k):'—'],['Divisão',esc(dvName(c))],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Pontos de título',cpPts(t)],['Títulos no jogo',t.lg.length+t.dom.length+t.ucl.length+t.lib.length]])}</div>
+  const right=`<div class="pn"><h2>Estatísticas</h2>${kv([['Liga',L?esc(L.k):'—'],['Divisão',esc(dvName(c))],['Força',Math.round(c.s)],['Posição',pos?pos+'º':'—'],['Pontos de título',cpPts(t)],['Títulos (total)',t.lg.length+t.dom.length+t.ucl.length+t.lib.length]])}</div>
     <div class="pn"><h2>Craques do clube</h2>${sq.length?`<ul class="rank">${sq.map(z=>`<li onclick="sheet('p','${z.id}')"><span class="pos">${z.pos}</span>${hx(Math.round(z.ovr))}<span class="nm2">${esc(z.n)}<small>${z.age} anos · ${esc(z.nat)}</small></span></li>`).join('')}</ul>`:'<p class="empty">Nenhum craque do top 96 joga neste clube agora.</p>'}<button class="ghost" onclick="abrirElenco(${c.id})">Ver elenco completo</button></div>
-    <details class="pn det"><summary>Todos os títulos</summary>${yrsLine('Liga dos Campeões',t.ucl)+yrsLine('Vice da Champions',t.uclV)+yrsLine('Libertadores',t.lib)+yrsLine('Vice da Libertadores',t.libV)+yrsLine('Liga nacional (jogo)',t.lg)+yrsLine('Copa nacional (jogo)',t.dom)+`<div class="tl"><b>Divisões de acesso (jogo) <span class="tag">${t.low.length}</span></b><small>${t.low.length?t.low.map(z=>z.y+' ('+LEAGUES[c.l].dn[z.d]+')').join(' · '):'—'}</small></div>`}</details>`;
+    <details class="pn det"><summary>Todos os títulos</summary>${yrsLine('Liga dos Campeões',t.ucl)+yrsLine('Vice da Champions',t.uclV)+yrsLine('Libertadores',t.lib)+yrsLine('Vice da Libertadores',t.libV)+yrsLine('Liga nacional',t.lg)+yrsLine('Vice da liga',t.lgV)+yrsLine('Copa nacional',t.dom)+yrsLine('Vice da copa',t.domV)+`<div class="tl"><b>Divisões de acesso (jogo) <span class="tag">${t.low.length}</span></b><small>${t.low.length?t.low.map(z=>z.y+' ('+LEAGUES[c.l].dn[z.d]+')').join(' · '):'—'}</small></div>`}</details>`;
   const rows=[];
   const stg=(m,rn,ch,id)=>{const st=m&&m[id];if(!st)return '—';if(ch)return '🏆 Campeão';return st>=rn.length?'Vice':rn[st-1]};
   S.fin.forEach(f=>{

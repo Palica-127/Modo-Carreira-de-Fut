@@ -1,0 +1,5259 @@
+{
+"ENG": {
+"lig": {
+"1950": [
+"Portsmouth",
+"Wolverhampton Wanderers"
+],
+"1951": [
+"Tottenham Hotspur",
+"Manchester United"
+],
+"1952": [
+"Manchester United",
+"Tottenham Hotspur"
+],
+"1953": [
+"Arsenal",
+"Preston North End"
+],
+"1954": [
+"Wolverhampton Wanderers",
+"West Bromwich Albion"
+],
+"1955": [
+"Chelsea",
+"Wolverhampton Wanderers"
+],
+"1956": [
+"Manchester United",
+"Blackpool"
+],
+"1957": [
+"Manchester United",
+"Tottenham Hotspur"
+],
+"1958": [
+"Wolverhampton Wanderers",
+"Preston North End"
+],
+"1959": [
+"Wolverhampton Wanderers",
+"Manchester United"
+],
+"1960": [
+"Burnley",
+"Wolverhampton Wanderers"
+],
+"1961": [
+"Tottenham Hotspur",
+"Sheffield Wednesday"
+],
+"1962": [
+"Ipswich Town",
+"Burnley"
+],
+"1963": [
+"Everton",
+"Tottenham Hotspur"
+],
+"1964": [
+"Liverpool",
+"Manchester United"
+],
+"1965": [
+"Manchester United",
+"Leeds United"
+],
+"1966": [
+"Liverpool",
+"Leeds United"
+],
+"1967": [
+"Manchester United",
+"Nottingham Forest"
+],
+"1968": [
+"Manchester City",
+"Manchester United"
+],
+"1969": [
+"Leeds United",
+"Liverpool"
+],
+"1970": [
+"Everton",
+"Leeds United"
+],
+"1971": [
+"Arsenal",
+"Leeds United"
+],
+"1972": [
+"Derby County",
+"Leeds United"
+],
+"1973": [
+"Liverpool",
+"Arsenal"
+],
+"1974": [
+"Leeds United",
+"Liverpool"
+],
+"1975": [
+"Derby County",
+"Liverpool"
+],
+"1976": [
+"Liverpool",
+"Manchester United"
+],
+"1977": [
+"Liverpool",
+"Manchester City"
+],
+"1978": [
+"Nottingham Forest",
+"Liverpool"
+],
+"1979": [
+"Liverpool",
+"Nottingham Forest"
+],
+"1980": [
+"Liverpool",
+"Manchester United"
+],
+"1981": [
+"Aston Villa",
+"Ipswich Town"
+],
+"1982": [
+"Liverpool",
+"Ipswich Town"
+],
+"1983": [
+"Liverpool",
+"Watford"
+],
+"1984": [
+"Liverpool",
+"Southampton"
+],
+"1985": [
+"Everton",
+"Liverpool"
+],
+"1986": [
+"Liverpool",
+"Everton"
+],
+"1987": [
+"Everton",
+"Liverpool"
+],
+"1988": [
+"Liverpool",
+"Manchester United"
+],
+"1989": [
+"Arsenal",
+"Liverpool"
+],
+"1990": [
+"Liverpool",
+"Aston Villa"
+],
+"1991": [
+"Arsenal",
+"Liverpool"
+],
+"1992": [
+"Leeds United",
+"Manchester United"
+],
+"1993": [
+"Manchester United",
+"Aston Villa"
+],
+"1994": [
+"Manchester United",
+"Blackburn Rovers"
+],
+"1995": [
+"Blackburn Rovers",
+"Manchester United"
+],
+"1996": [
+"Manchester United",
+"Newcastle United"
+],
+"1997": [
+"Manchester United",
+"Newcastle United"
+],
+"1998": [
+"Arsenal",
+"Manchester United"
+],
+"1999": [
+"Manchester United",
+"Arsenal"
+],
+"2000": [
+"Manchester United",
+"Arsenal"
+],
+"2001": [
+"Manchester United",
+"Arsenal"
+],
+"2002": [
+"Arsenal",
+"Liverpool"
+],
+"2003": [
+"Manchester United",
+"Arsenal"
+],
+"2004": [
+"Arsenal",
+"Chelsea"
+],
+"2005": [
+"Chelsea",
+"Arsenal"
+],
+"2006": [
+"Chelsea",
+"Manchester United"
+],
+"2007": [
+"Manchester United",
+"Chelsea"
+],
+"2008": [
+"Manchester United",
+"Chelsea"
+],
+"2009": [
+"Manchester United",
+"Liverpool"
+],
+"2010": [
+"Chelsea",
+"Manchester United"
+],
+"2011": [
+"Manchester United",
+"Chelsea"
+],
+"2012": [
+"Manchester City",
+"Manchester United"
+],
+"2013": [
+"Manchester United",
+"Manchester City"
+],
+"2014": [
+"Manchester City",
+"Liverpool"
+],
+"2015": [
+"Chelsea",
+"Manchester City"
+],
+"2016": [
+"Leicester City",
+"Arsenal"
+],
+"2017": [
+"Chelsea",
+"Tottenham Hotspur"
+],
+"2018": [
+"Manchester City",
+"Manchester United"
+],
+"2019": [
+"Manchester City",
+"Liverpool"
+],
+"2020": [
+"Liverpool",
+"Manchester City"
+],
+"2021": [
+"Manchester City",
+"Manchester United"
+],
+"2022": [
+"Manchester City",
+"Liverpool"
+],
+"2023": [
+"Manchester City",
+"Arsenal"
+],
+"2024": [
+"Manchester City",
+"Arsenal"
+],
+"2025": [
+"Liverpool",
+"Arsenal"
+]
+},
+"dom": {
+"1950": [
+"Arsenal",
+"Liverpool"
+],
+"1951": [
+"Newcastle United",
+"Blackpool"
+],
+"1952": [
+"Newcastle United",
+"Arsenal"
+],
+"1953": [
+"Blackpool",
+"Bolton Wanderers"
+],
+"1954": [
+"West Bromwich Albion",
+"Preston North End"
+],
+"1955": [
+"Newcastle United",
+"Manchester City"
+],
+"1956": [
+"Manchester City",
+"Birmingham City"
+],
+"1957": [
+"Aston Villa",
+"Manchester United"
+],
+"1958": [
+"Bolton Wanderers",
+"Manchester United"
+],
+"1959": [
+"Nottingham Forest",
+"Luton Town"
+],
+"1960": [
+"Wolverhampton Wanderers",
+"Blackburn Rovers"
+],
+"1961": [
+"Tottenham Hotspur",
+"Leicester City"
+],
+"1962": [
+"Tottenham Hotspur",
+"Burnley"
+],
+"1963": [
+"Manchester United",
+"Leicester City"
+],
+"1964": [
+"West Ham United",
+"Preston North End"
+],
+"1965": [
+"Liverpool",
+"Leeds United"
+],
+"1966": [
+"Everton",
+"Sheffield Wednesday"
+],
+"1967": [
+"Tottenham Hotspur",
+"Chelsea"
+],
+"1968": [
+"West Bromwich Albion",
+"Everton"
+],
+"1969": [
+"Manchester City",
+"Leicester City"
+],
+"1970": [
+"Chelsea",
+"Leeds United"
+],
+"1971": [
+"Arsenal",
+"Liverpool"
+],
+"1972": [
+"Leeds United",
+"Arsenal"
+],
+"1973": [
+"Sunderland",
+"Leeds United"
+],
+"1974": [
+"Liverpool",
+"Newcastle United"
+],
+"1975": [
+"West Ham United",
+"Fulham"
+],
+"1976": [
+"Southampton",
+"Manchester United"
+],
+"1977": [
+"Manchester United",
+"Liverpool"
+],
+"1978": [
+"Ipswich Town",
+"Arsenal"
+],
+"1979": [
+"Arsenal",
+"Manchester United"
+],
+"1980": [
+"West Ham United",
+"Arsenal"
+],
+"1981": [
+"Tottenham Hotspur",
+"Manchester City"
+],
+"1982": [
+"Tottenham Hotspur"
+],
+"1983": [
+"Manchester United",
+"Brighton & Hove Albion"
+],
+"1984": [
+"Everton",
+"Watford"
+],
+"1985": [
+"Manchester United",
+"Everton"
+],
+"1986": [
+"Liverpool",
+"Everton"
+],
+"1987": [
+"Coventry City",
+"Tottenham Hotspur"
+],
+"1988": [
+"Wimbledon",
+"Liverpool"
+],
+"1989": [
+"Liverpool",
+"Everton"
+],
+"1990": [
+"Manchester United",
+"Crystal Palace"
+],
+"1991": [
+"Tottenham Hotspur",
+"Nottingham Forest"
+],
+"1992": [
+"Liverpool",
+"Sunderland"
+],
+"1993": [
+"Arsenal",
+"Sheffield Wednesday"
+],
+"1994": [
+"Manchester United",
+"Chelsea"
+],
+"1995": [
+"Everton",
+"Manchester United"
+],
+"1996": [
+"Manchester United",
+"Liverpool"
+],
+"1997": [
+"Chelsea",
+"Middlesbrough"
+],
+"1998": [
+"Arsenal",
+"Newcastle United"
+],
+"1999": [
+"Manchester United #",
+"Newcastle United"
+],
+"2000": [
+"Chelsea",
+"Aston Villa"
+],
+"2001": [
+"Liverpool",
+"Arsenal"
+],
+"2002": [
+"Arsenal",
+"Chelsea"
+],
+"2003": [
+"Arsenal",
+"Southampton"
+],
+"2004": [
+"Manchester United",
+"Millwall"
+],
+"2005": [
+"Arsenal",
+"Manchester United"
+],
+"2006": [
+"Liverpool",
+"West Ham United"
+],
+"2007": [
+"Chelsea",
+"Manchester United"
+],
+"2008": [
+"Portsmouth",
+"Cardiff City"
+],
+"2009": [
+"Chelsea",
+"Everton"
+],
+"2010": [
+"Chelsea",
+"Portsmouth"
+],
+"2011": [
+"Manchester City",
+"Stoke City"
+],
+"2012": [
+"Chelsea",
+"Liverpool"
+],
+"2013": [
+"Wigan Athletic",
+"Manchester City"
+],
+"2014": [
+"Arsenal",
+"Hull City"
+],
+"2015": [
+"Arsenal",
+"Aston Villa"
+],
+"2016": [
+"Manchester United",
+"Crystal Palace"
+],
+"2017": [
+"Arsenal",
+"Chelsea"
+],
+"2018": [
+"Chelsea",
+"Manchester United"
+],
+"2019": [
+"Manchester City §",
+"Watford"
+],
+"2020": [
+"Arsenal",
+"Chelsea"
+],
+"2021": [
+"Leicester City",
+"Chelsea"
+],
+"2022": [
+"Liverpool",
+"Chelsea"
+],
+"2023": [
+"Manchester City #",
+"Manchester United"
+],
+"2024": [
+"Manchester United",
+"Manchester City"
+],
+"2025": [
+"Crystal Palace",
+"Manchester City"
+]
+}
+},
+"ESP": {
+"lig": {
+"1950": [
+"Atlético Madrid",
+"Deportivo La Coruña"
+],
+"1951": [
+"Atlético Madrid",
+"Sevilla"
+],
+"1952": [
+"Barcelona",
+"Athletic Bilbao"
+],
+"1953": [
+"Barcelona",
+"Valencia"
+],
+"1954": [
+"Real Madrid",
+"Barcelona"
+],
+"1955": [
+"Real Madrid",
+"Barcelona"
+],
+"1956": [
+"Athletic Bilbao",
+"Barcelona"
+],
+"1957": [
+"Real Madrid",
+"Sevilla"
+],
+"1958": [
+"Real Madrid",
+"Atlético Madrid"
+],
+"1959": [
+"Barcelona",
+"Real Madrid"
+],
+"1960": [
+"Barcelona",
+"Real Madrid"
+],
+"1961": [
+"Real Madrid",
+"Atlético Madrid"
+],
+"1962": [
+"Real Madrid",
+"Barcelona"
+],
+"1963": [
+"Real Madrid",
+"Atlético Madrid"
+],
+"1964": [
+"Real Madrid",
+"Barcelona"
+],
+"1965": [
+"Real Madrid",
+"Atlético Madrid"
+],
+"1966": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"1967": [
+"Real Madrid",
+"Barcelona"
+],
+"1968": [
+"Real Madrid",
+"Barcelona"
+],
+"1969": [
+"Real Madrid",
+"Las Palmas"
+],
+"1970": [
+"Atlético Madrid",
+"Athletic Bilbao"
+],
+"1971": [
+"Valencia",
+"Barcelona"
+],
+"1972": [
+"Real Madrid",
+"Valencia"
+],
+"1973": [
+"Atlético Madrid",
+"Barcelona"
+],
+"1974": [
+"Barcelona",
+"Atlético Madrid"
+],
+"1975": [
+"Real Madrid",
+"Zaragoza"
+],
+"1976": [
+"Real Madrid",
+"Barcelona"
+],
+"1977": [
+"Atlético Madrid",
+"Barcelona"
+],
+"1978": [
+"Real Madrid",
+"Barcelona"
+],
+"1979": [
+"Real Madrid",
+"Sporting Gijón"
+],
+"1980": [
+"Real Madrid",
+"Real Sociedad"
+],
+"1981": [
+"Real Sociedad",
+"Real Madrid"
+],
+"1982": [
+"Real Sociedad",
+"Barcelona"
+],
+"1983": [
+"Athletic Bilbao",
+"Real Madrid"
+],
+"1984": [
+"Athletic Bilbao",
+"Real Madrid"
+],
+"1985": [
+"Barcelona",
+"Atlético Madrid"
+],
+"1986": [
+"Real Madrid",
+"Barcelona"
+],
+"1987": [
+"Real Madrid",
+"Barcelona"
+],
+"1988": [
+"Real Madrid",
+"Real Sociedad"
+],
+"1989": [
+"Real Madrid",
+"Barcelona"
+],
+"1990": [
+"Real Madrid",
+"Valencia"
+],
+"1991": [
+"Barcelona",
+"Atlético Madrid"
+],
+"1992": [
+"Barcelona",
+"Real Madrid"
+],
+"1993": [
+"Barcelona",
+"Real Madrid"
+],
+"1994": [
+"Barcelona",
+"Deportivo La Coruña"
+],
+"1995": [
+"Real Madrid",
+"Deportivo La Coruña"
+],
+"1996": [
+"Atlético Madrid",
+"Valencia"
+],
+"1997": [
+"Real Madrid",
+"Barcelona"
+],
+"1998": [
+"Barcelona",
+"Athletic Bilbao"
+],
+"1999": [
+"Barcelona",
+"Real Madrid"
+],
+"2000": [
+"Deportivo La Coruña",
+"Barcelona"
+],
+"2001": [
+"Real Madrid",
+"Deportivo La Coruña"
+],
+"2002": [
+"Valencia",
+"Deportivo La Coruña"
+],
+"2003": [
+"Real Madrid",
+"Real Sociedad"
+],
+"2004": [
+"Valencia",
+"Barcelona"
+],
+"2005": [
+"Barcelona",
+"Real Madrid"
+],
+"2006": [
+"Barcelona",
+"Real Madrid"
+],
+"2007": [
+"Real Madrid",
+"Barcelona"
+],
+"2008": [
+"Real Madrid",
+"Villarreal"
+],
+"2009": [
+"Barcelona",
+"Real Madrid"
+],
+"2010": [
+"Barcelona",
+"Real Madrid"
+],
+"2011": [
+"Barcelona",
+"Real Madrid"
+],
+"2012": [
+"Real Madrid",
+"Barcelona"
+],
+"2013": [
+"Barcelona",
+"Real Madrid"
+],
+"2014": [
+"Atlético Madrid",
+"Barcelona"
+],
+"2015": [
+"Barcelona",
+"Real Madrid"
+],
+"2016": [
+"Barcelona",
+"Real Madrid"
+],
+"2017": [
+"Real Madrid",
+"Barcelona"
+],
+"2018": [
+"Barcelona",
+"Atlético Madrid"
+],
+"2019": [
+"Barcelona",
+"Atlético Madrid"
+],
+"2020": [
+"Real Madrid",
+"Barcelona"
+],
+"2021": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"2022": [
+"Real Madrid",
+"Barcelona"
+],
+"2023": [
+"Barcelona",
+"Real Madrid"
+],
+"2024": [
+"Real Madrid",
+"Barcelona"
+],
+"2025": [
+"Barcelona",
+"Real Madrid"
+]
+},
+"dom": {
+"1950": [
+"Atlético Bilbao",
+"Valladolid"
+],
+"1951": [
+"Barcelona",
+"Real Sociedad"
+],
+"1952": [
+"Barcelona",
+"Valencia"
+],
+"1953": [
+"Barcelona",
+"Atlético Bilbao"
+],
+"1954": [
+"Valencia",
+"Barcelona"
+],
+"1955": [
+"Atlético Bilbao",
+"Sevilla"
+],
+"1956": [
+"Atlético Bilbao",
+"Atlético Madrid"
+],
+"1957": [
+"Barcelona",
+"Español"
+],
+"1958": [
+"Atlético Bilbao",
+"Real Madrid"
+],
+"1959": [
+"Barcelona",
+"Granada"
+],
+"1960": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"1961": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"1962": [
+"Real Madrid",
+"Sevilla"
+],
+"1963": [
+"Barcelona",
+"Zaragoza"
+],
+"1964": [
+"Zaragoza",
+"Atlético Madrid"
+],
+"1965": [
+"Atlético Madrid",
+"Zaragoza"
+],
+"1966": [
+"Zaragoza",
+"Atlético Bilbao"
+],
+"1967": [
+"Valencia",
+"Atlético Bilbao"
+],
+"1968": [
+"Barcelona",
+"Real Madrid"
+],
+"1969": [
+"Atlético Bilbao",
+"Elche"
+],
+"1970": [
+"Real Madrid",
+"Valencia"
+],
+"1971": [
+"Barcelona",
+"Valencia"
+],
+"1972": [
+"Atlético Madrid",
+"Valencia"
+],
+"1973": [
+"Athletic Bilbao",
+"Castellón"
+],
+"1974": [
+"Real Madrid",
+"Barcelona"
+],
+"1975": [
+"Real Madrid",
+"Atlético Madrid"
+],
+"1976": [
+"Atlético Madrid",
+"Zaragoza"
+],
+"1977": [
+"Real Betis",
+"Athletic Bilbao"
+],
+"1978": [
+"Barcelona",
+"Las Palmas"
+],
+"1979": [
+"Valencia",
+"Real Madrid"
+],
+"1980": [
+"Real Madrid",
+"Castilla"
+],
+"1981": [
+"Barcelona",
+"Sporting Gijón"
+],
+"1982": [
+"Real Madrid",
+"Sporting Gijón"
+],
+"1983": [
+"Barcelona",
+"Real Madrid"
+],
+"1984": [
+"Athletic Bilbao",
+"Barcelona"
+],
+"1985": [
+"Atlético Madrid",
+"Athletic Bilbao"
+],
+"1986": [
+"Zaragoza",
+"Barcelona"
+],
+"1987": [
+"Real Sociedad",
+"Atlético Madrid"
+],
+"1988": [
+"Barcelona",
+"Real Sociedad"
+],
+"1989": [
+"Real Madrid",
+"Valladolid"
+],
+"1990": [
+"Barcelona",
+"Real Madrid"
+],
+"1991": [
+"Atlético Madrid",
+"Mallorca"
+],
+"1992": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"1993": [
+"Real Madrid",
+"Zaragoza"
+],
+"1994": [
+"Zaragoza",
+"Celta Vigo"
+],
+"1995": [
+"Deportivo La Coruña",
+"Valencia"
+],
+"1996": [
+"Atlético Madrid",
+"Barcelona"
+],
+"1997": [
+"Barcelona",
+"Real Betis"
+],
+"1998": [
+"Barcelona",
+"Mallorca"
+],
+"1999": [
+"Valencia",
+"Atlético Madrid"
+],
+"2000": [
+"Espanyol",
+"Atlético Madrid"
+],
+"2001": [
+"Zaragoza",
+"Celta Vigo"
+],
+"2002": [
+"Deportivo La Coruña",
+"Real Madrid"
+],
+"2003": [
+"Mallorca",
+"Recreativo"
+],
+"2004": [
+"Zaragoza",
+"Real Madrid"
+],
+"2005": [
+"Real Betis",
+"Osasuna"
+],
+"2006": [
+"Espanyol",
+"Zaragoza"
+],
+"2007": [
+"Sevilla",
+"Getafe"
+],
+"2008": [
+"Valencia",
+"Getafe"
+],
+"2009": [
+"Barcelona #",
+"Athletic Bilbao"
+],
+"2010": [
+"Sevilla",
+"Atlético Madrid"
+],
+"2011": [
+"Real Madrid",
+"Barcelona"
+],
+"2012": [
+"Barcelona",
+"Athletic Bilbao"
+],
+"2013": [
+"Atlético Madrid",
+"Real Madrid"
+],
+"2014": [
+"Real Madrid §",
+"Barcelona"
+],
+"2015": [
+"Barcelona #",
+"Athletic Bilbao"
+],
+"2016": [
+"Barcelona",
+"Sevilla"
+],
+"2017": [
+"Barcelona",
+"Alavés"
+],
+"2018": [
+"Barcelona",
+"Sevilla"
+],
+"2019": [
+"Valencia",
+"Barcelona"
+],
+"2020": [
+"Real Sociedad",
+"Athletic Bilbao"
+],
+"2021": [
+"Barcelona",
+"Athletic Bilbao"
+],
+"2022": [
+"Real Betis",
+"Valencia"
+],
+"2023": [
+"Real Madrid",
+"Osasuna"
+],
+"2024": [
+"Athletic Bilbao",
+"Mallorca"
+],
+"2025": [
+"Barcelona",
+"Real Madrid"
+]
+}
+},
+"ITA": {
+"lig": {
+"1950": [
+"Juventus",
+"Milan"
+],
+"1951": [
+"Milan",
+"Internazionale"
+],
+"1952": [
+"Juventus",
+"Milan"
+],
+"1953": [
+"Internazionale",
+"Juventus"
+],
+"1954": [
+"Internazionale",
+"Juventus"
+],
+"1955": [
+"Milan",
+"Udinese"
+],
+"1956": [
+"Fiorentina",
+"Milan"
+],
+"1957": [
+"Milan",
+"Fiorentina"
+],
+"1958": [
+"Juventus",
+"Fiorentina"
+],
+"1959": [
+"Milan",
+"Fiorentina"
+],
+"1960": [
+"Juventus",
+"Fiorentina"
+],
+"1961": [
+"Juventus",
+"Milan"
+],
+"1962": [
+"Milan",
+"Internazionale"
+],
+"1963": [
+"Internazionale",
+"Juventus"
+],
+"1964": [
+"Bologna",
+"Internazionale"
+],
+"1965": [
+"Internazionale",
+"Milan"
+],
+"1966": [
+"Internazionale",
+"Bologna"
+],
+"1967": [
+"Juventus",
+"Internazionale"
+],
+"1968": [
+"Milan #",
+"Napoli"
+],
+"1969": [
+"Fiorentina",
+"Cagliari"
+],
+"1970": [
+"Cagliari",
+"Internazionale"
+],
+"1971": [
+"Internazionale",
+"Milan"
+],
+"1972": [
+"Juventus"
+],
+"1973": [
+"Juventus",
+"Milan"
+],
+"1974": [
+"Lazio",
+"Juventus"
+],
+"1975": [
+"Juventus",
+"Napoli"
+],
+"1976": [
+"Torino",
+"Juventus"
+],
+"1977": [
+"Juventus",
+"Torino"
+],
+"1978": [
+"Juventus"
+],
+"1979": [
+"Milan",
+"Perugia"
+],
+"1980": [
+"Internazionale",
+"Juventus"
+],
+"1981": [
+"Juventus",
+"Roma"
+],
+"1982": [
+"Juventus",
+"Fiorentina"
+],
+"1983": [
+"Roma",
+"Juventus"
+],
+"1984": [
+"Juventus #",
+"Roma"
+],
+"1985": [
+"Hellas Verona",
+"Torino"
+],
+"1986": [
+"Juventus",
+"Roma"
+],
+"1987": [
+"Napoli",
+"Juventus"
+],
+"1988": [
+"Milan",
+"Napoli"
+],
+"1989": [
+"Internazionale",
+"Napoli"
+],
+"1990": [
+"Napoli",
+"Milan"
+],
+"1991": [
+"Sampdoria",
+"Milan"
+],
+"1992": [
+"Milan",
+"Juventus"
+],
+"1993": [
+"Milan",
+"Internazionale"
+],
+"1994": [
+"Milan",
+"Juventus"
+],
+"1995": [
+"Juventus",
+"Parma"
+],
+"1996": [
+"Milan",
+"Juventus"
+],
+"1997": [
+"Juventus",
+"Parma"
+],
+"1998": [
+"Juventus",
+"Internazionale"
+],
+"1999": [
+"Milan",
+"Lazio"
+],
+"2000": [
+"Lazio",
+"Juventus"
+],
+"2001": [
+"Roma",
+"Juventus"
+],
+"2002": [
+"Juventus",
+"Roma"
+],
+"2003": [
+"Juventus",
+"Internazionale"
+],
+"2004": [
+"Milan",
+"Roma"
+],
+"2005": [
+"Juventus",
+"Milan"
+],
+"2006": [
+"Internazionale",
+"Roma"
+],
+"2007": [
+"Internazionale",
+"Roma"
+],
+"2008": [
+"Internazionale",
+"Roma"
+],
+"2009": [
+"Internazionale",
+"Juventus"
+],
+"2010": [
+"Internazionale",
+"Roma"
+],
+"2011": [
+"Milan",
+"Internazionale"
+],
+"2012": [
+"Juventus",
+"Milan"
+],
+"2013": [
+"Juventus",
+"Napoli"
+],
+"2014": [
+"Juventus",
+"Roma"
+],
+"2015": [
+"Juventus",
+"Roma"
+],
+"2016": [
+"Juventus",
+"Napoli"
+],
+"2017": [
+"Juventus",
+"Roma"
+],
+"2018": [
+"Juventus",
+"Napoli"
+],
+"2019": [
+"Juventus",
+"Napoli"
+],
+"2020": [
+"Juventus",
+"Internazionale"
+],
+"2021": [
+"Internazionale",
+"Milan"
+],
+"2022": [
+"Milan",
+"Internazionale"
+],
+"2023": [
+"Napoli",
+"Lazio"
+],
+"2024": [
+"Internazionale",
+"Milan"
+],
+"2025": [
+"Napoli",
+"Internazionale"
+]
+},
+"dom": {
+"1957": [
+"Not held"
+],
+"1958": [
+"Lazio",
+"Fiorentina"
+],
+"1959": [
+"Juventus",
+"Inter Milan"
+],
+"1960": [
+"Juventus",
+"Fiorentina"
+],
+"1961": [
+"Fiorentina",
+"Lazio"
+],
+"1962": [
+"Napoli",
+"SPAL"
+],
+"1963": [
+"Atalanta",
+"Torino"
+],
+"1964": [
+"Roma"
+],
+"1965": [
+"Juventus",
+"Inter Milan"
+],
+"1966": [
+"Fiorentina",
+"Catanzaro"
+],
+"1967": [
+"AC Milan",
+"Padova"
+],
+"1968": [
+"Torino",
+"AC Milan"
+],
+"1969": [
+"Roma",
+"Cagliari"
+],
+"1970": [
+"Bologna",
+"Torino"
+],
+"1971": [
+"Torino",
+"AC Milan"
+],
+"1972": [
+"AC Milan",
+"Napoli"
+],
+"1973": [
+"AC Milan",
+"Juventus"
+],
+"1974": [
+"Bologna",
+"Palermo"
+],
+"1975": [
+"Fiorentina",
+"AC Milan"
+],
+"1976": [
+"Napoli",
+"Hellas Verona"
+],
+"1977": [
+"AC Milan",
+"Inter Milan"
+],
+"1978": [
+"Inter Milan",
+"Napoli"
+],
+"1979": [
+"Juventus",
+"Palermo"
+],
+"1980": [
+"Roma",
+"Torino"
+],
+"1981": [
+"Roma",
+"Torino"
+],
+"1982": [
+"Inter Milan",
+"Torino"
+],
+"1983": [
+"Juventus",
+"Hellas Verona"
+],
+"1984": [
+"Roma",
+"Hellas Verona"
+],
+"1985": [
+"Sampdoria",
+"AC Milan"
+],
+"1986": [
+"Roma",
+"Sampdoria"
+],
+"1987": [
+"Napoli",
+"Atalanta"
+],
+"1988": [
+"Sampdoria",
+"Torino"
+],
+"1989": [
+"Sampdoria",
+"Napoli"
+],
+"1990": [
+"Juventus",
+"AC Milan"
+],
+"1991": [
+"Roma",
+"Sampdoria"
+],
+"1992": [
+"Parma",
+"Juventus"
+],
+"1993": [
+"Torino",
+"Roma"
+],
+"1994": [
+"Sampdoria",
+"Ancona"
+],
+"1995": [
+"Juventus",
+"Parma"
+],
+"1996": [
+"Fiorentina",
+"Atalanta"
+],
+"1997": [
+"Vicenza",
+"Napoli"
+],
+"1998": [
+"Lazio",
+"AC Milan"
+],
+"1999": [
+"Parma",
+"Fiorentina"
+],
+"2000": [
+"Lazio",
+"Inter Milan"
+],
+"2001": [
+"Fiorentina",
+"Parma"
+],
+"2002": [
+"Parma",
+"Juventus"
+],
+"2003": [
+"AC Milan",
+"Roma"
+],
+"2004": [
+"Lazio",
+"Juventus"
+],
+"2005": [
+"Inter Milan",
+"Roma"
+],
+"2006": [
+"Inter Milan",
+"Roma"
+],
+"2007": [
+"Roma",
+"Inter Milan"
+],
+"2008": [
+"Roma",
+"Inter Milan"
+],
+"2009": [
+"Lazio",
+"Sampdoria"
+],
+"2010": [
+"Inter Milan #",
+"Roma"
+],
+"2011": [
+"Inter Milan",
+"Palermo"
+],
+"2012": [
+"Napoli",
+"Juventus"
+],
+"2013": [
+"Lazio",
+"Roma"
+],
+"2014": [
+"Napoli",
+"Fiorentina"
+],
+"2015": [
+"Juventus",
+"Lazio"
+],
+"2016": [
+"Juventus",
+"AC Milan"
+],
+"2017": [
+"Juventus",
+"Lazio"
+],
+"2018": [
+"Juventus",
+"AC Milan"
+],
+"2019": [
+"Lazio",
+"Atalanta"
+],
+"2020": [
+"Napoli",
+"Juventus"
+],
+"2021": [
+"Juventus",
+"Atalanta"
+],
+"2022": [
+"Inter Milan",
+"Juventus"
+],
+"2023": [
+"Inter Milan",
+"Fiorentina"
+],
+"2024": [
+"Juventus",
+"Atalanta"
+],
+"2025": [
+"Bologna",
+"AC Milan"
+]
+}
+},
+"GER": {
+"lig": {
+"1964": [
+"1. FC Köln",
+"Meidericher SV"
+],
+"1965": [
+"Werder Bremen"
+],
+"1966": [
+"TSV 1860 Munich",
+"Borussia Dortmund"
+],
+"1967": [
+"Eintracht Braunschweig"
+],
+"1968": [
+"1. FC Nürnberg",
+"Werder Bremen"
+],
+"1969": [
+"Bayern Munich",
+"Alemannia Aachen"
+],
+"1970": [
+"Borussia Mönchengladbach",
+"Bayern Munich"
+],
+"1971": [
+"Borussia Mönchengladbach",
+"Bayern Munich"
+],
+"1972": [
+"Bayern Munich"
+],
+"1973": [
+"Bayern Munich"
+],
+"1974": [
+"Bayern Munich",
+"Borussia Mönchengladbach"
+],
+"1975": [
+"Borussia Mönchengladbach",
+"Hertha BSC"
+],
+"1976": [
+"Borussia Mönchengladbach",
+"Hamburger SV"
+],
+"1977": [
+"Borussia Mönchengladbach"
+],
+"1978": [
+"1. FC Köln",
+"Borussia Mönchengladbach"
+],
+"1979": [
+"Hamburger SV",
+"VfB Stuttgart"
+],
+"1980": [
+"Bayern Munich",
+"Hamburger SV"
+],
+"1981": [
+"Bayern Munich",
+"Hamburger SV"
+],
+"1982": [
+"Hamburger SV"
+],
+"1983": [
+"Hamburger SV",
+"Werder Bremen"
+],
+"1984": [
+"VfB Stuttgart",
+"Hamburger SV"
+],
+"1985": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"1986": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"1987": [
+"Bayern Munich",
+"Hamburger SV"
+],
+"1988": [
+"Werder Bremen",
+"Bayern Munich"
+],
+"1989": [
+"Bayern Munich"
+],
+"1990": [
+"Bayern Munich"
+],
+"1991": [
+"1. FC Kaiserslautern",
+"Bayern Munich"
+],
+"1992": [
+"VfB Stuttgart",
+"Borussia Dortmund"
+],
+"1993": [
+"Werder Bremen",
+"Bayern Munich"
+],
+"1994": [
+"Bayern Munich"
+],
+"1995": [
+"Borussia Dortmund",
+"Werder Bremen"
+],
+"1996": [
+"Borussia Dortmund",
+"Bayern Munich"
+],
+"1997": [
+"Bayern Munich",
+"Bayer Leverkusen"
+],
+"1998": [
+"1. FC Kaiserslautern",
+"Bayern Munich"
+],
+"1999": [
+"Bayern Munich",
+"Bayer Leverkusen"
+],
+"2000": [
+"Bayern Munich",
+"Bayer Leverkusen"
+],
+"2001": [
+"Bayern Munich"
+],
+"2002": [
+"Borussia Dortmund",
+"Bayer Leverkusen"
+],
+"2003": [
+"Bayern Munich",
+"VfB Stuttgart"
+],
+"2004": [
+"Werder Bremen",
+"Bayern Munich"
+],
+"2005": [
+"Bayern Munich"
+],
+"2006": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"2007": [
+"VfB Stuttgart"
+],
+"2008": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"2009": [
+"VfL Wolfsburg",
+"Bayern Munich"
+],
+"2010": [
+"Bayern Munich"
+],
+"2011": [
+"Borussia Dortmund",
+"Bayer Leverkusen"
+],
+"2012": [
+"Borussia Dortmund",
+"Bayern Munich"
+],
+"2013": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2014": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2015": [
+"Bayern Munich",
+"VfL Wolfsburg"
+],
+"2016": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2017": [
+"Bayern Munich",
+"RB Leipzig"
+],
+"2018": [
+"Bayern Munich"
+],
+"2019": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2020": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2021": [
+"Bayern Munich",
+"RB Leipzig"
+],
+"2022": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2023": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2024": [
+"Bayer Leverkusen",
+"VfB Stuttgart"
+],
+"2025": [
+"Bayern Munich",
+"Bayer Leverkusen"
+]
+},
+"dom": {
+"1953": [
+"Rot-Weiss Essen",
+"Alemannia Aachen"
+],
+"1954": [
+"VfB Stuttgart"
+],
+"1955": [
+"Karlsruher SC"
+],
+"1956": [
+"Karlsruher SC",
+"Hamburger SV"
+],
+"1957": [
+"Bayern Munich",
+"Fortuna Düsseldorf"
+],
+"1958": [
+"VfB Stuttgart",
+"Fortuna Düsseldorf"
+],
+"1959": [
+"Schwarz-Weiß Essen",
+"Borussia Neunkirchen"
+],
+"1960": [
+"Borussia Mönchengladbach",
+"Karlsruher SC"
+],
+"1961": [
+"Werder Bremen"
+],
+"1962": [
+"1. FC Nürnberg",
+"Fortuna Düsseldorf"
+],
+"1963": [
+"Hamburger SV",
+"Borussia Dortmund"
+],
+"1964": [
+"1860 Munich",
+"Eintracht Frankfurt"
+],
+"1965": [
+"Borussia Dortmund",
+"Alemannia Aachen"
+],
+"1966": [
+"Bayern Munich",
+"Meidericher SV"
+],
+"1967": [
+"Bayern Munich",
+"Hamburger SV"
+],
+"1968": [
+"1. FC Köln",
+"VfL Bochum"
+],
+"1969": [
+"Bayern Munich"
+],
+"1970": [
+"Kickers Offenbach"
+],
+"1971": [
+"Bayern Munich"
+],
+"1972": [
+"Schalke 04"
+],
+"1973": [
+"Borussia Mönchengladbach"
+],
+"1974": [
+"Eintracht Frankfurt",
+"Hamburger SV"
+],
+"1975": [
+"Eintracht Frankfurt",
+"MSV Duisburg"
+],
+"1976": [
+"Hamburger SV"
+],
+"1977": [
+"1. FC Köln",
+"Hertha BSC"
+],
+"1978": [
+"1. FC Köln",
+"Fortuna Düsseldorf"
+],
+"1979": [
+"Fortuna Düsseldorf",
+"Hertha BSC"
+],
+"1980": [
+"Fortuna Düsseldorf"
+],
+"1981": [
+"Eintracht Frankfurt"
+],
+"1982": [
+"Bayern Munich"
+],
+"1983": [
+"1. FC Köln",
+"Fortuna Köln"
+],
+"1984": [
+"Bayern Munich",
+"Borussia Mönchengladbach"
+],
+"1985": [
+"Bayer Uerdingen",
+"Bayern Munich"
+],
+"1986": [
+"Bayern Munich",
+"VfB Stuttgart"
+],
+"1987": [
+"Hamburger SV",
+"Stuttgarter Kickers"
+],
+"1988": [
+"Eintracht Frankfurt",
+"VfL Bochum"
+],
+"1989": [
+"Borussia Dortmund",
+"Werder Bremen"
+],
+"1990": [
+"1. FC Kaiserslautern",
+"Werder Bremen"
+],
+"1991": [
+"Werder Bremen"
+],
+"1992": [
+"Hannover 96",
+"Borussia Mönchengladbach"
+],
+"1993": [
+"Bayer Leverkusen",
+"Hertha BSC Amateure"
+],
+"1994": [
+"Werder Bremen",
+"Rot-Weiss Essen"
+],
+"1995": [
+"Borussia Mönchengladbach",
+"VfL Wolfsburg"
+],
+"1996": [
+"1. FC Kaiserslautern",
+"Karlsruher SC"
+],
+"1997": [
+"VfB Stuttgart",
+"Energie Cottbus"
+],
+"1998": [
+"Bayern Munich",
+"MSV Duisburg"
+],
+"1999": [
+"Werder Bremen",
+"Bayern Munich"
+],
+"2000": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"2001": [
+"Schalke 04",
+"Union Berlin"
+],
+"2002": [
+"Schalke 04",
+"Bayer Leverkusen"
+],
+"2003": [
+"Bayern Munich"
+],
+"2004": [
+"Werder Bremen",
+"Alemannia Aachen"
+],
+"2005": [
+"Bayern Munich"
+],
+"2006": [
+"Bayern Munich",
+"Eintracht Frankfurt"
+],
+"2007": [
+"1. FC Nürnberg",
+"VfB Stuttgart"
+],
+"2008": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2009": [
+"Werder Bremen",
+"Bayer Leverkusen"
+],
+"2010": [
+"Bayern Munich",
+"Werder Bremen"
+],
+"2011": [
+"Schalke 04",
+"MSV Duisburg"
+],
+"2012": [
+"Borussia Dortmund",
+"Bayern Munich"
+],
+"2013": [
+"Bayern Munich",
+"VfB Stuttgart"
+],
+"2014": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2015": [
+"VfL Wolfsburg",
+"Borussia Dortmund"
+],
+"2016": [
+"Bayern Munich",
+"Borussia Dortmund"
+],
+"2017": [
+"Borussia Dortmund",
+"Eintracht Frankfurt"
+],
+"2018": [
+"Eintracht Frankfurt",
+"Bayern Munich"
+],
+"2019": [
+"Bayern Munich",
+"RB Leipzig"
+],
+"2020": [
+"Bayern Munich",
+"Bayer Leverkusen"
+],
+"2021": [
+"Borussia Dortmund",
+"RB Leipzig"
+],
+"2022": [
+"RB Leipzig",
+"SC Freiburg"
+],
+"2023": [
+"RB Leipzig",
+"Eintracht Frankfurt"
+],
+"2024": [
+"Bayer Leverkusen"
+],
+"2025": [
+"VfB Stuttgart",
+"Arminia Bielefeld"
+]
+}
+},
+"FRA": {
+"lig": {
+"1950": [
+"Bordeaux",
+"Lille"
+],
+"1951": [
+"Nice",
+"Lille"
+],
+"1952": [
+"Nice",
+"Bordeaux"
+],
+"1953": [
+"Reims",
+"Sochaux"
+],
+"1954": [
+"Lille",
+"Reims"
+],
+"1955": [
+"Reims",
+"Toulouse"
+],
+"1956": [
+"Nice",
+"Lens"
+],
+"1957": [
+"Saint-Étienne",
+"Lens"
+],
+"1958": [
+"Reims",
+"Nîmes"
+],
+"1959": [
+"Nice",
+"Nîmes"
+],
+"1960": [
+"Reims",
+"Nîmes"
+],
+"1961": [
+"Monaco",
+"RC Paris"
+],
+"1962": [
+"Reims",
+"RC Paris"
+],
+"1963": [
+"Monaco",
+"Reims"
+],
+"1964": [
+"Saint-Étienne",
+"Monaco"
+],
+"1965": [
+"Nantes",
+"Bordeaux"
+],
+"1966": [
+"Nantes",
+"Bordeaux"
+],
+"1967": [
+"Saint-Étienne",
+"Nantes"
+],
+"1968": [
+"Saint-Étienne",
+"Nice"
+],
+"1969": [
+"Saint-Étienne",
+"Bordeaux"
+],
+"1970": [
+"Saint-Étienne",
+"Marseille"
+],
+"1971": [
+"Marseille",
+"Saint-Étienne"
+],
+"1972": [
+"Marseille",
+"Nîmes"
+],
+"1973": [
+"Nantes",
+"Nice"
+],
+"1974": [
+"Saint-Étienne",
+"Nantes"
+],
+"1975": [
+"Saint-Étienne",
+"Marseille"
+],
+"1976": [
+"Saint-Étienne",
+"Nice"
+],
+"1977": [
+"Nantes",
+"Lens"
+],
+"1978": [
+"Monaco",
+"Nantes"
+],
+"1979": [
+"Strasbourg",
+"Nantes"
+],
+"1980": [
+"Nantes",
+"Sochaux"
+],
+"1981": [
+"Saint-Étienne",
+"Nantes"
+],
+"1982": [
+"Monaco",
+"Saint-Étienne"
+],
+"1983": [
+"Nantes",
+"Bordeaux"
+],
+"1984": [
+"Bordeaux",
+"Monaco"
+],
+"1985": [
+"Bordeaux",
+"Nantes"
+],
+"1986": [
+"Paris Saint-Germain",
+"Nantes"
+],
+"1987": [
+"Bordeaux",
+"Marseille"
+],
+"1988": [
+"Monaco",
+"Bordeaux"
+],
+"1989": [
+"Marseille",
+"Paris Saint-Germain"
+],
+"1990": [
+"Marseille",
+"Bordeaux"
+],
+"1991": [
+"Marseille",
+"Monaco"
+],
+"1992": [
+"Marseille",
+"Monaco"
+],
+"1993": [
+"—",
+"Paris Saint-Germain"
+],
+"1994": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"1995": [
+"Nantes",
+"Lyon"
+],
+"1996": [
+"Auxerre",
+"Paris Saint-Germain"
+],
+"1997": [
+"Monaco",
+"Paris Saint-Germain"
+],
+"1998": [
+"Lens",
+"Metz"
+],
+"1999": [
+"Bordeaux",
+"Marseille"
+],
+"2000": [
+"Monaco",
+"Paris Saint-Germain"
+],
+"2001": [
+"Nantes",
+"Lyon"
+],
+"2002": [
+"Lyon",
+"Lens"
+],
+"2003": [
+"Lyon",
+"Monaco"
+],
+"2004": [
+"Lyon",
+"Paris Saint-Germain"
+],
+"2005": [
+"Lyon",
+"Lille"
+],
+"2006": [
+"Lyon",
+"Bordeaux"
+],
+"2007": [
+"Lyon",
+"Marseille"
+],
+"2008": [
+"Lyon",
+"Bordeaux"
+],
+"2009": [
+"Bordeaux",
+"Marseille"
+],
+"2010": [
+"Marseille",
+"Lyon"
+],
+"2011": [
+"Lille",
+"Marseille"
+],
+"2012": [
+"Montpellier",
+"Paris Saint-Germain"
+],
+"2013": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"2014": [
+"Paris Saint-Germain",
+"Monaco"
+],
+"2015": [
+"Paris Saint-Germain",
+"Lyon"
+],
+"2016": [
+"Paris Saint-Germain",
+"Lyon"
+],
+"2017": [
+"Monaco",
+"Paris Saint-Germain"
+],
+"2018": [
+"Paris Saint-Germain",
+"Monaco"
+],
+"2019": [
+"Paris Saint-Germain",
+"Lille"
+],
+"2020": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"2021": [
+"Lille",
+"Paris Saint-Germain"
+],
+"2022": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"2023": [
+"Paris Saint-Germain",
+"Lens"
+],
+"2024": [
+"Paris Saint-Germain",
+"Monaco"
+],
+"2025": [
+"Paris Saint-Germain",
+"Marseille"
+]
+},
+"dom": {
+"1950": [
+"Reims",
+"RC Paris"
+],
+"1951": [
+"Strasbourg",
+"Valenciennes"
+],
+"1952": [
+"Nice",
+"Bordeaux"
+],
+"1953": [
+"Lille",
+"FC Nancy"
+],
+"1954": [
+"Nice",
+"Marseille"
+],
+"1955": [
+"Lille",
+"Bordeaux"
+],
+"1956": [
+"CS Sedan",
+"AS Troyes-Savinienne"
+],
+"1957": [
+"Toulouse",
+"Angers"
+],
+"1958": [
+"Reims",
+"Nîmes"
+],
+"1959": [
+"Le Havre",
+"Sochaux"
+],
+"1960": [
+"Monaco",
+"Saint-Étienne"
+],
+"1961": [
+"CS Sedan",
+"Nîmes"
+],
+"1962": [
+"Saint-Étienne",
+"FC Nancy"
+],
+"1963": [
+"Monaco",
+"Lyon"
+],
+"1964": [
+"Lyon",
+"Bordeaux"
+],
+"1965": [
+"Rennes",
+"CS Sedan"
+],
+"1966": [
+"Strasbourg",
+"Nantes"
+],
+"1967": [
+"Lyon",
+"Sochaux"
+],
+"1968": [
+"Saint-Étienne",
+"Bordeaux"
+],
+"1969": [
+"Marseille",
+"Bordeaux"
+],
+"1970": [
+"Saint-Étienne",
+"Nantes"
+],
+"1971": [
+"Rennes",
+"Lyon"
+],
+"1972": [
+"Marseille",
+"Bastia"
+],
+"1973": [
+"Lyon",
+"Nantes"
+],
+"1974": [
+"Saint-Étienne",
+"Monaco"
+],
+"1975": [
+"Saint-Étienne",
+"Lens"
+],
+"1976": [
+"Marseille",
+"Lyon"
+],
+"1977": [
+"Saint-Étienne",
+"Reims"
+],
+"1978": [
+"Nancy",
+"Nice"
+],
+"1979": [
+"Nantes",
+"Auxerre"
+],
+"1980": [
+"Monaco",
+"Orléans"
+],
+"1981": [
+"Bastia",
+"Saint-Étienne"
+],
+"1982": [
+"Paris Saint-Germain",
+"Saint-Étienne"
+],
+"1983": [
+"Paris Saint-Germain",
+"Nantes"
+],
+"1984": [
+"Metz",
+"Monaco"
+],
+"1985": [
+"Monaco",
+"Paris Saint-Germain"
+],
+"1986": [
+"Bordeaux",
+"Marseille"
+],
+"1987": [
+"Bordeaux",
+"Marseille"
+],
+"1988": [
+"Metz",
+"Sochaux"
+],
+"1989": [
+"Marseille",
+"Monaco"
+],
+"1990": [
+"Montpellier",
+"RC Paris"
+],
+"1991": [
+"Monaco",
+"Marseille"
+],
+"1992": [
+"6,343"
+],
+"1993": [
+"Paris Saint-Germain",
+"Nantes"
+],
+"1994": [
+"Auxerre",
+"Montpellier"
+],
+"1995": [
+"Paris Saint-Germain",
+"Strasbourg"
+],
+"1996": [
+"Auxerre",
+"Nîmes"
+],
+"1997": [
+"Nice",
+"Guingamp"
+],
+"1998": [
+"Paris Saint-Germain",
+"Lens"
+],
+"1999": [
+"Nantes",
+"Sedan"
+],
+"2000": [
+"Nantes",
+"Calais RUFC"
+],
+"2001": [
+"Strasbourg",
+"Amiens"
+],
+"2002": [
+"Lorient",
+"Bastia"
+],
+"2003": [
+"Auxerre",
+"Paris Saint-Germain"
+],
+"2004": [
+"Paris Saint-Germain",
+"LB Châteauroux"
+],
+"2005": [
+"Auxerre",
+"CS Sedan"
+],
+"2006": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"2007": [
+"Sochaux",
+"Marseille"
+],
+"2008": [
+"Lyon",
+"Paris Saint-Germain"
+],
+"2009": [
+"Guingamp",
+"Rennes"
+],
+"2010": [
+"Paris Saint-Germain",
+"Monaco"
+],
+"2011": [
+"Lille",
+"Paris Saint-Germain"
+],
+"2012": [
+"Lyon",
+"US Quevilly"
+],
+"2013": [
+"Bordeaux",
+"Evian"
+],
+"2014": [
+"Guingamp",
+"Rennes"
+],
+"2015": [
+"Paris Saint-Germain",
+"Auxerre"
+],
+"2016": [
+"Paris Saint-Germain",
+"Marseille"
+],
+"2017": [
+"Paris Saint-Germain",
+"Angers"
+],
+"2018": [
+"Paris Saint-Germain",
+"Les Herbiers"
+],
+"2019": [
+"Rennes",
+"Paris Saint-Germain"
+],
+"2020": [
+"Paris Saint-Germain",
+"Saint-Étienne"
+],
+"2021": [
+"Paris Saint-Germain",
+"Monaco"
+],
+"2022": [
+"Nantes",
+"Nice"
+],
+"2023": [
+"Toulouse",
+"Nantes"
+],
+"2024": [
+"Paris Saint-Germain",
+"Lyon"
+],
+"2025": [
+"Paris Saint-Germain",
+"Reims"
+]
+}
+},
+"POR": {
+"lig": {
+"1950": [
+"Benfica",
+"Sporting CP"
+],
+"1951": [
+"Sporting CP",
+"Porto"
+],
+"1952": [
+"Sporting CP",
+"Benfica"
+],
+"1953": [
+"Sporting CP",
+"Benfica"
+],
+"1954": [
+"Sporting CP",
+"Porto"
+],
+"1955": [
+"Benfica",
+"Belenenses"
+],
+"1956": [
+"Porto",
+"Benfica"
+],
+"1957": [
+"Benfica",
+"Porto"
+],
+"1958": [
+"Sporting CP",
+"Porto"
+],
+"1959": [
+"Porto",
+"Benfica"
+],
+"1960": [
+"Benfica",
+"Sporting CP"
+],
+"1961": [
+"Benfica",
+"Sporting CP"
+],
+"1962": [
+"Sporting CP",
+"Porto"
+],
+"1963": [
+"Benfica",
+"Porto"
+],
+"1964": [
+"Benfica",
+"Porto"
+],
+"1965": [
+"Benfica",
+"Porto"
+],
+"1966": [
+"Sporting CP",
+"Benfica"
+],
+"1967": [
+"Benfica",
+"Académica de Coimbra"
+],
+"1968": [
+"Benfica",
+"Sporting CP"
+],
+"1969": [
+"Benfica",
+"Porto"
+],
+"1970": [
+"Sporting CP",
+"Benfica"
+],
+"1971": [
+"Benfica",
+"Sporting CP"
+],
+"1972": [
+"Benfica",
+"Vitória de Setúbal"
+],
+"1973": [
+"Benfica",
+"Belenenses"
+],
+"1974": [
+"Sporting CP",
+"Benfica"
+],
+"1975": [
+"Benfica",
+"Porto"
+],
+"1976": [
+"Benfica",
+"Boavista"
+],
+"1977": [
+"Benfica",
+"Sporting CP"
+],
+"1978": [
+"Porto",
+"Benfica"
+],
+"1979": [
+"Porto",
+"Benfica"
+],
+"1980": [
+"Sporting CP",
+"Porto"
+],
+"1981": [
+"Benfica",
+"Porto"
+],
+"1982": [
+"Sporting CP",
+"Benfica"
+],
+"1983": [
+"Benfica",
+"Porto"
+],
+"1984": [
+"Benfica",
+"Porto"
+],
+"1985": [
+"Porto",
+"Sporting CP"
+],
+"1986": [
+"Porto",
+"Benfica"
+],
+"1987": [
+"Benfica",
+"Porto"
+],
+"1988": [
+"Porto",
+"Benfica"
+],
+"1989": [
+"Benfica",
+"Porto"
+],
+"1990": [
+"Porto",
+"Benfica"
+],
+"1991": [
+"Benfica",
+"Porto"
+],
+"1992": [
+"Porto",
+"Benfica"
+],
+"1993": [
+"Porto",
+"Benfica"
+],
+"1994": [
+"Benfica",
+"Porto"
+],
+"1995": [
+"Porto",
+"Sporting CP"
+],
+"1996": [
+"Porto",
+"Benfica"
+],
+"1997": [
+"Porto",
+"Sporting CP"
+],
+"1998": [
+"Porto",
+"Benfica"
+],
+"1999": [
+"Porto",
+"Boavista"
+],
+"2000": [
+"Sporting CP",
+"Porto"
+],
+"2001": [
+"Boavista",
+"Porto"
+],
+"2002": [
+"Sporting CP",
+"Boavista"
+],
+"2003": [
+"Porto",
+"Benfica"
+],
+"2004": [
+"Porto",
+"Benfica"
+],
+"2005": [
+"Benfica",
+"Porto"
+],
+"2006": [
+"Porto",
+"Sporting CP"
+],
+"2007": [
+"Porto",
+"Sporting CP"
+],
+"2008": [
+"Porto",
+"Sporting CP"
+],
+"2009": [
+"Porto",
+"Sporting CP"
+],
+"2010": [
+"Benfica",
+"Braga"
+],
+"2011": [
+"Porto",
+"Benfica"
+],
+"2012": [
+"Porto",
+"Benfica"
+],
+"2013": [
+"Porto",
+"Benfica"
+],
+"2014": [
+"Benfica",
+"Sporting CP"
+],
+"2015": [
+"Benfica",
+"Porto"
+],
+"2016": [
+"Benfica",
+"Sporting CP"
+],
+"2017": [
+"Benfica",
+"Porto"
+],
+"2018": [
+"Porto",
+"Benfica"
+],
+"2019": [
+"Benfica",
+"Porto"
+],
+"2020": [
+"Porto",
+"Benfica"
+],
+"2021": [
+"Sporting CP",
+"Porto"
+],
+"2022": [
+"Porto",
+"Sporting CP"
+],
+"2023": [
+"Benfica",
+"Porto"
+],
+"2024": [
+"Sporting CP",
+"Benfica"
+],
+"2025": [
+"Sporting CP",
+"Benfica"
+]
+},
+"dom": {
+"1951": [
+"Benfica",
+"Académica"
+],
+"1952": [
+"Benfica",
+"Sporting CP"
+],
+"1953": [
+"Benfica",
+"Porto"
+],
+"1954": [
+"Sporting CP",
+"Vitória de Setúbal"
+],
+"1955": [
+"Benfica",
+"Sporting CP"
+],
+"1956": [
+"Porto",
+"Torreense"
+],
+"1957": [
+"Benfica",
+"Sporting da Covilhã"
+],
+"1958": [
+"Porto",
+"Benfica"
+],
+"1959": [
+"Benfica",
+"Porto"
+],
+"1960": [
+"Belenenses",
+"Sporting CP"
+],
+"1961": [
+"Leixões",
+"Porto"
+],
+"1962": [
+"Benfica",
+"Vitória de Setúbal"
+],
+"1963": [
+"Sporting CP",
+"Vitória de Guimarães"
+],
+"1964": [
+"Benfica",
+"Porto"
+],
+"1965": [
+"Vitória de Setúbal",
+"Benfica"
+],
+"1966": [
+"Braga",
+"Vitória de Setúbal"
+],
+"1967": [
+"Vitória de Setúbal",
+"Académica"
+],
+"1968": [
+"Porto",
+"Vitória de Setúbal"
+],
+"1969": [
+"Benfica",
+"Académica"
+],
+"1970": [
+"Benfica",
+"Sporting CP"
+],
+"1971": [
+"Sporting CP",
+"Benfica"
+],
+"1972": [
+"Benfica",
+"Sporting CP"
+],
+"1973": [
+"Sporting CP",
+"Vitória de Setúbal"
+],
+"1974": [
+"Sporting CP",
+"Benfica"
+],
+"1975": [
+"Boavista",
+"Benfica"
+],
+"1976": [
+"Boavista",
+"Vitória de Guimarães"
+],
+"1977": [
+"Porto",
+"Braga"
+],
+"1978": [
+"Sporting CP",
+"Porto"
+],
+"1979": [
+"Boavista",
+"Sporting CP"
+],
+"1980": [
+"Benfica",
+"Porto"
+],
+"1981": [
+"Benfica",
+"Porto"
+],
+"1982": [
+"Sporting CP",
+"Braga"
+],
+"1983": [
+"Benfica",
+"Porto"
+],
+"1984": [
+"Porto",
+"Rio Ave"
+],
+"1985": [
+"Benfica",
+"Porto"
+],
+"1986": [
+"Benfica",
+"Belenenses"
+],
+"1987": [
+"Benfica",
+"Sporting CP"
+],
+"1988": [
+"Porto",
+"Vitória de Guimarães"
+],
+"1989": [
+"Belenenses",
+"Benfica"
+],
+"1990": [
+"Estrela da Amadora",
+"Farense"
+],
+"1991": [
+"Porto",
+"Beira-Mar"
+],
+"1992": [
+"Boavista",
+"Porto"
+],
+"1993": [
+"Benfica",
+"Boavista"
+],
+"1994": [
+"Porto",
+"Sporting CP"
+],
+"1995": [
+"Sporting CP",
+"Marítimo"
+],
+"1996": [
+"Benfica",
+"Sporting CP"
+],
+"1997": [
+"Boavista",
+"Benfica"
+],
+"1998": [
+"Porto",
+"Braga"
+],
+"1999": [
+"Beira-Mar",
+"Campomaiorense"
+],
+"2000": [
+"Porto",
+"Sporting CP"
+],
+"2001": [
+"Porto",
+"Marítimo"
+],
+"2002": [
+"Sporting CP",
+"Leixões"
+],
+"2003": [
+"Porto",
+"União de Leiria"
+],
+"2004": [
+"Benfica",
+"Porto"
+],
+"2005": [
+"Vitória de Setúbal",
+"Benfica"
+],
+"2006": [
+"Porto",
+"Vitória de Setúbal"
+],
+"2007": [
+"Sporting CP",
+"Belenenses"
+],
+"2008": [
+"Sporting CP",
+"Porto"
+],
+"2009": [
+"Porto",
+"Paços de Ferreira"
+],
+"2010": [
+"Porto",
+"Chaves"
+],
+"2011": [
+"Porto",
+"Vitória de Guimarães"
+],
+"2012": [
+"Académica",
+"Sporting CP"
+],
+"2013": [
+"Vitória de Guimarães",
+"Benfica"
+],
+"2014": [
+"Benfica",
+"Rio Ave"
+],
+"2015": [
+"Sporting CP",
+"Braga"
+],
+"2016": [
+"Braga",
+"Porto"
+],
+"2017": [
+"Benfica",
+"Vitória de Guimarães"
+],
+"2018": [
+"Desportivo das Aves",
+"Sporting CP"
+],
+"2019": [
+"Sporting CP",
+"Porto"
+],
+"2020": [
+"Porto",
+"Benfica"
+],
+"2021": [
+"Braga",
+"Benfica"
+],
+"2022": [
+"Porto",
+"Tondela"
+],
+"2023": [
+"Porto",
+"Braga"
+],
+"2024": [
+"Porto",
+"Sporting CP"
+],
+"2025": [
+"Sporting CP",
+"Benfica"
+]
+}
+},
+"NED": {
+"lig": {
+"1950": [
+"Limburgia"
+],
+"1951": [
+"PSV"
+],
+"1952": [
+"Willem II"
+],
+"1953": [
+"RCH"
+],
+"1954": [
+"FC Eindhoven"
+],
+"1955": [
+"Willem II"
+],
+"1956": [
+"Rapid JC"
+],
+"1957": [
+"Ajax"
+],
+"1958": [
+"D.O.S."
+],
+"1959": [
+"Sparta"
+],
+"1960": [
+"Ajax"
+],
+"1961": [
+"Feyenoord"
+],
+"1962": [
+"Feyenoord"
+],
+"1963": [
+"PSV"
+],
+"1964": [
+"DWS"
+],
+"1965": [
+"Feyenoord"
+],
+"1966": [
+"Ajax"
+],
+"1967": [
+"Ajax"
+],
+"1968": [
+"Ajax"
+],
+"1969": [
+"Feyenoord"
+],
+"1970": [
+"Ajax"
+],
+"1971": [
+"Feyenoord"
+],
+"1972": [
+"Ajax"
+],
+"1973": [
+"Ajax"
+],
+"1974": [
+"Feyenoord"
+],
+"1975": [
+"PSV"
+],
+"1976": [
+"PSV"
+],
+"1977": [
+"Ajax"
+],
+"1978": [
+"PSV"
+],
+"1979": [
+"Ajax"
+],
+"1980": [
+"Ajax"
+],
+"1981": [
+"AZ '67"
+],
+"1982": [
+"Ajax"
+],
+"1983": [
+"Ajax"
+],
+"1984": [
+"Feyenoord"
+],
+"1985": [
+"Ajax"
+],
+"1986": [
+"PSV"
+],
+"1987": [
+"PSV"
+],
+"1988": [
+"PSV"
+],
+"1989": [
+"PSV"
+],
+"1990": [
+"Ajax"
+],
+"1991": [
+"PSV"
+],
+"1992": [
+"PSV"
+],
+"1993": [
+"Feyenoord"
+],
+"1994": [
+"Ajax"
+],
+"1995": [
+"Ajax"
+],
+"1996": [
+"Ajax"
+],
+"1997": [
+"PSV"
+],
+"1998": [
+"Ajax"
+],
+"1999": [
+"Feyenoord"
+],
+"2000": [
+"PSV"
+],
+"2001": [
+"PSV"
+],
+"2002": [
+"Ajax"
+],
+"2003": [
+"PSV"
+],
+"2004": [
+"Ajax"
+],
+"2005": [
+"PSV"
+],
+"2006": [
+"PSV"
+],
+"2007": [
+"PSV"
+],
+"2008": [
+"PSV"
+],
+"2009": [
+"AZ"
+],
+"2010": [
+"Twente"
+],
+"2011": [
+"Ajax"
+],
+"2012": [
+"Ajax"
+],
+"2013": [
+"Ajax"
+],
+"2014": [
+"Ajax"
+],
+"2015": [
+"PSV"
+],
+"2016": [
+"PSV"
+],
+"2017": [
+"Feyenoord"
+],
+"2018": [
+"PSV"
+],
+"2019": [
+"Ajax"
+],
+"2020": [
+"Competition abandoned due to the COVID-19 pandemic"
+],
+"2021": [
+"Ajax"
+],
+"2022": [
+"Ajax"
+],
+"2023": [
+"Feyenoord"
+],
+"2024": [
+"PSV"
+],
+"2025": [
+"PSV"
+]
+},
+"dom": {
+"1950": [
+"PSV"
+],
+"1951": [
+"Not played"
+],
+"1957": [
+"Fortuna'54"
+],
+"1958": [
+"Sparta"
+],
+"1959": [
+"Venlo"
+],
+"1960": [
+"Not played"
+],
+"1961": [
+"Ajax"
+],
+"1962": [
+"Sparta"
+],
+"1963": [
+"Willem II"
+],
+"1964": [
+"Fortuna'54",
+"ADO"
+],
+"1965": [
+"Feijenoord"
+],
+"1966": [
+"Sparta"
+],
+"1967": [
+"Ajax"
+],
+"1968": [
+"ADO"
+],
+"1969": [
+"Feijenoord"
+],
+"1970": [
+"Ajax"
+],
+"1971": [
+"Ajax"
+],
+"1972": [
+"Ajax"
+],
+"1973": [
+"NAC"
+],
+"1974": [
+"PSV"
+],
+"1975": [
+"FC Den Haag"
+],
+"1976": [
+"PSV"
+],
+"1977": [
+"Twente"
+],
+"1978": [
+"AZ '67"
+],
+"1979": [
+"Ajax"
+],
+"1980": [
+"Feyenoord"
+],
+"1981": [
+"AZ '67"
+],
+"1982": [
+"AZ '67",
+"FC Utrecht"
+],
+"1983": [
+"Ajax"
+],
+"1984": [
+"Feyenoord"
+],
+"1985": [
+"FC Utrecht"
+],
+"1986": [
+"Ajax"
+],
+"1987": [
+"Ajax"
+],
+"1988": [
+"PSV"
+],
+"1989": [
+"PSV"
+],
+"1990": [
+"PSV"
+],
+"1991": [
+"Feyenoord"
+],
+"1992": [
+"Feyenoord"
+],
+"1993": [
+"Ajax"
+],
+"1994": [
+"Feyenoord"
+],
+"1995": [
+"Feyenoord"
+],
+"1996": [
+"PSV"
+],
+"1997": [
+"Roda JC"
+],
+"1998": [
+"Ajax"
+],
+"1999": [
+"Ajax"
+],
+"2000": [
+"Roda JC"
+],
+"2001": [
+"Twente",
+"PSV"
+],
+"2002": [
+"Ajax"
+],
+"2003": [
+"FC Utrecht"
+],
+"2004": [
+"FC Utrecht"
+],
+"2005": [
+"PSV",
+"Willem II"
+],
+"2006": [
+"Ajax"
+],
+"2007": [
+"Ajax"
+],
+"2008": [
+"Feyenoord"
+],
+"2009": [
+"Heerenveen"
+],
+"2010": [
+"Ajax"
+],
+"2011": [
+"Twente"
+],
+"2012": [
+"PSV"
+],
+"2013": [
+"AZ"
+],
+"2014": [
+"PEC Zwolle"
+],
+"2015": [
+"FC Groningen"
+],
+"2016": [
+"Feyenoord"
+],
+"2017": [
+"Vitesse"
+],
+"2018": [
+"Feyenoord"
+],
+"2019": [
+"Ajax"
+],
+"2020": [
+"Final between Utrecht and Feyenoord not played due to COVID-19 pandemic",
+"De Kuip"
+],
+"2021": [
+"Ajax"
+],
+"2022": [
+"PSV"
+],
+"2023": [
+"PSV"
+],
+"2024": [
+"Feyenoord"
+],
+"2025": [
+"Go Ahead Eagles"
+]
+}
+},
+"ARG": {
+"lig": {
+"1950": [
+"Racing"
+],
+"1951": [
+"Racing",
+"Racing"
+],
+"1952": [
+"River Plate"
+],
+"1953": [
+"River Plate"
+],
+"1954": [
+"Boca Juniors"
+],
+"1955": [
+"River Plate"
+],
+"1956": [
+"River Plate"
+],
+"1957": [
+"River Plate"
+],
+"1958": [
+"Racing"
+],
+"1959": [
+"San Lorenzo"
+],
+"1960": [
+"Independiente"
+],
+"1961": [
+"Racing"
+],
+"1962": [
+"Boca Juniors"
+],
+"1963": [
+"Independiente"
+],
+"1964": [
+"Boca Juniors"
+],
+"1965": [
+"Boca Juniors"
+],
+"1966": [
+"Racing"
+],
+"1967": [
+"Estudiantes",
+"Independiente"
+],
+"1968": [
+"San Lorenzo",
+"Vélez Sarsfield"
+],
+"1969": [
+"Chacarita Juniors",
+"Boca Juniors"
+],
+"1970": [
+"Independiente",
+"Boca Juniors"
+],
+"1971": [
+"Independiente",
+"Rosario Central"
+],
+"1972": [
+"San Lorenzo",
+"San Lorenzo"
+],
+"1973": [
+"Huracán",
+"Rosario Central"
+],
+"1974": [
+"Newell's Old Boys",
+"San Lorenzo"
+],
+"1975": [
+"River Plate",
+"River Plate"
+],
+"1976": [
+"Boca Juniors",
+"Boca Juniors"
+],
+"1977": [
+"River Plate",
+"Independiente"
+],
+"1978": [
+"Quilmes",
+"Independiente"
+],
+"1979": [
+"River Plate",
+"River Plate"
+],
+"1980": [
+"River Plate",
+"Rosario Central"
+],
+"1981": [
+"Boca Juniors",
+"River Plate"
+],
+"1982": [
+"Estudiantes",
+"Ferro Carril Oeste"
+],
+"1983": [
+"Independiente",
+"Estudiantes"
+],
+"1984": [
+"Argentinos Juniors",
+"Ferro Carril Oeste"
+],
+"1985": [
+"Argentinos Juniors"
+],
+"1986": [
+"River Plate"
+],
+"1987": [
+"Rosario Central"
+],
+"1988": [
+"Newell's Old Boys"
+],
+"1989": [
+"Independiente"
+],
+"1990": [
+"River Plate"
+],
+"1991": [
+"Newell's Old Boys",
+"River Plate",
+"Newell's Old Boys"
+],
+"1992": [
+"Newell's Old Boys",
+"Boca Juniors"
+],
+"1993": [
+"Vélez Sarsfield",
+"River Plate"
+],
+"1994": [
+"Independiente",
+"River Plate"
+],
+"1995": [
+"San Lorenzo",
+"Vélez Sarsfield"
+],
+"1996": [
+"Vélez Sarsfield",
+"River Plate"
+],
+"1997": [
+"River Plate",
+"River Plate"
+],
+"1998": [
+"Vélez Sarsfield",
+"Boca Juniors"
+],
+"1999": [
+"Boca Juniors",
+"River Plate"
+],
+"2000": [
+"River Plate",
+"Boca Juniors"
+],
+"2001": [
+"San Lorenzo",
+"Racing"
+],
+"2002": [
+"River Plate",
+"Independiente"
+],
+"2003": [
+"River Plate",
+"Boca Juniors"
+],
+"2004": [
+"River Plate",
+"Newell's Old Boys"
+],
+"2005": [
+"Vélez Sarsfield",
+"Boca Juniors"
+],
+"2006": [
+"Boca Juniors",
+"Estudiantes",
+"Estudiantes"
+],
+"2007": [
+"San Lorenzo",
+"Lanús"
+],
+"2008": [
+"River Plate",
+"Boca Juniors",
+"Boca Juniors"
+],
+"2009": [
+"Vélez Sarsfield",
+"Banfield"
+],
+"2010": [
+"Argentinos Juniors",
+"Estudiantes"
+],
+"2011": [
+"Vélez Sarsfield",
+"Boca Juniors"
+],
+"2012": [
+"Arsenal",
+"Vélez Sarsfield"
+],
+"2013": [
+"Newell's Old Boys",
+"Vélez Sarsfield",
+"San Lorenzo"
+],
+"2014": [
+"River Plate",
+"Racing"
+],
+"2015": [
+"Boca Juniors"
+],
+"2016": [
+"Lanús"
+],
+"2017": [
+"Boca Juniors"
+],
+"2018": [
+"Boca Juniors"
+],
+"2019": [
+"Racing"
+],
+"2020": [
+"Boca Juniors"
+],
+"2021": [
+"River Plate"
+],
+"2022": [
+"Boca Juniors"
+],
+"2023": [
+"River Plate"
+],
+"2024": [
+"Vélez Sarsfield"
+],
+"2025": [
+"Platense",
+"Estudiantes",
+"Rosario Central"
+]
+},
+"dom": {
+"1969": [
+"Boca Juniors"
+],
+"1970": [
+"Estadio Atlanta",
+"Buenos Aires"
+],
+"2012": [
+"Boca Juniors",
+"Racing"
+],
+"2013": [
+"Arsenal",
+"San Lorenzo"
+],
+"2014": [
+"Huracán",
+"Rosario Central"
+],
+"2015": [
+"Boca Juniors",
+"Rosario Central"
+],
+"2016": [
+"River Plate",
+"Rosario Central"
+],
+"2017": [
+"River Plate",
+"Atlético Tucumán"
+],
+"2018": [
+"Rosario Central",
+"Gimnasia y Esgrima"
+],
+"2019": [
+"River Plate",
+"Central Córdoba"
+],
+"2020": [
+"Boca Juniors",
+"Talleres"
+],
+"2022": [
+"Patronato",
+"Talleres"
+],
+"2023": [
+"Estudiantes",
+"Defensa y Justicia"
+],
+"2024": [
+"Central Córdoba",
+"Vélez Sarsfield"
+],
+"2025": [
+"Independiente Rivadavia",
+"Argentinos Juniors"
+]
+}
+},
+"TUR": {
+"lig": {
+"1950": [
+"Göztepe",
+"Gençlerbirliği"
+],
+"1951": [
+"Beşiktaş",
+"Altay"
+],
+"1959": [
+"Fenerbahçe",
+"Galatasaray"
+],
+"1960": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"1961": [
+"Fenerbahçe",
+"Galatasaray"
+],
+"1962": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1963": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1964": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1965": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1966": [
+"Beşiktaş",
+"Galatasaray"
+],
+"1967": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"1968": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1969": [
+"Galatasaray",
+"Eskişehirspor"
+],
+"1970": [
+"Fenerbahçe",
+"Eskişehirspor"
+],
+"1971": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1972": [
+"Galatasaray",
+"Eskişehirspor"
+],
+"1973": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1974": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1975": [
+"Fenerbahçe",
+"Galatasaray"
+],
+"1976": [
+"Trabzonspor",
+"Fenerbahçe"
+],
+"1977": [
+"Trabzonspor",
+"Fenerbahçe"
+],
+"1978": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"1979": [
+"Trabzonspor",
+"Galatasaray"
+],
+"1980": [
+"Trabzonspor",
+"Fenerbahçe"
+],
+"1981": [
+"Trabzonspor",
+"Adanaspor"
+],
+"1982": [
+"Beşiktaş",
+"Trabzonspor"
+],
+"1983": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"1984": [
+"Trabzonspor",
+"Fenerbahçe"
+],
+"1985": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1986": [
+"Beşiktaş",
+"Galatasaray"
+],
+"1987": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1988": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1989": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1990": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"1991": [
+"Beşiktaş",
+"Galatasaray"
+],
+"1992": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"1993": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1994": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1995": [
+"Beşiktaş",
+"Trabzonspor"
+],
+"1996": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"1997": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1998": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1999": [
+"Galatasaray",
+"Beşiktaş"
+],
+"2000": [
+"Galatasaray",
+"Beşiktaş"
+],
+"2001": [
+"Fenerbahçe",
+"Galatasaray"
+],
+"2002": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2003": [
+"Beşiktaş",
+"Galatasaray"
+],
+"2004": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"2005": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"2006": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2007": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"2008": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2009": [
+"Beşiktaş",
+"Sivasspor"
+],
+"2010": [
+"Bursaspor",
+"Fenerbahçe"
+],
+"2011": [
+"Fenerbahçe",
+"Trabzonspor"
+],
+"2012": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2013": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2014": [
+"Fenerbahçe",
+"Galatasaray"
+],
+"2015": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2016": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"2017": [
+"Beşiktaş",
+"İstanbul Başakşehir"
+],
+"2018": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2019": [
+"Galatasaray",
+"İstanbul Başakşehir"
+],
+"2020": [
+"İstanbul Başakşehir",
+"Trabzonspor"
+],
+"2021": [
+"Beşiktaş",
+"Galatasaray"
+],
+"2022": [
+"Trabzonspor",
+"Fenerbahçe"
+],
+"2023": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2024": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2025": [
+"Galatasaray",
+"Fenerbahçe"
+]
+},
+"dom": {
+"1963": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1964": [
+"Altay",
+"Galatasaray"
+],
+"1965": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1966": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1967": [
+"Altay",
+"Göztepe"
+],
+"1968": [
+"Fenerbahçe",
+"Altay"
+],
+"1969": [
+"Göztepe",
+"Galatasaray"
+],
+"1970": [
+"Eskişehirspor",
+"Göztepe"
+],
+"1971": [
+"Bursaspor",
+"Eskişehirspor"
+],
+"1972": [
+"Altay",
+"Ankaragücü"
+],
+"1973": [
+"Galatasaray",
+"Ankaragücü"
+],
+"1974": [
+"Bursaspor",
+"Fenerbahçe"
+],
+"1975": [
+"Trabzonspor",
+"Beşiktaş"
+],
+"1976": [
+"Trabzonspor",
+"Galatasaray"
+],
+"1977": [
+"Trabzonspor",
+"Beşiktaş"
+],
+"1978": [
+"Trabzonspor",
+"Adana Demirspor"
+],
+"1979": [
+"Altay",
+"Fenerbahçe"
+],
+"1980": [
+"Altay",
+"Galatasaray"
+],
+"1981": [
+"Ankaragücü",
+"Boluspor"
+],
+"1982": [
+"Galatasaray",
+"Ankaragücü"
+],
+"1983": [
+"Fenerbahçe",
+"Mersin İdman Yurdu"
+],
+"1984": [
+"Trabzonspor",
+"Beşiktaş"
+],
+"1985": [
+"Trabzonspor",
+"Galatasaray"
+],
+"1986": [
+"Bursaspor",
+"Altay"
+],
+"1987": [
+"Gençlerbirliği",
+"Eskişehirspor"
+],
+"1988": [
+"Sakaryaspor",
+"Samsunspor"
+],
+"1989": [
+"Fenerbahçe",
+"Beşiktaş"
+],
+"1990": [
+"Beşiktaş",
+"Trabzonspor"
+],
+"1991": [
+"Galatasaray",
+"Ankaragücü"
+],
+"1992": [
+"Bursaspor",
+"Trabzonspor"
+],
+"1993": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1994": [
+"Galatasaray",
+"Beşiktaş"
+],
+"1995": [
+"Galatasaray",
+"Trabzonspor"
+],
+"1996": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"1997": [
+"Trabzonspor",
+"Kocaelispor"
+],
+"1998": [
+"Beşiktaş",
+"Galatasaray"
+],
+"1999": [
+"Galatasaray",
+"Beşiktaş"
+],
+"2000": [
+"Galatasaray",
+"Antalyaspor"
+],
+"2001": [
+"Gençlerbirliği",
+"Fenerbahçe"
+],
+"2002": [
+"Kocaelispor",
+"Beşiktaş"
+],
+"2003": [
+"Trabzonspor",
+"Gençlerbirliği"
+],
+"2004": [
+"Atatürk Olimpiyat Stadı"
+],
+"2005": [
+"Galatasaray",
+"Fenerbahçe"
+],
+"2006": [
+"Beşiktaş",
+"İzmir Atatürk Stadı"
+],
+"2007": [
+"Kayseri Erciyesspor"
+],
+"2008": [
+"Kayserispor",
+"Gençlerbirliği"
+],
+"2009": [
+"Beşiktaş",
+"Fenerbahçe"
+],
+"2010": [
+"Trabzonspor",
+"Şanlıurfa GAP Stadı"
+],
+"2011": [
+"Beşiktaş",
+"İstanbul Başakşehir"
+],
+"2012": [
+"Fenerbahçe",
+"Bursaspor"
+],
+"2013": [
+"Trabzonspor"
+],
+"2014": [
+"Galatasaray",
+"Eskişehirspor"
+],
+"2015": [
+"Bursaspor",
+"Bursa Atatürk Stadı"
+],
+"2016": [
+"Fenerbahçe",
+"Antalya Stadı"
+],
+"2017": [
+"Konyaspor",
+"İstanbul Başakşehir"
+],
+"2018": [
+"Akhisar Belediyespor",
+"Fenerbahçe"
+],
+"2019": [
+"Galatasaray",
+"Akhisar Belediyespor"
+],
+"2020": [
+"Trabzonspor",
+"Alanyaspor"
+],
+"2021": [
+"Beşiktaş",
+"Antalyaspor"
+],
+"2022": [
+"Sivasspor",
+"Kayserispor"
+],
+"2023": [
+"Fenerbahçe",
+"İstanbul Başakşehir"
+],
+"2024": [
+"Beşiktaş",
+"Trabzonspor"
+],
+"2025": [
+"Galatasaray"
+]
+}
+},
+"BRA": {
+"lig": {
+"1959": [
+"Bahia",
+"Santos"
+],
+"1960": [
+"Palmeiras",
+"Fortaleza"
+],
+"1961": [
+"Santos",
+"Bahia"
+],
+"1962": [
+"Santos",
+"Botafogo"
+],
+"1963": [
+"Santos",
+"Bahia"
+],
+"1964": [
+"Santos",
+"Flamengo"
+],
+"1965": [
+"Santos",
+"Vasco da Gama"
+],
+"1966": [
+"Cruzeiro",
+"Santos"
+],
+"1967": [
+"Palmeiras",
+"Internacional"
+],
+"1968": [
+"Botafogo",
+"Fortaleza"
+],
+"1969": [
+"Palmeiras",
+"Cruzeiro"
+],
+"1970": [
+"Fluminense",
+"Palmeiras"
+],
+"1971": [
+"Atlético Mineiro",
+"São Paulo"
+],
+"1972": [
+"Palmeiras",
+"Botafogo"
+],
+"1973": [
+"Palmeiras",
+"São Paulo"
+],
+"1974": [
+"Vasco da Gama",
+"Cruzeiro"
+],
+"1975": [
+"Internacional",
+"Cruzeiro"
+],
+"1976": [
+"Internacional",
+"Corinthians"
+],
+"1977": [
+"São Paulo",
+"Atlético Mineiro"
+],
+"1978": [
+"Guarani",
+"Palmeiras"
+],
+"1979": [
+"Internacional",
+"Vasco da Gama"
+],
+"1980": [
+"Flamengo",
+"Atlético Mineiro"
+],
+"1981": [
+"Grêmio",
+"São Paulo"
+],
+"1982": [
+"Flamengo",
+"Grêmio"
+],
+"1983": [
+"Flamengo",
+"Santos"
+],
+"1984": [
+"Fluminense",
+"Vasco da Gama"
+],
+"1985": [
+"Coritiba",
+"Bangu"
+],
+"1986": [
+"São Paulo",
+"Guarani"
+],
+"1987": [
+"Sport",
+"Guarani"
+],
+"1988": [
+"Bahia",
+"Internacional"
+],
+"1989": [
+"Vasco da Gama",
+"São Paulo"
+],
+"1990": [
+"Corinthians",
+"São Paulo"
+],
+"1991": [
+"São Paulo",
+"Bragantino"
+],
+"1992": [
+"Flamengo",
+"Botafogo"
+],
+"1993": [
+"Palmeiras",
+"Vitória"
+],
+"1994": [
+"Palmeiras",
+"Corinthians"
+],
+"1995": [
+"Botafogo",
+"Santos"
+],
+"1996": [
+"Grêmio",
+"Portuguesa"
+],
+"1997": [
+"Vasco da Gama",
+"Palmeiras"
+],
+"1998": [
+"Corinthians",
+"Cruzeiro"
+],
+"1999": [
+"Corinthians",
+"Atlético Mineiro"
+],
+"2000": [
+"Vasco da Gama",
+"São Caetano"
+],
+"2001": [
+"Atlético Paranaense",
+"São Caetano"
+],
+"2002": [
+"Santos",
+"Corinthians"
+],
+"2003": [
+"Cruzeiro",
+"Santos"
+],
+"2004": [
+"Santos",
+"Atlético Paranaense"
+],
+"2005": [
+"Corinthians",
+"Internacional"
+],
+"2006": [
+"São Paulo",
+"Internacional"
+],
+"2007": [
+"São Paulo",
+"Santos"
+],
+"2008": [
+"São Paulo",
+"Grêmio"
+],
+"2009": [
+"Flamengo",
+"Internacional"
+],
+"2010": [
+"Fluminense",
+"Cruzeiro"
+],
+"2011": [
+"Corinthians",
+"Vasco da Gama"
+],
+"2012": [
+"Fluminense",
+"Atlético Mineiro"
+],
+"2013": [
+"Cruzeiro",
+"Grêmio"
+],
+"2014": [
+"Cruzeiro",
+"São Paulo"
+],
+"2015": [
+"Corinthians",
+"Atlético Mineiro"
+],
+"2016": [
+"Palmeiras",
+"Santos"
+],
+"2017": [
+"Corinthians",
+"Palmeiras"
+],
+"2018": [
+"Palmeiras",
+"Flamengo"
+],
+"2019": [
+"Flamengo",
+"Santos"
+],
+"2020": [
+"Flamengo",
+"Internacional"
+],
+"2021": [
+"Atlético Mineiro",
+"Flamengo"
+],
+"2022": [
+"Palmeiras",
+"Internacional"
+],
+"2023": [
+"Palmeiras",
+"Grêmio"
+],
+"2024": [
+"Botafogo",
+"Palmeiras"
+],
+"2025": [
+"Flamengo",
+"Palmeiras"
+]
+},
+"dom": {
+"1989": [
+"Grêmio"
+],
+"1990": [
+"Flamengo"
+],
+"1991": [
+"Criciúma"
+],
+"1992": [
+"Internacional"
+],
+"1993": [
+"Cruzeiro"
+],
+"1994": [
+"Grêmio"
+],
+"1995": [
+"Corinthians"
+],
+"1996": [
+"Cruzeiro"
+],
+"1997": [
+"Grêmio"
+],
+"1998": [
+"Palmeiras"
+],
+"1999": [
+"Juventude"
+],
+"2000": [
+"Cruzeiro"
+],
+"2001": [
+"Grêmio"
+],
+"2002": [
+"Corinthians"
+],
+"2003": [
+"Cruzeiro"
+],
+"2004": [
+"Santo André"
+],
+"2005": [
+"Paulista"
+],
+"2006": [
+"Flamengo"
+],
+"2007": [
+"Fluminense"
+],
+"2008": [
+"Sport Recife"
+],
+"2009": [
+"Corinthians"
+],
+"2010": [
+"Santos"
+],
+"2011": [
+"Vasco da Gama"
+],
+"2012": [
+"Palmeiras"
+],
+"2013": [
+"Flamengo"
+],
+"2014": [
+"Atlético Mineiro"
+],
+"2015": [
+"Palmeiras"
+],
+"2016": [
+"Grêmio"
+],
+"2017": [
+"Cruzeiro"
+],
+"2018": [
+"Cruzeiro"
+],
+"2019": [
+"Athletico Paranaense"
+],
+"2020": [
+"Palmeiras"
+],
+"2021": [
+"Atlético Mineiro"
+],
+"2022": [
+"Flamengo"
+],
+"2023": [
+"São Paulo"
+],
+"2024": [
+"Flamengo"
+],
+"2025": [
+"Corinthians"
+]
+}
+}
+}

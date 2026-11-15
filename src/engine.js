@@ -1221,7 +1221,13 @@ function clubTitles(cid){
   const c=S.cs[cid],n=c.n,L=c.l>=0?LEAGUES[c.l]:null;
   const ucl=UCL_H.filter(x=>x.c==n).map(x=>x.y),uclV=UCL_H.filter(x=>x.r==n).map(x=>x.y);
   const lib=LIB_H.filter(x=>x.c==n).map(x=>x.y),libV=LIB_H.filter(x=>x.r==n).map(x=>x.y);
-  const lg=[],dom=[],mcG=[],low=[];
+  const lg=[],dom=[],mcG=[],low=[],lgV=[],domV=[];
+  /* histórico real das ligas e copas nacionais (1970-2025); depois de 2026 valem os campeões simulados */
+  const rh=L&&typeof NAT_H!='undefined'?NAT_H[L.k]:null;
+  if(rh)['lig','dom'].forEach(k=>rh[k].forEach(r=>{
+    const y=+r[0],multi=L.k=='ARG'&&k=='lig',ch=multi?r.slice(1):[r[1]];
+    if(ch.indexOf(n)>=0)(k=='lig'?lg:dom).push(y);else if(!multi&&r[2]==n)(k=='lig'?lgV:domV).push(y);
+  }));
   S.champs.forEach(h=>{
     if(h.ucl.c==cid)ucl.push(h.y);if(h.ucl.r==cid)uclV.push(h.y);
     if(h.lib.c==cid)lib.push(h.y);if(h.lib.r==cid)libV.push(h.y);
@@ -1229,7 +1235,7 @@ function clubTitles(cid){
     if(L){if(h.lg[L.k]==cid)lg.push(h.y);if(h.dom[L.k]==cid)dom.push(h.y)}
   });
   if(L)S.fin.forEach(f=>{for(let d=1;d<L.dn.length;d++){const a=f.p[c.l+'-'+d];if(a&&a[0]==cid)low.push({y:f.y,d})}});
-  return{ucl,uclV,lib,libV,mc:(MCH[n]||0)+mcG.length,mcG,lg,dom,low};
+  return{ucl,uclV,lib,libV,mc:(MCH[n]||0)+mcG.length,mcG,lg,dom,low,lgV,domV};
 }
 const cpPts=t=>t.ucl.length*10+t.lib.length*8+t.mc*5+t.lg.length*2+t.dom.length+t.uclV.length*3+t.libV.length*2;
 function clubPower(){return S.cs.map(c=>{const t=clubTitles(c.id);return{c,t,pts:cpPts(t)}}).sort((a,b)=>b.pts-a.pts||b.c.s-a.c.s)}
